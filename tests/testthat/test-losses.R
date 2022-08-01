@@ -110,3 +110,65 @@ test_succeeds("passing R fn to compile(loss=)", {
   fit(model, data, labels, epochs = 2)
 
 })
+
+
+test_succeeds("objects from new_layer_class() can be used as stateless callables", {
+
+
+  y_pred <- array(runif(60), c(2, 10, 3))
+  y_true <- array(runif(20), c(2, 10, 1))
+
+
+  # =============================================================================
+  #                         INITIALIZE METHOD NOT DEFINED
+  # =============================================================================
+
+  loss_quantile <- new_loss_class(
+    classname = "QuantileLoss",
+
+    initialize = function(quantiles, ...) {
+      super$initialize(...)
+      self$quantiles <-
+        self$.validate_quantiles(quantiles) %>%
+        as_tensor(shape = c(1, 1, -1))
+    },
+
+    call = function(y_true, y_pred, quantiles) {
+      # if we get R arrays in, cast to tensor
+      y_pred %<>% as_tensor()
+      y_true %<>% as_tensor(dtype = y_pred$dtype)
+
+      errors <- y_pred - y_true
+      quantiles <- self$quantiles %>% tf$cast(errors$dtype)
+
+      loss <- tf$maximum((quantiles - 1) * errors,
+                          quantiles      * errors)
+
+      loss
+    },
+
+    .validate_quantiles = function(quantiles) {
+      if (any(quantiles > 1) | any(quantiles < 0)) {
+        stop("It contains quatiles out of the [0, 1] range!")
+      }
+      quantiles
+    }
+
+  )
+
+  # As a callable object
+  loss_quantile(quantiles = c(0.1, 0.5, 0.9), reduction = 'auto')(y_true, y_pred)
+  loss_quantile(quantiles = c(0.1, 0.5, 0.9), reduction = 'sum')(y_true, y_pred)
+
+  # As a function
+  loss_quantile(y_true, y_pred, quantiles = c(0.1, 0.5, 0.9))
+  loss_quantile(y_true, y_pred, quantiles = c(0.1, 0.5, 0.9), reduction = 'sum')
+  loss_quantile(y_true, y_pred, quantiles = c(0.1, 0.5, 0.9), reduction = 'none')
+
+  obj <- loss_quantile(quantiles = c(0.1, 0.5, 0.9), reduction = 'none')
+  obj(y_true, y_pred)
+
+  quantiles <- c(0.1, 0.5, 0.9) %>% as_tensor(shape = c(1, 1, -1))
+
+
+})

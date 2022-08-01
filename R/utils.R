@@ -684,3 +684,12 @@ formals(`[.tensorflow.tensor`)$options <-
     warn_tensors_passed_asis = FALSE,
     warn_negatives_pythonic = FALSE
   )
+
+
+CamelCase_to_snake_case <- function(x) {
+  # dependency free, poor mans version
+  x <- sub("^([[:upper:]])([[:lower:]])", "\\L\\1\\2", x, perl = TRUE)
+  x <- gsub("([[:lower:]])([[:upper:]])([[:lower:]])", "\\1_\\L\\2\\3", x,
+            perl = TRUE)
+  x
+}

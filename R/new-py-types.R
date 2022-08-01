@@ -57,11 +57,123 @@ function(classname, ..., initialize, update_state, result) {
 new_loss_class <-
 function(classname, ..., call = NULL) {
   members <- capture_args(match.call(), ignore = "classname")
+
+  has_init <- any(c("initialize", "__init__") %in% names(members))
+  if(!has_init) {
+    # assume this is basically a stateless function,
+    # we enable calling it by patching the formals so that
+    # it has the sig (y_true, y_pred)
+    call_extra_args <- formals(call)
+    intersect(names(formals(call)))
+  }
   members$call <- call
-  new_py_class(classname, members,
-              inherit = keras::keras$losses$Loss,
-              parent_env = parent.frame())
+  LossClass <- new_py_class(classname, members,
+                            inherit = keras::keras$losses$Loss,
+                            parent_env = parent.frame())
+
+  # TODO: after reticulate builds R func wrappers properly, inspect
+  # LayerClass$call here and make sure it's correct, (self, y_true, y_pred).
+  # keras.losses.Loss.call implements an @abstractmethod with a strict
+  # signature, any additional args in call throw a cryptic error downstream, we
+  # should throw a more informative error here instead.
+
+  init_sig <- formals(members$initialize %||% members$`__init__` %||% function(){})
+  init_sig$reduction <- init_sig$reduction %||% "auto"
+  init_sig$name      <- init_sig$name %||% CamelCase_to_snake_case(classname)
+
+  wrapper_frmls <-  c(alist(y_true = , y_pred = , ... =),
+                      init_sig)
+
+  #if init has ..., we make sure to pull ... forward. all args to __init__ must be kwargs
+  wrapper_frmls <- wrapper_frmls[!duplicated(names(wrapper_frmls))]
+
+  mask <- new.env(parent = parent.env(environment())) # parent == package:keras namespace
+  mask$LossClass <- LossClass
+
+  init_call <- c("...", setNames(nm = names(init_sig)))
+  INIT_CALL <- as.call(c(quote(LossClass), lapply(init_call, as.symbol)))
+
+  wrapper <- as.function.default(c(wrapper_frmls, substitute({
+    loss_instance <- INIT_CALL
+    if (missing(y_true) && missing(y_pred))
+      loss_instance
+    else
+      loss_instance(y_true, y_pred)
+  }, list(INIT_CALL = INIT_CALL))),
+  envir = mask)
+
+  wrapper
 }
+
+
+new_loss_class <-
+  function(classname, ..., call = NULL) {
+    members <- capture_args(match.call(), ignore = "classname")
+
+
+    has_init <- any(c("initialize", "__init__") %in% names(members))
+    call_frmls <- formals(members$call)
+    call_frmls$self <- NULL
+    stopifnot(identical(call_frmls[1:2], alist(y_true =, y_pred =)))
+    call_extra_args <- call_frmls[-(1:2)]
+    if(length(call_extra_args) && !has_init) {
+      # assume this is basically a pure stateless function, and return a wrapper with
+      # that allows usage like loss(y_true, y_pred).
+      call_fn <- call # methods needs a strict signature: (y_true, y_pred)
+      # I heard you liked calls dawg, so I made a call for your call call
+      CALL_CALL <- as.call(c(alist(call, y_true, y_pred),
+                             lapply(names(call_extra_args), as.symbol)))
+      # call_method_mask <-
+      #   new.env(parent = parent.env(environment())) # parent == package:keras namespace
+      # call_method_mask$call <- call
+      call_method_mask <- list2env(c(call_extra_args, call = call),
+                                   parent = parent.env(environment())) # parent == package:keras namespace)
+      members$call <-
+        as.function.default(c(alist(y_true = , y_pred = ),
+                              CALL_CALL), envir = call_method_mask)
+
+    }
+
+    members$call <- call
+    LossClass <- new_py_class(classname, members,
+                              inherit = keras::keras$losses$Loss,
+                              parent_env = parent.frame())
+
+    # TODO: after reticulate builds R func wrappers properly, inspect
+    # LayerClass$call here and make sure it's correct, (self, y_true, y_pred).
+    # keras.losses.Loss.call implements an @abstractmethod with a strict
+    # signature, any additional args in call throw a cryptic error downstream, we
+    # should throw a more informative error here instead.
+
+    init_sig <- formals(members$initialize %||% members$`__init__` %||% function(){})
+    init_sig$reduction <- init_sig$reduction %||% "auto"
+    init_sig$name      <- init_sig$name %||% CamelCase_to_snake_case(classname)
+
+    wrapper_frmls <-  c(alist(y_true = , y_pred = , ... =),
+                        init_sig)
+
+    #if init has ..., we make sure to pull ... forward. all args to __init__ must be kwargs
+    wrapper_frmls <- wrapper_frmls[!duplicated(names(wrapper_frmls))]
+
+    mask <- new.env(parent = parent.env(environment())) # parent == package:keras namespace
+    mask$LossClass <- LossClass
+
+    init_call <- c("...", setNames(nm = names(init_sig)))
+    INIT_CALL <- as.call(c(quote(LossClass), lapply(init_call, as.symbol)))
+
+    wrapper <- as.function.default(c(wrapper_frmls, substitute({
+      loss_instance <- INIT_CALL
+      if (missing(y_true) && missing(y_pred))
+        call(y_true, y_pred, !!!extra_args)
+      else
+        loss_instance(y_true, y_pred)
+    }, list(INIT_CALL = INIT_CALL))),
+    envir = mask)
+
+    wrapper
+  }
+
+
 
 #' @rdname new-classes
 #' @export
