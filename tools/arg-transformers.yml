@@ -4,35 +4,11 @@ ALL_ARGS:
   axis: as_axis
   axes: as_axis
 
-
-Hashing:
-  num_bins: as.integer
-  salt: as_nullable_integer
-
 "*":
   input_shape: normalize_shape
   batch_size: as_nullable_integer
   batch_input_shape: normalize_shape
 
-Permute:
-  dims: function(x) tuple(as.list(as.integer(x)))
-
-CategoryEncoding:
-  num_tokens: as_nullable_integer
-
-Embedding:
-  input_length: as_nullable_integer
-
-MultiHeadAttention:
-  num_heads: as.integer
-  key_dim: as.integer
-  value_dim: as.integer
-
-# "*":
-#   axis: as_axis
-
-AlphaDropout:
-  seed: as_nullable_integer
 
 "Conv*":
   filters: as.integer
@@ -44,13 +20,35 @@ AlphaDropout:
   pool_size: as.integer
   strides: as_nullable_integer
 
+Hashing:
+  num_bins: as.integer
+  salt: as_nullable_integer
+
+Permute:
+  dims: tuple(as.list(as.integer(x)))
+
+CategoryEncoding:
+  num_tokens: as_nullable_integer
+
+Embedding:
+  input_length: as_nullable_integer
+
+MultiHeadAttention:
+  num_heads: as.integer
+  key_dim: as.integer
+  value_dim: as.integer
+  attention_axes: as_nullable_integer # Keras 3: as_nullable_axis
+
+AlphaDropout:
+  seed: as_nullable_integer
+
 Reshape:
   target_shape: as.integer
 
 TextVectorization:
    max_tokens:             as_nullable_integer
    output_sequence_length: as_nullable_integer
-   ngrams: function(x) if(length(x) > 1) as_integer_or_integer_tuple(x) else as_nullable_integer(x)
+   ngrams: if(length(x) > 1) as_integer_or_integer_tuple(x) else as_nullable_integer(x)
 
 
 # in keras 3 we'll make these 1 based
@@ -66,4 +64,8 @@ LayerNormalization:
 
 Softmax:
   axis: as.integer
+
+PReLU:
+  shared_axes: as.list(as.integer(x))
+
 

@@ -6669,9 +6669,9 @@ function(inputs, num_heads, key_dim, value_dim = NULL, dropout = 0,
     kernel_constraint = NULL, bias_constraint = NULL, ...)
 {
     args <- capture_args(match.call(), list(num_heads = as.integer,
-        key_dim = as.integer, value_dim = as.integer, input_shape = normalize_shape,
-        batch_size = as_nullable_integer, batch_input_shape = normalize_shape),
-        ignore = "inputs")
+        key_dim = as.integer, value_dim = as.integer, attention_axes = as_nullable_integer,
+        input_shape = normalize_shape, batch_size = as_nullable_integer,
+        batch_input_shape = normalize_shape), ignore = "inputs")
     layer <- do.call(keras$layers$MultiHeadAttention, args)
     if (missing(inputs) || is.null(inputs))
         return(layer)
@@ -6870,9 +6870,9 @@ layer_activation_parametric_relu <-
 function(object, alpha_initializer = "zeros", alpha_regularizer = NULL,
     alpha_constraint = NULL, shared_axes = NULL, ...)
 {
-    args <- capture_args(match.call(), list(input_shape = normalize_shape,
-        batch_size = as_nullable_integer, batch_input_shape = normalize_shape),
-        ignore = "object")
+    args <- capture_args(match.call(), list(shared_axes = function(x)
+    as.list(as.integer(x)), input_shape = normalize_shape, batch_size = as_nullable_integer,
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$PReLU, object, args)
 }
 

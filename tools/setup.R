@@ -211,7 +211,12 @@ r_doc_from_py_fn <- function(py_fn, name = NULL) {
 
 transformers_registry <-
   yaml::read_yaml("tools/arg-transformers.yml") %>%
-  lapply(\(args) lapply(args, str2lang))
+  lapply(\(args) lapply(args, function(fn) {
+    fn %<>% str2lang()
+    if (is.call(fn) && !identical(fn[[1]], quote(`function`)))
+      fn <- as.function.default(c(alist(x =), fn))
+    fn
+  }))
 
 get_arg_transformers <- function(py_obj) {
   py_obj_name <- py_obj$`__name__`
