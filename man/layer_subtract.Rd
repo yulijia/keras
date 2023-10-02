@@ -4,7 +4,7 @@
 \alias{layer_subtract}
 \title{Layer that subtracts two inputs}
 \usage{
-layer_subtract(object, ...)
+layer_subtract(inputs, ...)
 }
 \arguments{
 \item{...}{standard layer arguments.}

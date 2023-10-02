@@ -4,7 +4,7 @@
 \alias{layer_dot}
 \title{Layer that computes a dot product between samples in two tensors}
 \usage{
-layer_dot(object, axes, normalize = FALSE, ...)
+layer_dot(inputs, ..., axes, normalize = FALSE)
 }
 \arguments{
 \item{...}{standard layer arguments.}

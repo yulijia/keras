@@ -4,7 +4,7 @@
 \alias{layer_maximum}
 \title{Layer that computes the maximum (element-wise) a list of inputs}
 \usage{
-layer_maximum(object, ...)
+layer_maximum(inputs, ...)
 }
 \arguments{
 \item{...}{standard layer arguments.}

@@ -4,7 +4,7 @@
 \alias{layer_abstract_rnn_cell}
 \title{Abstract object representing an RNN cell}
 \usage{
-layer_abstract_rnn_cell(object, ...)
+layer_abstract_rnn_cell(...)
 }
 \arguments{
 \item{...}{standard layer arguments.}

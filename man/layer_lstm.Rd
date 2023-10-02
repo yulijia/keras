@@ -33,6 +33,85 @@ layer_lstm(
 )
 }
 \arguments{
+\item{units}{Positive integer, dimensionality of the output space.}
+
+\item{activation}{Activation function to use.
+Default: hyperbolic tangent (\code{tanh}). If you pass \code{NULL}, no activation
+is applied (ie. "linear" activation: \code{a(x) = x}).}
+
+\item{recurrent_activation}{Activation function to use for the recurrent step.
+Default: sigmoid (\code{sigmoid}). If you pass \code{NULL}, no activation is
+applied (ie. "linear" activation: \code{a(x) = x}).}
+
+\item{use_bias}{Boolean (default \code{TRUE}), whether the layer uses a bias vector.}
+
+\item{kernel_initializer}{Initializer for the \code{kernel} weights matrix, used for
+the linear transformation of the inputs. Default: \code{glorot_uniform}.}
+
+\item{recurrent_initializer}{Initializer for the \code{recurrent_kernel} weights
+matrix, used for the linear transformation of the recurrent state.
+Default: \code{orthogonal}.}
+
+\item{bias_initializer}{Initializer for the bias vector. Default: \code{zeros}.}
+
+\item{unit_forget_bias}{Boolean (default \code{TRUE}). If TRUE, add 1 to the bias of
+the forget gate at initialization. Setting it to true will also force
+\code{bias_initializer="zeros"}. This is recommended in \href{http://www.jmlr.org/proceedings/papers/v37/jozefowicz15.pdf}{Jozefowicz et al.}.}
+
+\item{kernel_regularizer}{Regularizer function applied to the \code{kernel} weights
+matrix. Default: \code{NULL}.}
+
+\item{recurrent_regularizer}{Regularizer function applied to the
+\code{recurrent_kernel} weights matrix. Default: \code{NULL}.}
+
+\item{bias_regularizer}{Regularizer function applied to the bias vector.
+Default: \code{NULL}.}
+
+\item{activity_regularizer}{Regularizer function applied to the output of the
+layer (its "activation"). Default: \code{NULL}.}
+
+\item{kernel_constraint}{Constraint function applied to the \code{kernel} weights
+matrix. Default: \code{NULL}.}
+
+\item{recurrent_constraint}{Constraint function applied to the
+\code{recurrent_kernel} weights matrix. Default: \code{NULL}.}
+
+\item{bias_constraint}{Constraint function applied to the bias vector. Default:
+\code{NULL}.}
+
+\item{dropout}{Float between 0 and 1. Fraction of the units to drop for the
+linear transformation of the inputs. Default: 0.}
+
+\item{recurrent_dropout}{Float between 0 and 1. Fraction of the units to drop
+for the linear transformation of the recurrent state. Default: 0.}
+
+\item{return_sequences}{Boolean. Whether to return the last output in the output
+sequence, or the full sequence. Default: \code{FALSE}.}
+
+\item{return_state}{Boolean. Whether to return the last state in addition to the
+output. Default: \code{FALSE}.}
+
+\item{go_backwards}{Boolean (default \code{FALSE}). If TRUE, process the input
+sequence backwards and return the reversed sequence.}
+
+\item{stateful}{Boolean (default \code{FALSE}). If TRUE, the last state for each
+sample at index i in a batch will be used as initial state for the sample
+of index i in the following batch.}
+
+\item{time_major}{The shape format of the \code{inputs} and \code{outputs} tensors.
+If TRUE, the inputs and outputs will be in shape
+\verb{[timesteps, batch, feature]}, whereas in the FALSE case, it will be
+\verb{[batch, timesteps, feature]}. Using \code{time_major = TRUE} is a bit more
+efficient because it avoids transposes at the beginning and end of the
+RNN calculation. However, most TensorFlow data is batch-major, so by
+default this function accepts input and emits output in batch-major
+form.}
+
+\item{unroll}{Boolean (default \code{FALSE}). If TRUE, the network will be unrolled,
+else a symbolic loop will be used. Unrolling can speed-up a RNN,
+although it tends to be more memory-intensive. Unrolling is only
+suitable for short sequences.}
+
 \item{...}{standard layer arguments.}
 }
 \description{
@@ -75,79 +154,6 @@ For example:
 >>> print(final_carry_state.shape)
 (32, 4)
 }\if{html}{\out{</div>}}
-
-Args:
-units: Positive integer, dimensionality of the output space.
-activation: Activation function to use.
-Default: hyperbolic tangent (\code{tanh}). If you pass \code{NULL}, no activation
-is applied (ie. "linear" activation: \code{a(x) = x}).
-recurrent_activation: Activation function to use for the recurrent step.
-Default: sigmoid (\code{sigmoid}). If you pass \code{NULL}, no activation is
-applied (ie. "linear" activation: \code{a(x) = x}).
-use_bias: Boolean (default \code{TRUE}), whether the layer uses a bias vector.
-kernel_initializer: Initializer for the \code{kernel} weights matrix, used for
-the linear transformation of the inputs. Default: \code{glorot_uniform}.
-recurrent_initializer: Initializer for the \code{recurrent_kernel} weights
-matrix, used for the linear transformation of the recurrent state.
-Default: \code{orthogonal}.
-bias_initializer: Initializer for the bias vector. Default: \code{zeros}.
-unit_forget_bias: Boolean (default \code{TRUE}). If TRUE, add 1 to the bias of
-the forget gate at initialization. Setting it to true will also force
-\code{bias_initializer="zeros"}. This is recommended in \href{http://www.jmlr.org/proceedings/papers/v37/jozefowicz15.pdf}{Jozefowicz et al.}.
-kernel_regularizer: Regularizer function applied to the \code{kernel} weights
-matrix. Default: \code{NULL}.
-recurrent_regularizer: Regularizer function applied to the
-\code{recurrent_kernel} weights matrix. Default: \code{NULL}.
-bias_regularizer: Regularizer function applied to the bias vector.
-Default: \code{NULL}.
-activity_regularizer: Regularizer function applied to the output of the
-layer (its "activation"). Default: \code{NULL}.
-kernel_constraint: Constraint function applied to the \code{kernel} weights
-matrix. Default: \code{NULL}.
-recurrent_constraint: Constraint function applied to the
-\code{recurrent_kernel} weights matrix. Default: \code{NULL}.
-bias_constraint: Constraint function applied to the bias vector. Default:
-\code{NULL}.
-dropout: Float between 0 and 1. Fraction of the units to drop for the
-linear transformation of the inputs. Default: 0.
-recurrent_dropout: Float between 0 and 1. Fraction of the units to drop
-for the linear transformation of the recurrent state. Default: 0.
-return_sequences: Boolean. Whether to return the last output in the output
-sequence, or the full sequence. Default: \code{FALSE}.
-return_state: Boolean. Whether to return the last state in addition to the
-output. Default: \code{FALSE}.
-go_backwards: Boolean (default \code{FALSE}). If TRUE, process the input
-sequence backwards and return the reversed sequence.
-stateful: Boolean (default \code{FALSE}). If TRUE, the last state for each
-sample at index i in a batch will be used as initial state for the sample
-of index i in the following batch.
-time_major: The shape format of the \code{inputs} and \code{outputs} tensors.
-If TRUE, the inputs and outputs will be in shape
-\verb{[timesteps, batch, feature]}, whereas in the FALSE case, it will be
-\verb{[batch, timesteps, feature]}. Using \code{time_major = TRUE} is a bit more
-efficient because it avoids transposes at the beginning and end of the
-RNN calculation. However, most TensorFlow data is batch-major, so by
-default this function accepts input and emits output in batch-major
-form.
-unroll: Boolean (default \code{FALSE}). If TRUE, the network will be unrolled,
-else a symbolic loop will be used. Unrolling can speed-up a RNN,
-although it tends to be more memory-intensive. Unrolling is only
-suitable for short sequences.
-
-Call arguments:
-inputs: A 3D tensor with shape \verb{[batch, timesteps, feature]}.
-mask: Binary tensor of shape \verb{[batch, timesteps]} indicating whether
-a given timestep should be masked (optional).
-An individual \code{TRUE} entry indicates that the corresponding timestep
-should be utilized, while a \code{FALSE} entry indicates that the
-corresponding timestep should be ignored. Defaults to \code{NULL}.
-training: Python boolean indicating whether the layer should behave in
-training mode or in inference mode. This argument is passed to the cell
-when calling it. This is only relevant if \code{dropout} or
-\code{recurrent_dropout} is used (optional). Defaults to \code{NULL}.
-initial_state: List of initial state tensors to be passed to the first
-call of the cell (optional, \code{NULL} causes creation
-of zero-filled initial state tensors). Defaults to \code{NULL}.
 }
 \seealso{
 \itemize{

@@ -447,14 +447,12 @@ assert_all_dots_named <- function(envir = parent.frame(), cl) {
        paste(deparse(cl, 500L), collapse = "\n"))
 }
 
-# TODO: should there be some default modifiers in capture_args() for standard layer args
-# like, input_shape, batch_input_shape, etc.
 
 ## TODO: we'll want the new summary() method to show colors in the Rstudio IDE, fix rendering.
 
 
-#' @param ignore character, arg names to ignore (not capture)
-#' @param modifiers named list of functions. names match args
+# @param ignore character, arg names to ignore (not capture)
+# @param modifiers named list of functions. names match args
 capture_args <- function(cl, modifiers = NULL, ignore = NULL,
                          envir = parent.frame(), fn = sys.function(-1)) {
 

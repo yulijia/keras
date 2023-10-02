@@ -4,7 +4,7 @@
 \alias{layer_concatenate}
 \title{Layer that concatenates a list of inputs}
 \usage{
-layer_concatenate(object, axis = -1L, ...)
+layer_concatenate(inputs, ..., axis = -1L)
 }
 \arguments{
 \item{...}{standard layer arguments.}

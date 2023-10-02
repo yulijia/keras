@@ -5,7 +5,6 @@
 \title{Cell class for the GRU layer}
 \usage{
 layer_gru_cell(
-  object,
   units,
   activation = "tanh",
   recurrent_activation = "sigmoid",

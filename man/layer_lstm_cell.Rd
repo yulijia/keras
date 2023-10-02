@@ -5,7 +5,6 @@
 \title{Cell class for the LSTM layer}
 \usage{
 layer_lstm_cell(
-  object,
   units,
   activation = "tanh",
   recurrent_activation = "sigmoid",

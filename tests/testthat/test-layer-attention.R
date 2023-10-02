@@ -9,7 +9,7 @@ test_succeeds("multi_head_attention", {
 
   expect_equal(layer$name, "hello")
 
-  c(output_tensor, weights) %<-% layer(target, source,return_attention_scores=TRUE)
+  c(output_tensor, weights) %<-% layer(target, source, return_attention_scores=TRUE)
 
   expect_equal(output_tensor$shape$as_list(), list(NULL, 8, 16))
   expect_equal(weights$shape$as_list(), list(NULL, 2, 8, 4))

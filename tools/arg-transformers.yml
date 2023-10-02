@@ -2,6 +2,7 @@
 
 ALL_ARGS:
   axis: as_axis
+  axes: as_axis
 
 
 Hashing:
@@ -12,6 +13,20 @@ Hashing:
   input_shape: normalize_shape
   batch_size: as_nullable_integer
   batch_input_shape: normalize_shape
+
+Permute:
+  dims: function(x) tuple(as.list(as.integer(x)))
+
+CategoryEncoding:
+  num_tokens: as_nullable_integer
+
+Embedding:
+  input_length: as_nullable_integer
+
+MultiHeadAttention:
+  num_heads: as.integer
+  key_dim: as.integer
+  value_dim: as.integer
 
 # "*":
 #   axis: as_axis
@@ -29,7 +44,8 @@ AlphaDropout:
   pool_size: as.integer
   strides: as_nullable_integer
 
-
+Reshape:
+  target_shape: as.integer
 
 TextVectorization:
    max_tokens:             as_nullable_integer
@@ -37,4 +53,14 @@ TextVectorization:
    ngrams: function(x) if(length(x) > 1) as_integer_or_integer_tuple(x) else as_nullable_integer(x)
 
 
-GaussianDropout:
+# in keras 3 we'll make these 1 based
+# in keras 2, keep them 0 based
+Concatenate:
+  axis: as.integer
+
+Dot:
+  axes: as.integer
+
+LayerNormalization:
+  axis: as.integer
+

@@ -4,7 +4,7 @@
 \alias{layer_multiply}
 \title{Layer that multiplies (element-wise) a list of inputs}
 \usage{
-layer_multiply(object, ...)
+layer_multiply(inputs, ...)
 }
 \arguments{
 \item{...}{standard layer arguments.}

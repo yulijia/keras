@@ -4,7 +4,7 @@
 \alias{layer_stacked_rnn_cells}
 \title{Wrapper allowing a stack of RNN cells to behave as a single cell}
 \usage{
-layer_stacked_rnn_cells(object, cells, ...)
+layer_stacked_rnn_cells(cells, ...)
 }
 \arguments{
 \item{cells}{List of RNN cell instances.}

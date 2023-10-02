@@ -5,7 +5,6 @@
 \title{Cell class for SimpleRNN}
 \usage{
 layer_simple_rnn_cell(
-  object,
   units,
   activation = "tanh",
   use_bias = TRUE,

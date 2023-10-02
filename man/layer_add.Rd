@@ -4,7 +4,7 @@
 \alias{layer_add}
 \title{Layer that adds a list of inputs}
 \usage{
-layer_add(object, ...)
+layer_add(inputs, ...)
 }
 \arguments{
 \item{...}{standard layer arguments.}

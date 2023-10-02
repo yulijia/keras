@@ -991,7 +991,7 @@ old_layer_upsampling_2d <- function(object, size = c(2L, 2L), data_format = NULL
 #' Repeats the 1st, 2nd and 3rd dimensions of the data by `size[[0]]`, `size[[1]]` and
 #' `size[[2]]` respectively.
 #'
-#' @inheritParams layer_upsampling_1d
+#' @inheritParams old_layer_upsampling_1d
 #'
 #' @param size int, or list of 3 integers. The upsampling factors for dim1, dim2
 #'   and dim3.

@@ -4,7 +4,7 @@
 \alias{layer_average}
 \title{Layer that averages a list of inputs element-wise}
 \usage{
-layer_average(object, ...)
+layer_average(inputs, ...)
 }
 \arguments{
 \item{...}{standard layer arguments.}

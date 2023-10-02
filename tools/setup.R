@@ -9,12 +9,18 @@ tryCatch(
   error = function(e) {
     reticulate::virtualenv_create(
       "r-tensorflow", "3.10",
-      packages = c("tensorflow", "keras-core",
+      packages = unique(c("tensorflow", "keras-core",
                    "git+https://github.com/rr-/docstring_parser.git",
                    # "docstring_parser",
                    # "docstring-parser",
                    "ipython",
-                   "scipy", "pandas"))
+
+                   # keras:::default_extra_packages() %>% as.vector() %>% dput()
+                   c("tensorflow-hub", "tensorflow-datasets", "scipy", "requests",
+                     "Pillow", "h5py", "pandas", "pydot"),
+
+                   "scipy", "pandas")))
+
     # py_install("git+https://github.com/rr-/docstring_parser.git",
                # "r-tensorflow")
 
@@ -30,14 +36,14 @@ library(envir)
 library(magrittr, include.only = c("%>%", "%<>%"))
 
 inspect <- import("inspect")
-docstring_parser <-  import("docstring_parser") # broken in py 3.10
+docstring_parser <- import("docstring_parser") # broken in py 3.10
 
 keras <- import("tensorflow.keras")
 # keras <- import("keras_core")
 
-
-py$`_Layer` <- keras$layers$Layer
-py$`_ABCMeta` <- import("abc")$ABCMeta
+`__main__` <- reticulate::import_main()
+`__main__`$`_Layer` <- keras$layers$Layer
+`__main__`$`_ABCMeta` <- import("abc")$ABCMeta
 is_layer_class <- py_eval(
   "lambda x: isinstance(x, (type, _ABCMeta)) and issubclass(x, _Layer)")
 
@@ -50,7 +56,27 @@ print.docstring_parser.common.Docstring <- function(x) {
 
 get_doc <- function(py_obj, style = "GOOGLE") {
 
-  doc <-    inspect$getdoc(py_obj)
+  doc <- inspect$getdoc(py_obj)
+
+  if(py_obj$`__name__` == "LSTM" &&
+     py_id(py_obj) == py_id(keras$layers$LSTM)) {
+
+    doc <- doc %>%
+      sub("sample at index i", "  sample at index i", .)
+    # %>%
+      # strsplit("\n") %>% .[[1L]] %>%
+      # trimws("right") %>% {
+      #   .[-1] <- paste0("    ", .[-1])
+      #   .
+      # } %>%
+      # sub("^  ", "    ", .) %>%
+      # sub("^      ", "        ", .) %>%
+      # str_flatten("\n") %>%
+      # cat() %>%
+      # docstring_parser$parse(., style = docstring_parser$DocstringStyle[[style]])
+
+    # browser()
+  }
 
   # if(grepl("mple at index i in a batch will be used as initial state for the samp", doc))
   #   browser()
@@ -206,8 +232,21 @@ get_arg_transformers <- function(py_obj) {
       next
     }
 
-    if (identical(unname(frmls[i]), list(quote(expr =))))
+    if (identical(unname(frmls[i]), list(quote(expr =)))) {
+      # arg missing, inspect doc maybe to see if we should use
+      # as.integer
+      # if(py_obj_name == "RepeatVector")
+      #   browser()
+      doc <- get_doc(py_obj)
+      for (p in doc$params) {
+        if (p$arg_name == key && grepl("[Ii]nteger", p$description)) {
+          transformers[[key]] <- if(grepl("None", p$description))
+            quote(as_nullable_integer) else quote(as.integer)
+          break
+        }
+      }
       next
+    }
 
     val <- frmls[[i]]
     if (is.integer(val))
@@ -236,7 +275,8 @@ get_arg_transformers <- function(py_obj) {
 }
 
 
-new_layer_wrapper <- function(py_obj) {
+# new_layer_wrapper <-
+  function(py_obj) {
 
   py_obj_name <- py_obj$`__name__`
 
@@ -278,6 +318,9 @@ new_layer_wrapper <- function(py_obj) {
   py_obj_expr <- substitute(keras$layers$NAME,
                             list(NAME=as.name(py_obj_name)))
 
+  # if(py_obj_name == "Add")
+  # browser()
+
   if(py_obj_name == "Input") {
 
     transformers$shape <- quote(normalize_shape)
@@ -293,6 +336,19 @@ new_layer_wrapper <- function(py_obj) {
     # fn_body[[2L]][[3L]]$ignore <- NULL
     # # no need for compose_layer; --> relace create_layer() with do.call
     # fn_body[[3L]] <- bquote(do.call(.(py_obj_expr), args))
+
+  } else if (grepl("layers.merging.", py_repr(py_obj), fixed = TRUE)) {
+    frmls <- c(alist(inputs = , ... =), frmls)
+    browser()
+    fn_body <- bquote({
+      if (missing(inputs))
+        return(keras$layers$Add(...))
+      if (!is.list(inputs))
+        inputs <- list(inputs)
+      dots <- split_dots_named_unnamed(list(...))
+      inputs <- c(inputs, dots$unnamed)
+      do.call(keras$layers$add, c(list(inputs), dots$named))
+    })
 
   } else {
 
@@ -386,6 +442,53 @@ new_layer_wrapper <- function(py_obj) {
     # # no need for compose_layer; --> relace create_layer() with do.call
     # fn_body[[3L]] <- bquote(do.call(.(py_obj_expr), args))
 
+  } else if (grepl("layers.merging.", py_repr(py_obj), fixed = TRUE)) {
+
+    # accept tensors/layers in ..., collapse into `inputs` list for call method
+    frmls <- c(alist(inputs = , ... =), frmls)
+    frmls <- frmls[unique(names(frmls))]
+
+    fn_body <- bquote({
+      args <- capture_args(match.call(), .(transformers), ignore = c("...", "inputs"))
+      dots <- split_dots_named_unnamed(list(...))
+      if (missing(inputs))
+        inputs <- NULL
+      else if (!is.null(inputs) && !is.list(inputs))
+        inputs <- list(inputs)
+      inputs <- c(inputs, dots$unnamed)
+      args <- c(args, dots$named)
+
+      layer <- do.call(.(py_obj_expr), args)
+
+      if(length(inputs))
+        layer(inputs)
+      else
+        layer
+    })
+
+  } else if (grepl(".rnn.", py_repr(py_obj), fixed = TRUE) &&
+             grepl("Cells?$", py_obj_name)) {
+    # layer_gru_cell() and friends don't compose w/ `object`
+    # #TODO: consider renaming these in keras 3, maybe something like
+    # rnn_cell_{gru,simple,stacked,lstm}()
+    fn_body <- bquote({
+      args <- capture_args(match.call(), .(transformers))
+      do.call(.(py_obj_expr), args)
+    })
+
+  } else if (py_obj_name == "MultiHeadAttention") {
+    # first arg is inputs, a list
+    frmls <- c(alist(inputs = ), frmls)
+    fn_body <- bquote({
+      args <- capture_args(match.call(), .(transformers), ignore = "inputs")
+      layer <- do.call(.(py_obj_expr), args)
+      if (missing(inputs) || is.null(inputs))
+        return(layer)
+      if (!is.list(inputs))
+        inputs <- list(inputs)
+      do.call(layer, inputs)
+    })
+
   } else {
 
     frmls <- c(alist(object = ), frmls)
@@ -397,22 +500,37 @@ new_layer_wrapper <- function(py_obj) {
   }
 
   fn <- as.function(c(frmls, fn_body))
+  fn <- rlang::zap_srcref(fn)
 
   fn_string <- deparse(fn)
 
   # deparse adds a space for some reason
   fn_string <- sub("function (", "function(", fn_string, fixed = TRUE)
 
-  r_wrapper_name <-  snakecase::to_snake_case(py_obj$`__name__`) %>%
+  r_wrapper_name <- snakecase::to_snake_case(py_obj$`__name__`) %>%
     # conv_1_d  ->  conv_1d
     sub("_([0-9])_d(_|$)", "_\\1d\\2", .) %>%
     # ReLu -> re_lu -> relu
     sub("(re)_(lu)", "\\1\\2", .) %>%
-    sprintf("layer_%s <- ", .)
+    sprintf("layer_%s", .)
 
-  fn_string <- str_flatten(c(r_wrapper_name, fn_string), "\n")
+  if(grepl("UpSampling.D", py_obj_name)) {
+    r_wrapper_name %<>% sub("_up_sampling_", "_upsampling_", .)
+  }
+
+  if(r_wrapper_name == "layer_activation") {
+
+  } else if (grepl(".activation.", py_repr(py_obj), fixed = TRUE)) {
+    r_wrapper_name %<>% sub("layer_", "layer_activation_", .)
+  }
+
+  if(r_wrapper_name == "layer_activation_p_relu")
+    r_wrapper_name <-"layer_activation_parametric_relu"
+
+  fn_string <- str_flatten(c(paste(r_wrapper_name, "<-"), fn_string), "\n")
+
   docs <- r_doc_from_py_fn(py_obj)
-  out <- str_flatten(c(docs, fn_string), "")
+  out <- str_flatten(c("# ", py_repr(py_obj), "\n", docs, fn_string), "")
   # class(out) <-  "r_py_wrapper2"
   out
 }

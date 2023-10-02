@@ -4,7 +4,7 @@
 \alias{layer_minimum}
 \title{Layer that computes the minimum (element-wise) a list of inputs}
 \usage{
-layer_minimum(object, ...)
+layer_minimum(inputs, ...)
 }
 \arguments{
 \item{...}{standard layer arguments.}

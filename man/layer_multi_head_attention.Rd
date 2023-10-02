@@ -5,7 +5,7 @@
 \title{MultiHeadAttention layer}
 \usage{
 layer_multi_head_attention(
-  object,
+  inputs,
   num_heads,
   key_dim,
   value_dim = NULL,

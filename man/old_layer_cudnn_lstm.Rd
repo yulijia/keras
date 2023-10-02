@@ -33,22 +33,49 @@ old_layer_cudnn_lstm(
 \arguments{
 \item{units}{Positive integer, dimensionality of the output space.}
 
-\item{kernel_initializer}{Initializer for the \code{kernel} weights matrix.}
+\item{kernel_initializer}{Initializer for the \code{kernel} weights matrix, used for
+the linear transformation of the inputs. Default: \code{glorot_uniform}.}
 
-\item{bias_initializer}{Initializer for the bias vector.}
+\item{recurrent_initializer}{Initializer for the \code{recurrent_kernel} weights
+matrix, used for the linear transformation of the recurrent state.
+Default: \code{orthogonal}.}
 
-\item{kernel_regularizer}{Regularizer function applied to
-the \code{kernel} weights matrix.}
+\item{bias_initializer}{Initializer for the bias vector. Default: \code{zeros}.}
 
-\item{bias_regularizer}{Regularizer function applied to the bias vector.}
+\item{unit_forget_bias}{Boolean (default \code{TRUE}). If TRUE, add 1 to the bias of
+the forget gate at initialization. Setting it to true will also force
+\code{bias_initializer="zeros"}. This is recommended in \href{http://www.jmlr.org/proceedings/papers/v37/jozefowicz15.pdf}{Jozefowicz et al.}.}
 
-\item{activity_regularizer}{Regularizer function applied to
-the output of the layer (its "activation").}
+\item{kernel_regularizer}{Regularizer function applied to the \code{kernel} weights
+matrix. Default: \code{NULL}.}
 
-\item{kernel_constraint}{Constraint function applied to
-the \code{kernel} weights matrix.}
+\item{recurrent_regularizer}{Regularizer function applied to the
+\code{recurrent_kernel} weights matrix. Default: \code{NULL}.}
 
-\item{bias_constraint}{Constraint function applied to the bias vector.}
+\item{bias_regularizer}{Regularizer function applied to the bias vector.
+Default: \code{NULL}.}
+
+\item{activity_regularizer}{Regularizer function applied to the output of the
+layer (its "activation"). Default: \code{NULL}.}
+
+\item{kernel_constraint}{Constraint function applied to the \code{kernel} weights
+matrix. Default: \code{NULL}.}
+
+\item{recurrent_constraint}{Constraint function applied to the
+\code{recurrent_kernel} weights matrix. Default: \code{NULL}.}
+
+\item{bias_constraint}{Constraint function applied to the bias vector. Default:
+\code{NULL}.}
+
+\item{return_sequences}{Boolean. Whether to return the last output in the output
+sequence, or the full sequence. Default: \code{FALSE}.}
+
+\item{return_state}{Boolean. Whether to return the last state in addition to the
+output. Default: \code{FALSE}.}
+
+\item{stateful}{Boolean (default \code{FALSE}). If TRUE, the last state for each
+sample at index i in a batch will be used as initial state for the sample
+of index i in the following batch.}
 }
 \description{
 Can only be run on GPU, with the TensorFlow backend.
