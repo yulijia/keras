@@ -147,12 +147,42 @@ it adds a bias vector to the output.
 It then optionally applies an activation function to produce the final
 output.
 
+Input shape:
+3D tensor with shape:
+\verb{(batch_size, channels, steps)} if data_format='channels_first'
+or 3D tensor with shape:
+\verb{(batch_size, steps, channels)} if data_format='channels_last'.
+
+Output shape:
+3D tensor with shape:
+\verb{(batch_size, filters, new_steps)} if data_format='channels_first'
+or 3D tensor with shape:
+\verb{(batch_size,  new_steps, filters)} if data_format='channels_last'.
+\code{new_steps} value might have changed due to padding or strides.
+
+A tensor of rank 3 representing
+
 This layer performs a depthwise convolution that acts separately on
 channels, followed by a pointwise convolution that mixes channels.
 If \code{use_bias} is TRUE and a bias initializer is provided,
 it adds a bias vector to the output.
 It then optionally applies an activation function to produce the final
 output.
+
+Input shape:
+3D tensor with shape:
+\verb{(batch_size, channels, steps)} if data_format='channels_first'
+or 3D tensor with shape:
+\verb{(batch_size, steps, channels)} if data_format='channels_last'.
+
+Output shape:
+3D tensor with shape:
+\verb{(batch_size, filters, new_steps)} if data_format='channels_first'
+or 3D tensor with shape:
+\verb{(batch_size,  new_steps, filters)} if data_format='channels_last'.
+\code{new_steps} value might have changed due to padding or strides.
+
+A tensor of rank 3 representing
 }
 \seealso{
 \itemize{

@@ -125,6 +125,27 @@ provide the keyword argument \code{input_shape}
 (list of integers or \code{NULL}, does not include the sample axis),
 e.g. \verb{input_shape=(128, 3)} for data with 128 time steps and 3 channels.
 
+Input shape:
+3D tensor with shape:
+\verb{(batch_size, steps, channels)}
+
+Output shape:
+3D tensor with shape:
+\verb{(batch_size, new_steps, filters)}
+If \code{output_padding} is specified:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{new_timesteps = ((timesteps - 1) * strides + kernel_size -
+2 * padding + output_padding)
+}\if{html}{\out{</div>}}
+
+A tensor of rank 3 representing
+
+References:
+\itemize{
+\item \href{https://arxiv.org/abs/1603.07285v1}{A guide to convolution arithmetic for deep learning}
+\item \href{https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf}{Deconvolutional Networks}
+}
+
 The need for transposed convolutions generally arises
 from the desire to use a transformation going in the opposite direction
 of a normal convolution, i.e., from something that has the shape of the
@@ -136,6 +157,27 @@ When using this layer as the first layer in a model,
 provide the keyword argument \code{input_shape}
 (list of integers or \code{NULL}, does not include the sample axis),
 e.g. \verb{input_shape=(128, 3)} for data with 128 time steps and 3 channels.
+
+Input shape:
+3D tensor with shape:
+\verb{(batch_size, steps, channels)}
+
+Output shape:
+3D tensor with shape:
+\verb{(batch_size, new_steps, filters)}
+If \code{output_padding} is specified:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{new_timesteps = ((timesteps - 1) * strides + kernel_size -
+2 * padding + output_padding)
+}\if{html}{\out{</div>}}
+
+A tensor of rank 3 representing
+
+References:
+\itemize{
+\item \href{https://arxiv.org/abs/1603.07285v1}{A guide to convolution arithmetic for deep learning}
+\item \href{https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf}{Deconvolutional Networks}
+}
 }
 \seealso{
 \itemize{

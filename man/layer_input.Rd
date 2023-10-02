@@ -59,6 +59,45 @@ inputs and outputs of the model.
 For instance, if \code{a}, \code{b} and \code{c} are Keras tensors,
 it becomes possible to do:
 \verb{model = Model(input=[a, b], output=c)}
+
+A \code{tensor}.
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{# this is a logistic regression in Keras
+x = Input(shape=(32,))
+y = Dense(16, activation='softmax')(x)
+model = Model(x, y)
+}\if{html}{\out{</div>}}
+
+Note that even if eager execution is enabled,
+\code{Input} produces a symbolic tensor-like object (i.e. a placeholder).
+This symbolic tensor-like object can be used with lower-level
+TensorFlow ops that take tensors as inputs, as such:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{x = Input(shape=(32,))
+y = tf.square(x)  # This op will be treated like a layer
+model = Model(x, y)
+}\if{html}{\out{</div>}}
+
+(This behavior does not work for higher-order TensorFlow APIs such as
+control flow and being directly watched by a \code{tf.GradientTape}).
+
+However, the resulting model will not track any variables that were
+used as inputs to TensorFlow ops. All variable usages must happen within
+Keras layers to make sure they will be tracked by the model's weights.
+
+The Keras Input can also create a placeholder from an arbitrary
+\code{tf.TypeSpec}, e.g:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{x = Input(type_spec=tf.RaggedTensorSpec(shape=[NULL, NULL],
+                                        dtype=tf.float32, ragged_rank=1))
+y = x.values
+model = Model(x, y)
+}\if{html}{\out{</div>}}
+
+When passing an arbitrary \code{tf.TypeSpec}, it must represent the signature of
+an entire batch instead of just one example.
 }
 \seealso{
 \itemize{

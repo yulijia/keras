@@ -15,6 +15,26 @@ Layer that averages a list of inputs element-wise
 \details{
 It takes as input a list of tensors, all of the same shape, and returns
 a single tensor (also of the same shape).
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> x1 = np.ones((2, 2))
+>>> x2 = np.zeros((2, 2))
+>>> y = tf.keras.layers.Average()([x1, x2])
+>>> y.numpy().tolist()
+[[0.5, 0.5], [0.5, 0.5]]
+}\if{html}{\out{</div>}}
+
+Usage in a functional model:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input1 = tf.keras.layers.Input(shape=(16,))
+>>> x1 = tf.keras.layers.Dense(8, activation='relu')(input1)
+>>> input2 = tf.keras.layers.Input(shape=(32,))
+>>> x2 = tf.keras.layers.Dense(8, activation='relu')(input2)
+>>> avg = tf.keras.layers.Average()([x1, x2])
+>>> out = tf.keras.layers.Dense(4)(avg)
+>>> model = tf.keras.models.Model(inputs=[input1, input2], outputs=out)
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

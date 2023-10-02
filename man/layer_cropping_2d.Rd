@@ -40,7 +40,35 @@ Defaults to 'channels_last'.}
 \item{...}{standard layer arguments.}
 }
 \description{
+Cropping layer for 2D input (e.g. picture)
+}
+\details{
 It crops along spatial dimensions, i.e. height and width.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_shape = (2, 28, 28, 3)
+>>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+>>> y = tf.keras.layers.Cropping2D(cropping=((2, 2), (4, 4)))(x)
+>>> print(y.shape)
+(2, 24, 20, 3)
+}\if{html}{\out{</div>}}
+
+Input shape:
+4D tensor with shape:
+\itemize{
+\item If \code{data_format} is \code{"channels_last"}:
+\verb{(batch_size, rows, cols, channels)}
+\item If \code{data_format} is \code{"channels_first"}:
+\verb{(batch_size, channels, rows, cols)}
+}
+
+Output shape:
+4D tensor with shape:
+\itemize{
+\item If \code{data_format} is \code{"channels_last"}:
+\verb{(batch_size, cropped_rows, cropped_cols, channels)}
+\item If \code{data_format} is \code{"channels_first"}:
+\verb{(batch_size, channels, cropped_rows, cropped_cols)}
+}
 }
 \seealso{
 \itemize{

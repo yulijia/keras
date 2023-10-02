@@ -56,6 +56,11 @@ tf.Tensor(
  [ 7.5   8.75]
  [10.    0.  ]], shape=(5, 2), dtype=float32)
 }\if{html}{\out{</div>}}
+
+Call arguments:
+inputs: Input tensor (of any rank).
+training: Python boolean indicating whether the layer should behave in
+training mode (adding dropout) or in inference mode (doing nothing).
 }
 \seealso{
 \itemize{

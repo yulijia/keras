@@ -36,6 +36,85 @@ product: \code{scores = tf.matmul(query, key, transpose_b=TRUE)}.
 shape \verb{[batch_size, Tq, dim]}:
 \verb{return tf.matmul(distribution, value)}.
 }
+
+Call arguments:
+inputs: List of the following tensors:
+* query: Query \code{Tensor} of shape \verb{[batch_size, Tq, dim]}.
+* value: Value \code{Tensor} of shape \verb{[batch_size, Tv, dim]}.
+* key: Optional key \code{Tensor} of shape \verb{[batch_size, Tv, dim]}. If
+not given, will use \code{value} for both \code{key} and \code{value}, which is
+the most common case.
+mask: List of the following tensors:
+* query_mask: A boolean mask \code{Tensor} of shape \verb{[batch_size, Tq]}.
+If given, the output will be zero at the positions where
+\code{mask==FALSE}.
+* value_mask: A boolean mask \code{Tensor} of shape \verb{[batch_size, Tv]}.
+If given, will apply the mask such that values at positions
+where \code{mask==FALSE} do not contribute to the result.
+return_attention_scores: bool, it \code{TRUE}, returns the attention scores
+(after masking and softmax) as an additional output argument.
+training: Python boolean indicating whether the layer should behave in
+training mode (adding dropout) or in inference mode (no dropout).
+use_causal_mask: Boolean. Set to \code{TRUE} for decoder self-attention. Adds
+a mask such that position \code{i} cannot attend to positions \code{j > i}.
+This prevents the flow of information from the future towards the
+past.
+Defaults to \code{FALSE}.
+
+Output:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Attention outputs of shape `[batch_size, Tq, dim]`.
+[Optional] Attention scores after masking and softmax with shape
+    `[batch_size, Tq, Tv]`.
+}\if{html}{\out{</div>}}
+
+The meaning of \code{query}, \code{value} and \code{key} depend on the application. In the
+case of text similarity, for example, \code{query} is the sequence embeddings of
+the first piece of text and \code{value} is the sequence embeddings of the second
+piece of text. \code{key} is usually the same tensor as \code{value}.
+
+Here is a code example for using \code{Attention} in a CNN+Attention network:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{# Variable-length int sequences.
+query_input = tf.keras.Input(shape=(NULL,), dtype='int32')
+value_input = tf.keras.Input(shape=(NULL,), dtype='int32')
+
+# Embedding lookup.
+token_embedding = tf.keras.layers.Embedding(input_dim=1000, output_dim=64)
+# Query embeddings of shape [batch_size, Tq, dimension].
+query_embeddings = token_embedding(query_input)
+# Value embeddings of shape [batch_size, Tv, dimension].
+value_embeddings = token_embedding(value_input)
+
+# CNN layer.
+cnn_layer = tf.keras.layers.Conv1D(
+    filters=100,
+    kernel_size=4,
+    # Use 'same' padding so outputs have the same shape as inputs.
+    padding='same')
+# Query encoding of shape [batch_size, Tq, filters].
+query_seq_encoding = cnn_layer(query_embeddings)
+# Value encoding of shape [batch_size, Tv, filters].
+value_seq_encoding = cnn_layer(value_embeddings)
+
+# Query-value attention of shape [batch_size, Tq, filters].
+query_value_attention_seq = tf.keras.layers.Attention()(
+    [query_seq_encoding, value_seq_encoding])
+
+# Reduce over the sequence axis to produce encodings of shape
+# [batch_size, filters].
+query_encoding = tf.keras.layers.GlobalAveragePooling1D()(
+    query_seq_encoding)
+query_value_attention = tf.keras.layers.GlobalAveragePooling1D()(
+    query_value_attention_seq)
+
+# Concatenate query and document encodings to produce a DNN input layer.
+input_layer = tf.keras.layers.Concatenate()(
+    [query_encoding, query_value_attention])
+
+# Add DNN layers, and create Model.
+# ...
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

@@ -47,6 +47,29 @@ array([[3.],
        [6.],
        [9.], dtype=float32)>
 }\if{html}{\out{</div>}}
+
+Input shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+3D tensor with shape:
+\verb{(batch_size, steps, features)}
+\item If \code{data_format='channels_first'}:
+3D tensor with shape:
+\verb{(batch_size, features, steps)}
+}
+
+Output shape:
+\itemize{
+\item If \code{keepdims}=FALSE:
+2D tensor with shape \verb{(batch_size, features)}.
+\item If \code{keepdims}=TRUE:
+\itemize{
+\item If \code{data_format='channels_last'}:
+3D tensor with shape \verb{(batch_size, 1, features)}
+\item If \code{data_format='channels_first'}:
+3D tensor with shape \verb{(batch_size, features, 1)}
+}
+}
 }
 \seealso{
 \itemize{

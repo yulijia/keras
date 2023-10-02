@@ -16,6 +16,15 @@ layer_activity_regularization(object, l1 = 0, l2 = 0, ...)
 \description{
 Layer that applies an update to the cost function based input activity
 }
+\details{
+Input shape:
+Arbitrary. Use the keyword argument \code{input_shape}
+(list of integers, does not include the samples axis)
+when using this layer as the first layer in a model.
+
+Output shape:
+Same shape as input.
+}
 \seealso{
 \itemize{
 \item \url{https://keras.io/api/layers}

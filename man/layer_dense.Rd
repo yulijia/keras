@@ -73,6 +73,31 @@ once (except the \code{trainable} attribute).
 When a popular kwarg \code{input_shape} is passed, then keras will create
 an input layer to insert before the current layer. This can be treated
 equivalent to explicitly defining an \code{InputLayer}.
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # Create a `Sequential` model and add a Dense layer as the first layer.
+>>> model = tf.keras.models.Sequential()
+>>> model.add(tf.keras.Input(shape=(16,)))
+>>> model.add(tf.keras.layers.Dense(32, activation='relu'))
+>>> # Now the model will take as input arrays of shape (NULL, 16)
+>>> # and output arrays of shape (NULL, 32).
+>>> # Note that after the first layer, you don't need to specify
+>>> # the size of the input anymore:
+>>> model.add(tf.keras.layers.Dense(32))
+>>> model.output_shape
+(NULL, 32)
+}\if{html}{\out{</div>}}
+
+Input shape:
+N-D tensor with shape: \verb{(batch_size, ..., input_dim)}.
+The most common situation would be
+a 2D input with shape \verb{(batch_size, input_dim)}.
+
+Output shape:
+N-D tensor with shape: \verb{(batch_size, ..., units)}.
+For instance, for a 2D input with shape \verb{(batch_size, input_dim)},
+the output would have shape \verb{(batch_size, units)}.
 }
 \seealso{
 \itemize{

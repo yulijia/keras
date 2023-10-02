@@ -40,6 +40,44 @@ Upsampling layer for 2D inputs
 \details{
 Repeats the rows and columns of the data
 by \code{size[0]} and \code{size[1]} respectively.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_shape = (2, 2, 1, 3)
+>>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+>>> print(x)
+[[[[ 0  1  2]]
+  [[ 3  4  5]]]
+ [[[ 6  7  8]]
+  [[ 9 10 11]]]]
+>>> y = tf.keras.layers.UpSampling2D(size=(1, 2))(x)
+>>> print(y)
+tf.Tensor(
+  [[[[ 0  1  2]
+     [ 0  1  2]]
+    [[ 3  4  5]
+     [ 3  4  5]]]
+   [[[ 6  7  8]
+     [ 6  7  8]]
+    [[ 9 10 11]
+     [ 9 10 11]]]], shape=(2, 2, 2, 3), dtype=int64)
+}\if{html}{\out{</div>}}
+
+Input shape:
+4D tensor with shape:
+\itemize{
+\item If \code{data_format} is \code{"channels_last"}:
+\verb{(batch_size, rows, cols, channels)}
+\item If \code{data_format} is \code{"channels_first"}:
+\verb{(batch_size, channels, rows, cols)}
+}
+
+Output shape:
+4D tensor with shape:
+\itemize{
+\item If \code{data_format} is \code{"channels_last"}:
+\verb{(batch_size, upsampled_rows, upsampled_cols, channels)}
+\item If \code{data_format} is \code{"channels_first"}:
+\verb{(batch_size, channels, upsampled_rows, upsampled_cols)}
+}
 }
 \seealso{
 \itemize{

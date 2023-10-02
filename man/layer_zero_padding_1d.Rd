@@ -22,6 +22,37 @@ the padding dimension (\verb{(left_pad, right_pad)}).
 \description{
 Zero-padding layer for 1D input (e.g. temporal sequence)
 }
+\details{
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_shape = (2, 2, 3)
+>>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+>>> print(x)
+[[[ 0  1  2]
+  [ 3  4  5]]
+ [[ 6  7  8]
+  [ 9 10 11]]]
+>>> y = tf.keras.layers.ZeroPadding1D(padding=2)(x)
+>>> print(y)
+tf.Tensor(
+  [[[ 0  0  0]
+    [ 0  0  0]
+    [ 0  1  2]
+    [ 3  4  5]
+    [ 0  0  0]
+    [ 0  0  0]]
+   [[ 0  0  0]
+    [ 0  0  0]
+    [ 6  7  8]
+    [ 9 10 11]
+    [ 0  0  0]
+    [ 0  0  0]]], shape=(2, 6, 3), dtype=int64)
+}\if{html}{\out{</div>}}
+
+Input shape:
+3D tensor with shape \verb{(batch_size, axis_to_pad, features)}
+
+Output shape:
+3D tensor with shape \verb{(batch_size, padded_axis, features)}
+}
 \seealso{
 \itemize{
 \item \url{https://keras.io/api/layers}

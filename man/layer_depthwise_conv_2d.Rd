@@ -111,6 +111,20 @@ information across different input channels.
 The \code{depth_multiplier} argument determines how many filter are applied to
 one input channel. As such, it controls the amount of output channels that
 are generated per input channel in the depthwise step.
+
+Input shape:
+4D tensor with shape: \verb{[batch_size, channels, rows, cols]} if
+data_format='channels_first'
+or 4D tensor with shape: \verb{[batch_size, rows, cols, channels]} if
+data_format='channels_last'.
+
+Output shape:
+4D tensor with shape: \verb{[batch_size, channels * depth_multiplier, new_rows, new_cols]} if \code{data_format='channels_first'}
+or 4D tensor with shape: \verb{[batch_size, new_rows, new_cols, channels * depth_multiplier]} if
+\code{data_format='channels_last'}. \code{rows} and \code{cols} values might have
+changed due to padding.
+
+A tensor of rank 4 representing
 }
 \seealso{
 \itemize{

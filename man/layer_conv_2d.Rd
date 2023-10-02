@@ -133,6 +133,59 @@ e.g. \verb{input_shape=(128, 128, 3)} for 128x128 RGB pictures
 in \code{data_format="channels_last"}. You can use \code{NULL} when
 a dimension has variable size.
 
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # The inputs are 28x28 RGB images with `channels_last` and the batch
+>>> # size is 4.
+>>> input_shape = (4, 28, 28, 3)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv2D(
+... 2, 3, activation='relu', input_shape=input_shape[1:])(x)
+>>> print(y.shape)
+(4, 26, 26, 2)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # With `dilation_rate` as 2.
+>>> input_shape = (4, 28, 28, 3)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv2D(
+...     2, 3,
+...     activation='relu',
+...     dilation_rate=2,
+...     input_shape=input_shape[1:])(x)
+>>> print(y.shape)
+(4, 24, 24, 2)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # With `padding` as "same".
+>>> input_shape = (4, 28, 28, 3)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv2D(
+... 2, 3, activation='relu', padding="same", input_shape=input_shape[1:])(x)
+>>> print(y.shape)
+(4, 28, 28, 2)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # With extended batch shape [4, 7]:
+>>> input_shape = (4, 7, 28, 28, 3)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv2D(
+... 2, 3, activation='relu', input_shape=input_shape[2:])(x)
+>>> print(y.shape)
+(4, 7, 26, 26, 2)
+}\if{html}{\out{</div>}}
+
+Input shape:
+4+D tensor with shape: \verb{batch_shape + (channels, rows, cols)} if
+\code{data_format='channels_first'}
+or 4+D tensor with shape: \verb{batch_shape + (rows, cols, channels)} if
+\code{data_format='channels_last'}.
+
+Output shape:
+4+D tensor with shape: \verb{batch_shape + (filters, new_rows, new_cols)} if
+\code{data_format='channels_first'} or 4+D tensor with shape: \verb{batch_shape + (new_rows, new_cols, filters)} if \code{data_format='channels_last'}.  \code{rows}
+and \code{cols} values might have changed due to padding.
+
+A tensor of rank 4+ representing
+
 This layer creates a convolution kernel that is convolved
 with the layer input to produce a tensor of
 outputs. If \code{use_bias} is TRUE,
@@ -145,6 +198,59 @@ provide the keyword argument \code{input_shape}
 e.g. \verb{input_shape=(128, 128, 3)} for 128x128 RGB pictures
 in \code{data_format="channels_last"}. You can use \code{NULL} when
 a dimension has variable size.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # The inputs are 28x28 RGB images with `channels_last` and the batch
+>>> # size is 4.
+>>> input_shape = (4, 28, 28, 3)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv2D(
+... 2, 3, activation='relu', input_shape=input_shape[1:])(x)
+>>> print(y.shape)
+(4, 26, 26, 2)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # With `dilation_rate` as 2.
+>>> input_shape = (4, 28, 28, 3)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv2D(
+...     2, 3,
+...     activation='relu',
+...     dilation_rate=2,
+...     input_shape=input_shape[1:])(x)
+>>> print(y.shape)
+(4, 24, 24, 2)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # With `padding` as "same".
+>>> input_shape = (4, 28, 28, 3)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv2D(
+... 2, 3, activation='relu', padding="same", input_shape=input_shape[1:])(x)
+>>> print(y.shape)
+(4, 28, 28, 2)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # With extended batch shape [4, 7]:
+>>> input_shape = (4, 7, 28, 28, 3)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv2D(
+... 2, 3, activation='relu', input_shape=input_shape[2:])(x)
+>>> print(y.shape)
+(4, 7, 26, 26, 2)
+}\if{html}{\out{</div>}}
+
+Input shape:
+4+D tensor with shape: \verb{batch_shape + (channels, rows, cols)} if
+\code{data_format='channels_first'}
+or 4+D tensor with shape: \verb{batch_shape + (rows, cols, channels)} if
+\code{data_format='channels_last'}.
+
+Output shape:
+4+D tensor with shape: \verb{batch_shape + (filters, new_rows, new_cols)} if
+\code{data_format='channels_first'} or 4+D tensor with shape: \verb{batch_shape + (new_rows, new_cols, filters)} if \code{data_format='channels_last'}.  \code{rows}
+and \code{cols} values might have changed due to padding.
+
+A tensor of rank 4+ representing
 }
 \seealso{
 \itemize{

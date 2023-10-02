@@ -145,6 +145,40 @@ provide the keyword argument \code{input_shape}
 e.g. \verb{input_shape=(128, 128, 128, 3)} for a 128x128x128 volume with 3
 channels if \code{data_format="channels_last"}.
 
+Input shape:
+5D tensor with shape:
+\verb{(batch_size, channels, depth, rows, cols)} if
+data_format='channels_first'
+or 5D tensor with shape:
+\verb{(batch_size, depth, rows, cols, channels)} if
+data_format='channels_last'.
+
+Output shape:
+5D tensor with shape:
+\verb{(batch_size, filters, new_depth, new_rows, new_cols)} if
+data_format='channels_first'
+or 5D tensor with shape:
+\verb{(batch_size, new_depth, new_rows, new_cols, filters)} if
+data_format='channels_last'.
+\code{depth} and \code{rows} and \code{cols} values might have changed due to padding.
+If \code{output_padding} is specified::
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{new_depth = ((depth - 1) * strides[0] + kernel_size[0] - 2 * padding[0] +
+output_padding[0])
+new_rows = ((rows - 1) * strides[1] + kernel_size[1] - 2 * padding[1] +
+output_padding[1])
+new_cols = ((cols - 1) * strides[2] + kernel_size[2] - 2 * padding[2] +
+output_padding[2])
+}\if{html}{\out{</div>}}
+
+A tensor of rank 5 representing
+
+References:
+\itemize{
+\item \href{https://arxiv.org/abs/1603.07285v1}{A guide to convolution arithmetic for deep learning}
+\item \href{https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf}{Deconvolutional Networks}
+}
+
 The need for transposed convolutions generally arises
 from the desire to use a transformation going in the opposite direction
 of a normal convolution, i.e., from something that has the shape of the
@@ -157,6 +191,40 @@ provide the keyword argument \code{input_shape}
 (list of integers or \code{NULL}, does not include the sample axis),
 e.g. \verb{input_shape=(128, 128, 128, 3)} for a 128x128x128 volume with 3
 channels if \code{data_format="channels_last"}.
+
+Input shape:
+5D tensor with shape:
+\verb{(batch_size, channels, depth, rows, cols)} if
+data_format='channels_first'
+or 5D tensor with shape:
+\verb{(batch_size, depth, rows, cols, channels)} if
+data_format='channels_last'.
+
+Output shape:
+5D tensor with shape:
+\verb{(batch_size, filters, new_depth, new_rows, new_cols)} if
+data_format='channels_first'
+or 5D tensor with shape:
+\verb{(batch_size, new_depth, new_rows, new_cols, filters)} if
+data_format='channels_last'.
+\code{depth} and \code{rows} and \code{cols} values might have changed due to padding.
+If \code{output_padding} is specified::
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{new_depth = ((depth - 1) * strides[0] + kernel_size[0] - 2 * padding[0] +
+output_padding[0])
+new_rows = ((rows - 1) * strides[1] + kernel_size[1] - 2 * padding[1] +
+output_padding[1])
+new_cols = ((cols - 1) * strides[2] + kernel_size[2] - 2 * padding[2] +
+output_padding[2])
+}\if{html}{\out{</div>}}
+
+A tensor of rank 5 representing
+
+References:
+\itemize{
+\item \href{https://arxiv.org/abs/1603.07285v1}{A guide to convolution arithmetic for deep learning}
+\item \href{https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf}{Deconvolutional Networks}
+}
 }
 \seealso{
 \itemize{

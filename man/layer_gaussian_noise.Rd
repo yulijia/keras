@@ -23,6 +23,19 @@ Gaussian Noise (GS) is a natural choice as corruption process
 for real valued inputs.
 
 As it is a regularization layer, it is only active at training time.
+
+Call arguments:
+inputs: Input tensor (of any rank).
+training: Python boolean indicating whether the layer should behave in
+training mode (adding noise) or in inference mode (doing nothing).
+
+Input shape:
+Arbitrary. Use the keyword argument \code{input_shape}
+(list of integers, does not include the samples axis)
+when using this layer as the first layer in a model.
+
+Output shape:
+Same shape as input.
 }
 \seealso{
 \itemize{

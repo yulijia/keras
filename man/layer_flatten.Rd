@@ -26,6 +26,19 @@ Flattens the input. Does not affect the batch size
 \details{
 Note: If inputs are shaped \verb{(batch,)} without a feature axis, then
 flattening adds an extra channel dimension and output shape is \verb{(batch, 1)}.
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> model = tf.keras.Sequential()
+>>> model.add(tf.keras.layers.Conv2D(64, 3, 3, input_shape=(3, 32, 32)))
+>>> model.output_shape
+(NULL, 1, 10, 64)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> model.add(Flatten())
+>>> model.output_shape
+(NULL, 640)
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

@@ -66,6 +66,50 @@ inputs for an \code{Embedding} layer.
 
 This layer accepts \code{tf.Tensor}, \code{tf.RaggedTensor} and \code{tf.SparseTensor}
 input.
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> model = tf.keras.Sequential()
+>>> model.add(tf.keras.layers.Embedding(1000, 64, input_length=10))
+>>> # The model will take as input an integer matrix of size (batch,
+>>> # input_length), and the largest integer (i.e. word index) in the input
+>>> # should be no larger than 999 (vocabulary size).
+>>> # Now model.output_shape is (NULL, 10, 64), where `NULL` is the batch
+>>> # dimension.
+>>> input_array = np.random.randint(1000, size=(32, 10))
+>>> model.compile('rmsprop', 'mse')
+>>> output_array = model.predict(input_array)
+>>> print(output_array.shape)
+(32, 10, 64)
+}\if{html}{\out{</div>}}
+
+Input shape:
+2D tensor with shape: \verb{(batch_size, input_length)}.
+
+Output shape:
+3D tensor with shape: \verb{(batch_size, input_length, output_dim)}.
+
+\strong{Note on variable placement:}
+By default, if a GPU is available, the embedding matrix will be placed on
+the GPU. This achieves the best performance, but it might cause issues:
+\itemize{
+\item You may be using an optimizer that does not support sparse GPU kernels.
+In this case you will see an error upon training your model.
+\item Your embedding matrix may be too large to fit on your GPU. In this case
+you will see an Out Of Memory (OOM) error.
+}
+
+In such cases, you should place the embedding matrix on the CPU memory.
+You can do so with a device scope, as such:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{with tf.device('cpu:0'):
+  embedding_layer = Embedding(...)
+  embedding_layer.build()
+}\if{html}{\out{</div>}}
+
+The pre-built \code{embedding_layer} instance can then be added to a \code{Sequential}
+model (e.g. \code{model.add(embedding_layer)}), called in a Functional model
+(e.g. \code{x = embedding_layer(x)}), or used in a subclassed model.
 }
 \seealso{
 \itemize{

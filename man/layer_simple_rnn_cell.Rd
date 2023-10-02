@@ -77,6 +77,30 @@ for details about the usage of RNN API.
 
 This class processes one step within the whole time sequence input, whereas
 \code{tf.keras.layer.SimpleRNN} processes the whole sequence.
+
+Call arguments:
+inputs: A 2D tensor, with shape of \verb{[batch, feature]}.
+states: A 2D tensor with shape of \verb{[batch, units]}, which is the state
+from the previous time step. For timestep 0, the initial state provided
+by user will be feed to cell.
+training: Python boolean indicating whether the layer should behave in
+training mode or in inference mode. Only relevant when \code{dropout} or
+\code{recurrent_dropout} is used.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{inputs = np.random.random([32, 10, 8]).astype(np.float32)
+rnn = tf.keras.layers.RNN(tf.keras.layers.SimpleRNNCell(4))
+
+output = rnn(inputs)  # The output has shape `[32, 4]`.
+
+rnn = tf.keras.layers.RNN(
+    tf.keras.layers.SimpleRNNCell(4),
+    return_sequences=TRUE,
+    return_state=TRUE)
+
+# whole_sequence_output has shape `[32, 10, 4]`.
+# final_state has shape `[32, 4]`.
+whole_sequence_output, final_state = rnn(inputs)
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

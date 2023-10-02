@@ -31,6 +31,30 @@ The behavior is the same as for \code{tf.reduce_max} or \code{np.max}.}
 \description{
 Global Max pooling operation for 3D data
 }
+\details{
+Input shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+5D tensor with shape:
+\verb{(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)}
+\item If \code{data_format='channels_first'}:
+5D tensor with shape:
+\verb{(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)}
+}
+
+Output shape:
+\itemize{
+\item If \code{keepdims}=FALSE:
+2D tensor with shape \verb{(batch_size, channels)}.
+\item If \code{keepdims}=TRUE:
+\itemize{
+\item If \code{data_format='channels_last'}:
+5D tensor with shape \verb{(batch_size, 1, 1, 1, channels)}
+\item If \code{data_format='channels_first'}:
+5D tensor with shape \verb{(batch_size, channels, 1, 1, 1)}
+}
+}
+}
 \seealso{
 \itemize{
 \item \url{https://keras.io/api/layers}

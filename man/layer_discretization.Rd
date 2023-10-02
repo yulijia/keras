@@ -70,6 +70,29 @@ Any \code{tf.Tensor} or \code{tf.RaggedTensor} of dimension 2 or higher.
 
 Output shape:
 Same as input shape.
+
+Arguments:
+
+Bucketize float values based on provided buckets.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input = np.array([[-1.5, 1.0, 3.4, .5], [0.0, 3.0, 1.3, 0.0]])
+>>> layer = tf.keras.layers.Discretization(bin_boundaries=[0., 1., 2.])
+>>> layer(input)
+<tf.Tensor: shape=(2, 4), dtype=int64, numpy=
+array([[0, 2, 3, 1],
+       [1, 3, 2, 1]])>
+}\if{html}{\out{</div>}}
+
+Bucketize float values based on a number of buckets to compute.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input = np.array([[-1.5, 1.0, 3.4, .5], [0.0, 3.0, 1.3, 0.0]])
+>>> layer = tf.keras.layers.Discretization(num_bins=4, epsilon=0.01)
+>>> layer.adapt(input)
+>>> layer(input)
+<tf.Tensor: shape=(2, 4), dtype=int64, numpy=
+array([[0, 2, 3, 2],
+       [1, 3, 3, 1]])>
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

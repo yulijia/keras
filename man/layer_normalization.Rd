@@ -58,6 +58,56 @@ be called before \code{fit()}, \code{evaluate()}, or \code{predict()}.
 
 For an overview and full list of preprocessing layers, see the preprocessing
 \href{https://www.tensorflow.org/guide/keras/preprocessing_layers}{guide}.
+
+Calculate a global mean and variance by analyzing the dataset in \code{adapt()}.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> adapt_data = np.array([1., 2., 3., 4., 5.], dtype='float32')
+>>> input_data = np.array([1., 2., 3.], dtype='float32')
+>>> layer = tf.keras.layers.Normalization(axis=NULL)
+>>> layer.adapt(adapt_data)
+>>> layer(input_data)
+<tf.Tensor: shape=(3,), dtype=float32, numpy=
+array([-1.4142135, -0.70710677, 0.], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+Calculate a mean and variance for each index on the last axis.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> adapt_data = np.array([[0., 7., 4.],
+...                        [2., 9., 6.],
+...                        [0., 7., 4.],
+...                        [2., 9., 6.]], dtype='float32')
+>>> input_data = np.array([[0., 7., 4.]], dtype='float32')
+>>> layer = tf.keras.layers.Normalization(axis=-1)
+>>> layer.adapt(adapt_data)
+>>> layer(input_data)
+<tf.Tensor: shape=(1, 3), dtype=float32, numpy=
+array([-1., -1., -1.], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+Pass the mean and variance directly.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_data = np.array([[1.], [2.], [3.]], dtype='float32')
+>>> layer = tf.keras.layers.Normalization(mean=3., variance=2.)
+>>> layer(input_data)
+<tf.Tensor: shape=(3, 1), dtype=float32, numpy=
+array([[-1.4142135 ],
+       [-0.70710677],
+       [ 0.        ]], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+Use the layer to de-normalize inputs (after adapting the layer).
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> adapt_data = np.array([[0., 7., 4.],
+...                        [2., 9., 6.],
+...                        [0., 7., 4.],
+...                        [2., 9., 6.]], dtype='float32')
+>>> input_data = np.array([[1., 2., 3.]], dtype='float32')
+>>> layer = tf.keras.layers.Normalization(axis=-1, invert=TRUE)
+>>> layer.adapt(adapt_data)
+>>> layer(input_data)
+<tf.Tensor: shape=(1, 3), dtype=float32, numpy=
+array([2., 10., 8.], dtype=float32)>
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

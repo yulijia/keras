@@ -46,6 +46,31 @@ scalar inputs. Valid input shapes are \verb{(batch_size, 1)}, \verb{(batch_size,
 
 For an overview and full list of preprocessing layers, see the preprocessing
 \href{https://www.tensorflow.org/guide/keras/preprocessing_layers}{guide}.
+
+\strong{Crossing two scalar features.}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.HashedCrossing(
+...     num_bins=5)
+>>> feat1 = tf.constant(['A', 'B', 'A', 'B', 'A'])
+>>> feat2 = tf.constant([101, 101, 101, 102, 102])
+>>> layer((feat1, feat2))
+<tf.Tensor: shape=(5,), dtype=int64, numpy=array([1, 4, 1, 1, 3])>
+}\if{html}{\out{</div>}}
+
+\strong{Crossing and one-hotting two scalar features.}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.HashedCrossing(
+...     num_bins=5, output_mode='one_hot')
+>>> feat1 = tf.constant(['A', 'B', 'A', 'B', 'A'])
+>>> feat2 = tf.constant([101, 101, 101, 102, 102])
+>>> layer((feat1, feat2))
+<tf.Tensor: shape=(5, 5), dtype=float32, numpy=
+  array([[0., 1., 0., 0., 0.],
+         [0., 0., 0., 0., 1.],
+         [0., 1., 0., 0., 0.],
+         [0., 1., 0., 0., 0.],
+         [0., 0., 0., 1., 0.]], dtype=float32)>
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

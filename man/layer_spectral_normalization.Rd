@@ -21,6 +21,29 @@ Performs spectral normalization on the weights of a target layer
 \details{
 This wrapper controls the Lipschitz constant of the weights of a layer by
 constraining their spectral norm, which can stabilize the training of GANs.
+
+Wrap \code{keras.layers.Conv2D}:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> x = np.random.rand(1, 10, 10, 1)
+>>> conv2d = SpectralNormalization(tf.keras.layers.Conv2D(2, 2))
+>>> y = conv2d(x)
+>>> y.shape
+TensorShape([1, 9, 9, 2])
+}\if{html}{\out{</div>}}
+
+Wrap \code{keras.layers.Dense}:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> x = np.random.rand(1, 10, 10, 1)
+>>> dense = SpectralNormalization(tf.keras.layers.Dense(10))
+>>> y = dense(x)
+>>> y.shape
+TensorShape([1, 10, 10, 10])
+}\if{html}{\out{</div>}}
+
+Reference:
+\itemize{
+\item \href{https://arxiv.org/abs/1802.05957}{Spectral Normalization for GAN}.
+}
 }
 \seealso{
 \itemize{

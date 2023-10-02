@@ -122,6 +122,22 @@ For example, for \verb{strides=(1, 1)} and \code{padding="same"}:
            [9.]]]], dtype=float32)>
 }\if{html}{\out{</div>}}
 
+Input shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+4D tensor with shape \verb{(batch_size, rows, cols, channels)}.
+\item If \code{data_format='channels_first'}:
+4D tensor with shape \verb{(batch_size, channels, rows, cols)}.
+}
+
+Output shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+4D tensor with shape \verb{(batch_size, pooled_rows, pooled_cols, channels)}.
+\item If \code{data_format='channels_first'}:
+4D tensor with shape \verb{(batch_size, channels, pooled_rows, pooled_cols)}.
+}
+
 Downsamples the input along its spatial dimensions (height and width)
 by taking the average value over an input window
 (of size defined by \code{pool_size}) for each channel of the input.
@@ -185,6 +201,22 @@ For example, for \verb{strides=(1, 1)} and \code{padding="same"}:
            [8.5],
            [9.]]]], dtype=float32)>
 }\if{html}{\out{</div>}}
+
+Input shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+4D tensor with shape \verb{(batch_size, rows, cols, channels)}.
+\item If \code{data_format='channels_first'}:
+4D tensor with shape \verb{(batch_size, channels, rows, cols)}.
+}
+
+Output shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+4D tensor with shape \verb{(batch_size, pooled_rows, pooled_cols, channels)}.
+\item If \code{data_format='channels_first'}:
+4D tensor with shape \verb{(batch_size, channels, pooled_rows, pooled_cols)}.
+}
 }
 \seealso{
 \itemize{

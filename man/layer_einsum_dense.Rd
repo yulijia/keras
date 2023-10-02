@@ -58,7 +58,62 @@ matrix.}
 \item{...}{standard layer arguments.}
 }
 \description{
+A layer that uses \code{tf.einsum} as the backing computation
+}
+\details{
 This layer can perform einsum calculations of arbitrary dimensionality.
+
+\strong{Biased dense layer with einsums}
+
+This example shows how to instantiate a standard Keras dense layer using
+einsum operations. This example is equivalent to
+\code{tf.keras.layers.Dense(64, use_bias=TRUE)}.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.EinsumDense("ab,bc->ac",
+...                                     output_shape=64,
+...                                     bias_axes="c")
+>>> input_tensor = tf.keras.Input(shape=[32])
+>>> output_tensor = layer(input_tensor)
+>>> output_tensor
+<... shape=(NULL, 64) dtype=...>
+}\if{html}{\out{</div>}}
+
+\strong{Applying a dense layer to a sequence}
+
+This example shows how to instantiate a layer that applies the same dense
+operation to every element in a sequence. Here, the \code{output_shape} has two
+values (since there are two non-batch dimensions in the output); the first
+dimension in the \code{output_shape} is \code{NULL}, because the sequence dimension
+\code{b} has an unknown shape.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.EinsumDense("abc,cd->abd",
+...                                     output_shape=(NULL, 64),
+...                                     bias_axes="d")
+>>> input_tensor = tf.keras.Input(shape=[32, 128])
+>>> output_tensor = layer(input_tensor)
+>>> output_tensor
+<... shape=(NULL, 32, 64) dtype=...>
+}\if{html}{\out{</div>}}
+
+\strong{Applying a dense layer to a sequence using ellipses}
+
+This example shows how to instantiate a layer that applies the same dense
+operation to every element in a sequence, but uses the ellipsis notation
+instead of specifying the batch and sequence dimensions.
+
+Because we are using ellipsis notation and have specified only one axis, the
+\code{output_shape} arg is a single value. When instantiated in this way, the
+layer can handle any number of sequence dimensions - including the case
+where no sequence dimension exists.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.EinsumDense("...x,xy->...y",
+...                                     output_shape=64,
+...                                     bias_axes="y")
+>>> input_tensor = tf.keras.Input(shape=[32, 128])
+>>> output_tensor = layer(input_tensor)
+>>> output_tensor
+<... shape=(NULL, 32, 64) dtype=...>
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

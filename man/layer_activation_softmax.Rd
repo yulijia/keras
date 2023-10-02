@@ -34,6 +34,14 @@ when using this layer as the first layer in a model.
 
 Output shape:
 Same shape as the input.
+
+Call arguments:
+inputs: The inputs, or logits to the softmax layer.
+mask: A boolean mask of the same shape as \code{inputs}. The mask
+specifies 1 to keep and 0 to mask. Defaults to \code{NULL}.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{Softmaxed output with the same shape as `inputs`.
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

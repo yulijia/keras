@@ -131,6 +131,21 @@ For an overview and full list of preprocessing layers, see the preprocessing
          [1],
          [0]])>
 }\if{html}{\out{</div>}}
+
+Input shape:
+A single or list of string, int32 or int64 \code{Tensor},
+\code{SparseTensor} or \code{RaggedTensor} of shape \verb{(batch_size, ...,)}
+
+Output shape:
+An int64 \code{Tensor}, \code{SparseTensor} or \code{RaggedTensor} of shape
+\verb{(batch_size, ...)}. If any input is \code{RaggedTensor} then output is
+\code{RaggedTensor}, otherwise if any input is \code{SparseTensor} then output is
+\code{SparseTensor}, otherwise the output is \code{Tensor}.
+
+Reference:
+\itemize{
+\item \href{https://www.131002.net/siphash/siphash.pdf}{SipHash with salt}
+}
 }
 \seealso{
 \itemize{

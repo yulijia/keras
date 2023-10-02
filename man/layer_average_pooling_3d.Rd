@@ -59,10 +59,74 @@ width) by taking the average value over an input window
 (of size defined by \code{pool_size}) for each channel of the input.
 The window is shifted by \code{strides} along each dimension.
 
+Input shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+5D tensor with shape:
+\verb{(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)}
+\item If \code{data_format='channels_first'}:
+5D tensor with shape:
+\verb{(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)}
+}
+
+Output shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+5D tensor with shape:
+\verb{(batch_size, pooled_dim1, pooled_dim2, pooled_dim3, channels)}
+\item If \code{data_format='channels_first'}:
+5D tensor with shape:
+\verb{(batch_size, channels, pooled_dim1, pooled_dim2, pooled_dim3)}
+}
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{depth = 30
+height = 30
+width = 30
+input_channels = 3
+
+inputs = tf.keras.Input(shape=(depth, height, width, input_channels))
+layer = tf.keras.layers.AveragePooling3D(pool_size=3)
+outputs = layer(inputs)  # Shape: (batch_size, 10, 10, 10, 3)
+}\if{html}{\out{</div>}}
+
 Downsamples the input along its spatial dimensions (depth, height, and
 width) by taking the average value over an input window
 (of size defined by \code{pool_size}) for each channel of the input.
 The window is shifted by \code{strides} along each dimension.
+
+Input shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+5D tensor with shape:
+\verb{(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)}
+\item If \code{data_format='channels_first'}:
+5D tensor with shape:
+\verb{(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)}
+}
+
+Output shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+5D tensor with shape:
+\verb{(batch_size, pooled_dim1, pooled_dim2, pooled_dim3, channels)}
+\item If \code{data_format='channels_first'}:
+5D tensor with shape:
+\verb{(batch_size, channels, pooled_dim1, pooled_dim2, pooled_dim3)}
+}
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{depth = 30
+height = 30
+width = 30
+input_channels = 3
+
+inputs = tf.keras.Input(shape=(depth, height, width, input_channels))
+layer = tf.keras.layers.AveragePooling3D(pool_size=3)
+outputs = layer(inputs)  # Shape: (batch_size, 10, 10, 10, 3)
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

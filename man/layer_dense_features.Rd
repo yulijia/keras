@@ -28,6 +28,25 @@ This layer can be called multiple times with different features.
 This is the V2 version of this layer that uses name_scopes to create
 variables instead of variable_scopes. But this approach currently lacks
 support for partitioned variables. In that case, use the V1 version instead.
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{price = tf.feature_column.numeric_column('price')
+keywords_embedded = tf.feature_column.embedding_column(
+    tf.feature_column.categorical_column_with_hash_bucket("keywords",
+                                                          10000),
+    dimensions=16)
+columns = [price, keywords_embedded, ...]
+feature_layer = tf.keras.layers.DenseFeatures(columns)
+
+features = tf.io.parse_example(
+    ..., features=tf.feature_column.make_parse_example_spec(columns))
+dense_tensor = feature_layer(features)
+for units in [128, 64, 32]:
+  dense_tensor = tf.keras.layers.Dense(units, activation='relu')(
+    dense_tensor)
+prediction = tf.keras.layers.Dense(1)(dense_tensor)
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

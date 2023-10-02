@@ -29,6 +29,18 @@ early convolution layers) then regular dropout will not regularize the
 activations and will otherwise just result in an effective learning rate
 decrease. In this case, SpatialDropout3D will help promote independence
 between feature maps and should be used instead.
+
+Call arguments:
+inputs: A 5D tensor.
+training: Python boolean indicating whether the layer should behave in
+training mode (adding dropout) or in inference mode (doing nothing).
+Input shape:
+5D tensor with shape: \verb{(samples, channels, dim1, dim2, dim3)} if
+data_format='channels_first'
+or 5D tensor with shape: \verb{(samples, dim1, dim2, dim3, channels)} if
+data_format='channels_last'.
+Output shape: Same as input.
+References: - \href{https://arxiv.org/abs/1411.4280}{Efficient Object Localization Using Convolutional Networks}
 }
 \seealso{
 \itemize{

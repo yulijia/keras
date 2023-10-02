@@ -13,6 +13,47 @@
 #' Every `RNNCell` must have the properties below and implement `call` with
 #' the signature `(output, next_state) = call(input, state)`.
 #'
+#' ```python
+#'   class MinimalRNNCell(AbstractRNNCell):
+#'
+#'     def __init__(self, units, **kwargs):
+#'       self.units = units
+#'       super(MinimalRNNCell, self).__init__(**kwargs)
+#'
+#'     @property
+#'     def state_size(self):
+#'       return self.units
+#'
+#'     def build(self, input_shape):
+#'       self.kernel = self.add_weight(shape=(input_shape[-1], self.units),
+#'                                     initializer='uniform',
+#'                                     name='kernel')
+#'       self.recurrent_kernel = self.add_weight(
+#'           shape=(self.units, self.units),
+#'           initializer='uniform',
+#'           name='recurrent_kernel')
+#'       self.built = TRUE
+#'
+#'     def call(self, inputs, states):
+#'       prev_output = states[0]
+#'       h = backend.dot(inputs, self.kernel)
+#'       output = h + backend.dot(prev_output, self.recurrent_kernel)
+#'       return output, output
+#' ```
+#'
+#' This definition of cell differs from the definition used in the literature.
+#' In the literature, 'cell' refers to an object with a single scalar output.
+#' This definition refers to a horizontal array of such units.
+#'
+#' An RNN cell, in the most abstract setting, is anything that has
+#' a state and performs some operation that takes a matrix of inputs.
+#' This operation results in an output matrix with `self.output_size` columns.
+#' If `self.state_size` is an integer, this operation also results in a new
+#' state matrix with `self.state_size` columns.  If `self.state_size` is a
+#' (possibly nested list of) TensorShape object(s), then it should return a
+#' matching structure of Tensors having shape `[batch_size].concatenate(s)`
+#' for each `s` in `self.batch_size`.
+#'
 #' @param ... standard layer arguments.
 #'
 #' @seealso
@@ -29,6 +70,29 @@ function(...)
 
 # <class 'keras.src.layers.core.activation.Activation'>
 #' Applies an activation function to an output
+#'
+#' @details
+#'
+#' Usage:
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.Activation('relu')
+#' >>> output = layer([-3.0, -1.0, 0.0, 2.0])
+#' >>> list(output.numpy())
+#' [0.0, 0.0, 0.0, 2.0]
+#' >>> layer = tf.keras.layers.Activation(tf.nn.relu)
+#' >>> output = layer([-3.0, -1.0, 0.0, 2.0])
+#' >>> list(output.numpy())
+#' [0.0, 0.0, 0.0, 2.0]
+#' ```
+#'
+#' Input shape:
+#'   Arbitrary. Use the keyword argument `input_shape`
+#'   (list of integers, does not include the batch axis)
+#'   when using this layer as the first layer in a model.
+#'
+#' Output shape:
+#'   Same shape as input.
 #'
 #' @param activation
 #' Activation function, such as `tf.nn.relu`, or string name of
@@ -51,6 +115,16 @@ function(object, activation, ...)
 
 # <class 'keras.src.layers.regularization.activity_regularization.ActivityRegularization'>
 #' Layer that applies an update to the cost function based input activity
+#'
+#' @details
+#'
+#' Input shape:
+#'   Arbitrary. Use the keyword argument `input_shape`
+#'   (list of integers, does not include the samples axis)
+#'   when using this layer as the first layer in a model.
+#'
+#' Output shape:
+#'   Same shape as input.
 #'
 #' @param l1
 #' L1 regularization factor (positive float).
@@ -81,6 +155,28 @@ function(object, l1 = 0, l2 = 0, ...)
 #' It takes as input a list of tensors,
 #' all of the same shape, and returns
 #' a single tensor (also of the same shape).
+#'
+#' ```python
+#' >>> input_shape = (2, 3, 4)
+#' >>> x1 = tf.random.normal(input_shape)
+#' >>> x2 = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Add()([x1, x2])
+#' >>> print(y.shape)
+#' (2, 3, 4)
+#' ```
+#'
+#' Used in a functional model:
+#'
+#' ```python
+#' >>> input1 = tf.keras.layers.Input(shape=(16,))
+#' >>> x1 = tf.keras.layers.Dense(8, activation='relu')(input1)
+#' >>> input2 = tf.keras.layers.Input(shape=(32,))
+#' >>> x2 = tf.keras.layers.Dense(8, activation='relu')(input2)
+#' >>> # equivalent to `added = tf.keras.layers.add([x1, x2])`
+#' >>> added = tf.keras.layers.Add()([x1, x2])
+#' >>> out = tf.keras.layers.Dense(4)(added)
+#' >>> model = tf.keras.models.Model(inputs=[input1, input2], outputs=out)
+#' ```
 #'
 #' @param ... standard layer arguments.
 #'
@@ -125,6 +221,85 @@ function(inputs, ...)
 #'     shape `[batch_size, Tq, dim]`:
 #'    `return tf.matmul(distribution, value)`.
 #'
+#' Call arguments:
+#'     inputs: List of the following tensors:
+#'         * query: Query `Tensor` of shape `[batch_size, Tq, dim]`.
+#'         * value: Value `Tensor` of shape `[batch_size, Tv, dim]`.
+#'         * key: Optional key `Tensor` of shape `[batch_size, Tv, dim]`.
+#'             If not given, will use `value` for both `key` and `value`,
+#'             which is the most common case.
+#'     mask: List of the following tensors:
+#'         * query_mask: A boolean mask `Tensor` of shape `[batch_size, Tq]`.
+#'             If given, the output will be zero at the positions where
+#'             `mask==FALSE`.
+#'         * value_mask: A boolean mask `Tensor` of shape `[batch_size, Tv]`.
+#'             If given, will apply the mask such that values at positions
+#'             where `mask==FALSE` do not contribute to the result.
+#'     training: Python boolean indicating whether the layer should behave in
+#'         training mode (adding dropout) or in inference mode (no dropout).
+#'     return_attention_scores: bool, it `TRUE`, returns the attention scores
+#'         (after masking and softmax) as an additional output argument.
+#'     use_causal_mask: Boolean. Set to `TRUE` for decoder self-attention. Adds
+#'         a mask such that position `i` cannot attend to positions `j > i`.
+#'         This prevents the flow of information from the future towards the
+#'         past. Defaults to `FALSE`.
+#'
+#' Output:
+#'
+#'     Attention outputs of shape `[batch_size, Tq, dim]`.
+#'     [Optional] Attention scores after masking and softmax with shape
+#'         `[batch_size, Tq, Tv]`.
+#'
+#' The meaning of `query`, `value` and `key` depend on the application. In the
+#' case of text similarity, for example, `query` is the sequence embeddings of
+#' the first piece of text and `value` is the sequence embeddings of the second
+#' piece of text. `key` is usually the same tensor as `value`.
+#'
+#' Here is a code example for using `AdditiveAttention` in a CNN+Attention
+#' network:
+#'
+#' ```python
+#' # Variable-length int sequences.
+#' query_input = tf.keras.Input(shape=(NULL,), dtype='int32')
+#' value_input = tf.keras.Input(shape=(NULL,), dtype='int32')
+#'
+#' # Embedding lookup.
+#' token_embedding = tf.keras.layers.Embedding(max_tokens, dimension)
+#' # Query embeddings of shape [batch_size, Tq, dimension].
+#' query_embeddings = token_embedding(query_input)
+#' # Value embeddings of shape [batch_size, Tv, dimension].
+#' value_embeddings = token_embedding(value_input)
+#'
+#' # CNN layer.
+#' cnn_layer = tf.keras.layers.Conv1D(
+#'     filters=100,
+#'     kernel_size=4,
+#'     # Use 'same' padding so outputs have the same shape as inputs.
+#'     padding='same')
+#' # Query encoding of shape [batch_size, Tq, filters].
+#' query_seq_encoding = cnn_layer(query_embeddings)
+#' # Value encoding of shape [batch_size, Tv, filters].
+#' value_seq_encoding = cnn_layer(value_embeddings)
+#'
+#' # Query-value attention of shape [batch_size, Tq, filters].
+#' query_value_attention_seq = tf.keras.layers.AdditiveAttention()(
+#'     [query_seq_encoding, value_seq_encoding])
+#'
+#' # Reduce over the sequence axis to produce encodings of shape
+#' # [batch_size, filters].
+#' query_encoding = tf.keras.layers.GlobalAveragePooling1D()(
+#'     query_seq_encoding)
+#' query_value_attention = tf.keras.layers.GlobalAveragePooling1D()(
+#'     query_value_attention_seq)
+#'
+#' # Concatenate query and document encodings to produce a DNN input layer.
+#' input_layer = tf.keras.layers.Concatenate()(
+#'     [query_encoding, query_value_attention])
+#'
+#' # Add DNN layers, and create Model.
+#' # ...
+#' ```
+#'
 #' @param use_scale
 #' If `TRUE`, will create a variable to scale the attention
 #' scores.
@@ -157,6 +332,19 @@ function(object, use_scale = TRUE, ...)
 #' even after this dropout.
 #' Alpha Dropout fits well to Scaled Exponential Linear Units
 #' by randomly setting activations to the negative saturation value.
+#'
+#' Call arguments:
+#'   inputs: Input tensor (of any rank).
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode (adding dropout) or in inference mode (doing nothing).
+#'
+#' Input shape:
+#'   Arbitrary. Use the keyword argument `input_shape`
+#'   (list of integers, does not include the samples axis)
+#'   when using this layer as the first layer in a model.
+#'
+#' Output shape:
+#'   Same shape as input.
 #'
 #' @param rate
 #' float, drop probability (as with `Dropout`).
@@ -197,6 +385,85 @@ function(object, rate, noise_shape = NULL, seed = NULL, ...)
 #'      shape `[batch_size, Tq, dim]`:
 #'      `return tf.matmul(distribution, value)`.
 #'
+#' Call arguments:
+#'     inputs: List of the following tensors:
+#'         * query: Query `Tensor` of shape `[batch_size, Tq, dim]`.
+#'         * value: Value `Tensor` of shape `[batch_size, Tv, dim]`.
+#'         * key: Optional key `Tensor` of shape `[batch_size, Tv, dim]`. If
+#'             not given, will use `value` for both `key` and `value`, which is
+#'             the most common case.
+#'     mask: List of the following tensors:
+#'         * query_mask: A boolean mask `Tensor` of shape `[batch_size, Tq]`.
+#'             If given, the output will be zero at the positions where
+#'             `mask==FALSE`.
+#'         * value_mask: A boolean mask `Tensor` of shape `[batch_size, Tv]`.
+#'             If given, will apply the mask such that values at positions
+#'              where `mask==FALSE` do not contribute to the result.
+#'     return_attention_scores: bool, it `TRUE`, returns the attention scores
+#'         (after masking and softmax) as an additional output argument.
+#'     training: Python boolean indicating whether the layer should behave in
+#'         training mode (adding dropout) or in inference mode (no dropout).
+#'     use_causal_mask: Boolean. Set to `TRUE` for decoder self-attention. Adds
+#'         a mask such that position `i` cannot attend to positions `j > i`.
+#'         This prevents the flow of information from the future towards the
+#'         past.
+#'         Defaults to `FALSE`.
+#'
+#' Output:
+#'
+#'     Attention outputs of shape `[batch_size, Tq, dim]`.
+#'     [Optional] Attention scores after masking and softmax with shape
+#'         `[batch_size, Tq, Tv]`.
+#'
+#' The meaning of `query`, `value` and `key` depend on the application. In the
+#' case of text similarity, for example, `query` is the sequence embeddings of
+#' the first piece of text and `value` is the sequence embeddings of the second
+#' piece of text. `key` is usually the same tensor as `value`.
+#'
+#' Here is a code example for using `Attention` in a CNN+Attention network:
+#'
+#' ```python
+#' # Variable-length int sequences.
+#' query_input = tf.keras.Input(shape=(NULL,), dtype='int32')
+#' value_input = tf.keras.Input(shape=(NULL,), dtype='int32')
+#'
+#' # Embedding lookup.
+#' token_embedding = tf.keras.layers.Embedding(input_dim=1000, output_dim=64)
+#' # Query embeddings of shape [batch_size, Tq, dimension].
+#' query_embeddings = token_embedding(query_input)
+#' # Value embeddings of shape [batch_size, Tv, dimension].
+#' value_embeddings = token_embedding(value_input)
+#'
+#' # CNN layer.
+#' cnn_layer = tf.keras.layers.Conv1D(
+#'     filters=100,
+#'     kernel_size=4,
+#'     # Use 'same' padding so outputs have the same shape as inputs.
+#'     padding='same')
+#' # Query encoding of shape [batch_size, Tq, filters].
+#' query_seq_encoding = cnn_layer(query_embeddings)
+#' # Value encoding of shape [batch_size, Tv, filters].
+#' value_seq_encoding = cnn_layer(value_embeddings)
+#'
+#' # Query-value attention of shape [batch_size, Tq, filters].
+#' query_value_attention_seq = tf.keras.layers.Attention()(
+#'     [query_seq_encoding, value_seq_encoding])
+#'
+#' # Reduce over the sequence axis to produce encodings of shape
+#' # [batch_size, filters].
+#' query_encoding = tf.keras.layers.GlobalAveragePooling1D()(
+#'     query_seq_encoding)
+#' query_value_attention = tf.keras.layers.GlobalAveragePooling1D()(
+#'     query_value_attention_seq)
+#'
+#' # Concatenate query and document encodings to produce a DNN input layer.
+#' input_layer = tf.keras.layers.Concatenate()(
+#'     [query_encoding, query_value_attention])
+#'
+#' # Add DNN layers, and create Model.
+#' # ...
+#' ```
+#'
 #' @param use_scale
 #' If `TRUE`, will create a scalar variable to scale the
 #' attention scores.
@@ -232,6 +499,28 @@ function(object, use_scale = FALSE, score_mode = "dot", ...)
 #' @details
 #' It takes as input a list of tensors, all of the same shape, and returns
 #' a single tensor (also of the same shape).
+#'
+#' Example:
+#'
+#' ```python
+#' >>> x1 = np.ones((2, 2))
+#' >>> x2 = np.zeros((2, 2))
+#' >>> y = tf.keras.layers.Average()([x1, x2])
+#' >>> y.numpy().tolist()
+#' [[0.5, 0.5], [0.5, 0.5]]
+#' ```
+#'
+#' Usage in a functional model:
+#'
+#' ```python
+#' >>> input1 = tf.keras.layers.Input(shape=(16,))
+#' >>> x1 = tf.keras.layers.Dense(8, activation='relu')(input1)
+#' >>> input2 = tf.keras.layers.Input(shape=(32,))
+#' >>> x2 = tf.keras.layers.Dense(8, activation='relu')(input2)
+#' >>> avg = tf.keras.layers.Average()([x1, x2])
+#' >>> out = tf.keras.layers.Dense(4)(avg)
+#' >>> model = tf.keras.models.Model(inputs=[input1, input2], outputs=out)
+#' ```
 #'
 #' @param ... standard layer arguments.
 #'
@@ -335,6 +624,18 @@ function(inputs, ...)
 #'         [5.]]], dtype=float32)>
 #' ```
 #'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     3D tensor with shape `(batch_size, steps, features)`.
+#'   - If `data_format='channels_first'`:
+#'     3D tensor with shape `(batch_size, features, steps)`.
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     3D tensor with shape `(batch_size, downsampled_steps, features)`.
+#'   - If `data_format='channels_first'`:
+#'     3D tensor with shape `(batch_size, features, downsampled_steps)`.
+#'
 #' @param pool_size
 #' Integer, size of the average pooling windows.
 #'
@@ -446,6 +747,18 @@ function(object, pool_size = 2L, strides = NULL, padding = "valid",
 #'            [9.]]]], dtype=float32)>
 #' ```
 #'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     4D tensor with shape `(batch_size, rows, cols, channels)`.
+#'   - If `data_format='channels_first'`:
+#'     4D tensor with shape `(batch_size, channels, rows, cols)`.
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     4D tensor with shape `(batch_size, pooled_rows, pooled_cols, channels)`.
+#'   - If `data_format='channels_first'`:
+#'     4D tensor with shape `(batch_size, channels, pooled_rows, pooled_cols)`.
+#'
 #' @param pool_size
 #' integer or list of 2 integers,
 #' factors by which to downscale (vertical, horizontal).
@@ -502,6 +815,35 @@ function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid",
 #' width) by taking the average value over an input window
 #' (of size defined by `pool_size`) for each channel of the input.
 #' The window is shifted by `strides` along each dimension.
+#'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     5D tensor with shape:
+#'     `(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#'   - If `data_format='channels_first'`:
+#'     5D tensor with shape:
+#'     `(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)`
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     5D tensor with shape:
+#'     `(batch_size, pooled_dim1, pooled_dim2, pooled_dim3, channels)`
+#'   - If `data_format='channels_first'`:
+#'     5D tensor with shape:
+#'     `(batch_size, channels, pooled_dim1, pooled_dim2, pooled_dim3)`
+#'
+#' Example:
+#'
+#' ```python
+#' depth = 30
+#' height = 30
+#' width = 30
+#' input_channels = 3
+#'
+#' inputs = tf.keras.Input(shape=(depth, height, width, input_channels))
+#' layer = tf.keras.layers.AveragePooling3D(pool_size=3)
+#' outputs = layer(inputs)  # Shape: (batch_size, 10, 10, 10, 3)
+#' ```
 #'
 #' @param pool_size
 #' list of 3 integers,
@@ -624,6 +966,18 @@ function(object, pool_size = list(2L, 2L, 2L), strides = NULL,
 #'         [5.]]], dtype=float32)>
 #' ```
 #'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     3D tensor with shape `(batch_size, steps, features)`.
+#'   - If `data_format='channels_first'`:
+#'     3D tensor with shape `(batch_size, features, steps)`.
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     3D tensor with shape `(batch_size, downsampled_steps, features)`.
+#'   - If `data_format='channels_first'`:
+#'     3D tensor with shape `(batch_size, features, downsampled_steps)`.
+#'
 #' @param pool_size
 #' Integer, size of the average pooling windows.
 #'
@@ -735,6 +1089,18 @@ function(object, pool_size = 2L, strides = NULL, padding = "valid",
 #'            [9.]]]], dtype=float32)>
 #' ```
 #'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     4D tensor with shape `(batch_size, rows, cols, channels)`.
+#'   - If `data_format='channels_first'`:
+#'     4D tensor with shape `(batch_size, channels, rows, cols)`.
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     4D tensor with shape `(batch_size, pooled_rows, pooled_cols, channels)`.
+#'   - If `data_format='channels_first'`:
+#'     4D tensor with shape `(batch_size, channels, pooled_rows, pooled_cols)`.
+#'
 #' @param pool_size
 #' integer or list of 2 integers,
 #' factors by which to downscale (vertical, horizontal).
@@ -791,6 +1157,35 @@ function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid",
 #' width) by taking the average value over an input window
 #' (of size defined by `pool_size`) for each channel of the input.
 #' The window is shifted by `strides` along each dimension.
+#'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     5D tensor with shape:
+#'     `(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#'   - If `data_format='channels_first'`:
+#'     5D tensor with shape:
+#'     `(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)`
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     5D tensor with shape:
+#'     `(batch_size, pooled_dim1, pooled_dim2, pooled_dim3, channels)`
+#'   - If `data_format='channels_first'`:
+#'     5D tensor with shape:
+#'     `(batch_size, channels, pooled_dim1, pooled_dim2, pooled_dim3)`
+#'
+#' Example:
+#'
+#' ```python
+#' depth = 30
+#' height = 30
+#' width = 30
+#' input_channels = 3
+#'
+#' inputs = tf.keras.Input(shape=(depth, height, width, input_channels))
+#' layer = tf.keras.layers.AveragePooling3D(pool_size=3)
+#' outputs = layer(inputs)  # Shape: (batch_size, 10, 10, 10, 3)
+#' ```
 #'
 #' @param pool_size
 #' list of 3 integers,
@@ -893,6 +1288,56 @@ function(object, pool_size = list(2L, 2L, 2L), strides = NULL,
 #'   model.add(tf.keras.layers.BatchNormalization(synchronized=TRUE))
 #' ```
 #'
+#' Call arguments:
+#'   inputs: Input tensor (of any rank).
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode.
+#'     - `training=TRUE`: The layer will normalize its inputs using the mean
+#'       and variance of the current batch of inputs.
+#'     - `training=FALSE`: The layer will normalize its inputs using the mean
+#'       and variance of its moving statistics, learned during training.
+#'
+#' Input shape:
+#'   Arbitrary. Use the keyword argument `input_shape` (list of
+#'   integers, does not include the samples axis) when using this layer as the
+#'   first layer in a model.
+#'
+#' Output shape:
+#'   Same shape as input.
+#'
+#' Reference:
+#'   - [Ioffe and Szegedy, 2015](https://arxiv.org/abs/1502.03167).
+#'
+#' **About setting `layer.trainable = FALSE` on a `BatchNormalization` layer:**
+#'
+#' The meaning of setting `layer.trainable = FALSE` is to freeze the layer,
+#' i.e. its internal state will not change during training:
+#' its trainable weights will not be updated
+#' during `fit()` or `train_on_batch()`, and its state updates will not be run.
+#'
+#' Usually, this does not necessarily mean that the layer is run in inference
+#' mode (which is normally controlled by the `training` argument that can
+#' be passed when calling a layer). "Frozen state" and "inference mode"
+#' are two separate concepts.
+#'
+#' However, in the case of the `BatchNormalization` layer, **setting
+#' `trainable = FALSE` on the layer means that the layer will be
+#' subsequently run in inference mode** (meaning that it will use
+#' the moving mean and the moving variance to normalize the current batch,
+#' rather than using the mean and variance of the current batch).
+#'
+#' This behavior has been introduced in TensorFlow 2.0, in order
+#' to enable `layer.trainable = FALSE` to produce the most commonly
+#' expected behavior in the convnet fine-tuning use case.
+#'
+#' Note that:
+#'   - Setting `trainable` on an model containing other layers will
+#'     recursively set the `trainable` value of all inner layers.
+#'   - If the value of the `trainable`
+#'     attribute is changed after calling `compile()` on a model,
+#'     the new value doesn't take effect for this model
+#'     until `compile()` is called again.
+#'
 #' @param axis
 #' Integer, the axis that should be normalized (typically the features
 #' axis). For instance, after a `Conv2D` layer with
@@ -967,6 +1412,40 @@ function(object, axis = -1L, momentum = 0.99, epsilon = 0.001,
 # <class 'keras.src.layers.rnn.bidirectional.Bidirectional'>
 #' Bidirectional wrapper for RNNs
 #'
+#' @details
+#'
+#' Call arguments:
+#'   The call arguments for this layer are the same as those of the wrapped RNN
+#'     layer.
+#'   Beware that when passing the `initial_state` argument during the call of
+#'   this layer, the first half in the list of elements in the `initial_state`
+#'   list will be passed to the forward RNN call and the last half in the list
+#'   of elements will be passed to the backward RNN call.
+#'
+#'   ValueError:
+#'     1. If `layer` or `backward_layer` is not a `Layer` instance.
+#'
+#' ```python
+#' model = Sequential()
+#' model.add(Bidirectional(LSTM(10, return_sequences=TRUE),
+#'                              input_shape=(5, 10)))
+#' model.add(Bidirectional(LSTM(10)))
+#' model.add(Dense(5))
+#' model.add(Activation('softmax'))
+#' model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
+#'
+#' # With custom backward layer
+#' model = Sequential()
+#' forward_layer = LSTM(10, return_sequences=TRUE)
+#' backward_layer = LSTM(10, activation='relu', return_sequences=TRUE,
+#'                       go_backwards=TRUE)
+#' model.add(Bidirectional(forward_layer, backward_layer=backward_layer,
+#'                         input_shape=(5, 10)))
+#' model.add(Dense(5))
+#' model.add(Activation('softmax'))
+#' model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
+#' ```
+#'
 #' @param layer
 #' `keras.layers.RNN` instance, such as `keras.layers.LSTM` or
 #' `keras.layers.GRU`. It could also be a `keras.layers.Layer` instance
@@ -1030,6 +1509,52 @@ function(object, layer, merge_mode = "concat", weights = NULL,
 #'
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#'
+#' **One-hot encoding data**
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.CategoryEncoding(
+#' ...           num_tokens=4, output_mode="one_hot")
+#' >>> layer([3, 2, 0, 1])
+#' <tf.Tensor: shape=(4, 4), dtype=float32, numpy=
+#'   array([[0., 0., 0., 1.],
+#'          [0., 0., 1., 0.],
+#'          [1., 0., 0., 0.],
+#'          [0., 1., 0., 0.]], dtype=float32)>
+#' ```
+#'
+#' **Multi-hot encoding data**
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.CategoryEncoding(
+#' ...           num_tokens=4, output_mode="multi_hot")
+#' >>> layer([[0, 1], [0, 0], [1, 2], [3, 1]])
+#' <tf.Tensor: shape=(4, 4), dtype=float32, numpy=
+#'   array([[1., 1., 0., 0.],
+#'          [1., 0., 0., 0.],
+#'          [0., 1., 1., 0.],
+#'          [0., 1., 0., 1.]], dtype=float32)>
+#' ```
+#'
+#' **Using weighted inputs in `"count"` mode**
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.CategoryEncoding(
+#' ...           num_tokens=4, output_mode="count")
+#' >>> count_weights = np.array([[.1, .2], [.1, .1], [.2, .3], [.4, .2]])
+#' >>> layer([[0, 1], [0, 0], [1, 2], [3, 1]], count_weights=count_weights)
+#' <tf.Tensor: shape=(4, 4), dtype=float64, numpy=
+#'   array([[0.1, 0.2, 0. , 0. ],
+#'          [0.2, 0. , 0. , 0. ],
+#'          [0. , 0.2, 0.3, 0. ],
+#'          [0. , 0.2, 0. , 0.4]], dtype=float32)>
+#' ```
+#'
+#' Call arguments:
+#'   inputs: A 1D or 2D tensor of integer inputs.
+#'   count_weights: A tensor in the same shape as `inputs` indicating the
+#'     weight for each sample value when summing up in `count` mode. Not used
+#'     in `"multi_hot"` or `"one_hot"` modes.
 #'
 #' @param num_tokens
 #' The total number of tokens the layer should support. All
@@ -1203,6 +1728,38 @@ function(inputs, ..., axis = -1L)
 #' `(10, 128)` for sequences of 10 vectors of 128-dimensional vectors,
 #' or `(NULL, 128)` for variable-length sequences of 128-dimensional vectors.
 #'
+#' ```python
+#' >>> # The inputs are 128-length vectors with 10 timesteps, and the
+#' >>> # batch size is 4.
+#' >>> input_shape = (4, 10, 128)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv1D(
+#' ... 32, 3, activation='relu',input_shape=input_shape[1:])(x)
+#' >>> print(y.shape)
+#' (4, 8, 32)
+#' ```
+#'
+#' ```python
+#' >>> # With extended batch shape [4, 7] (e.g. weather data where batch
+#' >>> # dimensions correspond to spatial location and the third dimension
+#' >>> # corresponds to time.)
+#' >>> input_shape = (4, 7, 10, 128)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv1D(
+#' ... 32, 3, activation='relu', input_shape=input_shape[2:])(x)
+#' >>> print(y.shape)
+#' (4, 7, 8, 32)
+#' ```
+#'
+#' Input shape:
+#'   3+D tensor with shape: `batch_shape + (steps, input_dim)`
+#'
+#' Output shape:
+#'   3+D tensor with shape: `batch_shape + (new_steps, filters)`
+#'     `steps` value might have changed due to padding or strides.
+#'
+#'   A tensor of rank 3 representing
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space
 #' (i.e. the number of output filters in the convolution).
@@ -1324,6 +1881,27 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
 #' (list of integers or `NULL`, does not include the sample axis),
 #' e.g. `input_shape=(128, 3)` for data with 128 time steps and 3 channels.
 #'
+#' Input shape:
+#'   3D tensor with shape:
+#'   `(batch_size, steps, channels)`
+#'
+#' Output shape:
+#'   3D tensor with shape:
+#'   `(batch_size, new_steps, filters)`
+#'   If `output_padding` is specified:
+#'   ```
+#'   new_timesteps = ((timesteps - 1) * strides + kernel_size -
+#'   2 * padding + output_padding)
+#'   ```
+#'
+#'   A tensor of rank 3 representing
+#'
+#' References:
+#'   - [A guide to convolution arithmetic for deep learning](
+#'     https://arxiv.org/abs/1603.07285v1)
+#'   - [Deconvolutional Networks](
+#'     https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space
 #' (i.e. the number of output filters in the convolution).
@@ -1436,6 +2014,64 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
 #' e.g. `input_shape=(128, 128, 3)` for 128x128 RGB pictures
 #' in `data_format="channels_last"`. You can use `NULL` when
 #' a dimension has variable size.
+#'
+#' ```python
+#' >>> # The inputs are 28x28 RGB images with `channels_last` and the batch
+#' >>> # size is 4.
+#' >>> input_shape = (4, 28, 28, 3)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv2D(
+#' ... 2, 3, activation='relu', input_shape=input_shape[1:])(x)
+#' >>> print(y.shape)
+#' (4, 26, 26, 2)
+#' ```
+#'
+#' ```python
+#' >>> # With `dilation_rate` as 2.
+#' >>> input_shape = (4, 28, 28, 3)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv2D(
+#' ...     2, 3,
+#' ...     activation='relu',
+#' ...     dilation_rate=2,
+#' ...     input_shape=input_shape[1:])(x)
+#' >>> print(y.shape)
+#' (4, 24, 24, 2)
+#' ```
+#'
+#' ```python
+#' >>> # With `padding` as "same".
+#' >>> input_shape = (4, 28, 28, 3)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv2D(
+#' ... 2, 3, activation='relu', padding="same", input_shape=input_shape[1:])(x)
+#' >>> print(y.shape)
+#' (4, 28, 28, 2)
+#' ```
+#'
+#' ```python
+#' >>> # With extended batch shape [4, 7]:
+#' >>> input_shape = (4, 7, 28, 28, 3)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv2D(
+#' ... 2, 3, activation='relu', input_shape=input_shape[2:])(x)
+#' >>> print(y.shape)
+#' (4, 7, 26, 26, 2)
+#' ```
+#'
+#' Input shape:
+#'   4+D tensor with shape: `batch_shape + (channels, rows, cols)` if
+#'     `data_format='channels_first'`
+#'   or 4+D tensor with shape: `batch_shape + (rows, cols, channels)` if
+#'     `data_format='channels_last'`.
+#'
+#' Output shape:
+#'   4+D tensor with shape: `batch_shape + (filters, new_rows, new_cols)` if
+#'   `data_format='channels_first'` or 4+D tensor with shape: `batch_shape +
+#'     (new_rows, new_cols, filters)` if `data_format='channels_last'`.  `rows`
+#'     and `cols` values might have changed due to padding.
+#'
+#'   A tensor of rank 4+ representing
 #'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the number
@@ -1557,6 +2193,36 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
 #' (list of integers or `NULL`, does not include the sample axis),
 #' e.g. `input_shape=(128, 128, 3)` for 128x128 RGB pictures
 #' in `data_format="channels_last"`.
+#'
+#' Input shape:
+#'   4D tensor with shape:
+#'   `(batch_size, channels, rows, cols)` if data_format='channels_first'
+#'   or 4D tensor with shape:
+#'   `(batch_size, rows, cols, channels)` if data_format='channels_last'.
+#'
+#' Output shape:
+#'   4D tensor with shape:
+#'   `(batch_size, filters, new_rows, new_cols)` if
+#'   data_format='channels_first'
+#'   or 4D tensor with shape:
+#'   `(batch_size, new_rows, new_cols, filters)` if
+#'   data_format='channels_last'.  `rows` and `cols` values might have changed
+#'   due to padding.
+#'   If `output_padding` is specified:
+#'   ```
+#'   new_rows = ((rows - 1) * strides[0] + kernel_size[0] - 2 * padding[0] +
+#'   output_padding[0])
+#'   new_cols = ((cols - 1) * strides[1] + kernel_size[1] - 2 * padding[1] +
+#'   output_padding[1])
+#'   ```
+#'
+#'   A tensor of rank 4 representing
+#'
+#' References:
+#'   - [A guide to convolution arithmetic for deep
+#'     learning](https://arxiv.org/abs/1603.07285v1)
+#'   - [Deconvolutional
+#'     Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
 #'
 #' @param filters
 #' Integer, the dimensionality of the output space
@@ -1686,6 +2352,44 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
 #' with a single channel,
 #' in `data_format="channels_last"`.
 #'
+#' ```python
+#' >>> # The inputs are 28x28x28 volumes with a single channel, and the
+#' >>> # batch size is 4
+#' >>> input_shape =(4, 28, 28, 28, 1)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv3D(
+#' ... 2, 3, activation='relu', input_shape=input_shape[1:])(x)
+#' >>> print(y.shape)
+#' (4, 26, 26, 26, 2)
+#' ```
+#'
+#' ```python
+#' >>> # With extended batch shape [4, 7], e.g. a batch of 4 videos of
+#' >>> # 3D frames, with 7 frames per video.
+#' >>> input_shape = (4, 7, 28, 28, 28, 1)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv3D(
+#' ... 2, 3, activation='relu', input_shape=input_shape[2:])(x)
+#' >>> print(y.shape)
+#' (4, 7, 26, 26, 26, 2)
+#' ```
+#'
+#' Input shape:
+#'   5+D tensor with shape: `batch_shape + (channels, conv_dim1, conv_dim2,
+#'     conv_dim3)` if data_format='channels_first'
+#'   or 5+D tensor with shape: `batch_shape + (conv_dim1, conv_dim2, conv_dim3,
+#'     channels)` if data_format='channels_last'.
+#'
+#' Output shape:
+#'   5+D tensor with shape: `batch_shape + (filters, new_conv_dim1,
+#'     new_conv_dim2, new_conv_dim3)` if data_format='channels_first'
+#'   or 5+D tensor with shape: `batch_shape + (new_conv_dim1, new_conv_dim2,
+#'     new_conv_dim3, filters)` if data_format='channels_last'.
+#'     `new_conv_dim1`, `new_conv_dim2` and `new_conv_dim3` values might have
+#'     changed due to padding.
+#'
+#'   A tensor of rank 5+ representing
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the number
 #' of output filters in the convolution).
@@ -1808,6 +2512,40 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
 #' e.g. `input_shape=(128, 128, 128, 3)` for a 128x128x128 volume with 3
 #' channels if `data_format="channels_last"`.
 #'
+#' Input shape:
+#'   5D tensor with shape:
+#'   `(batch_size, channels, depth, rows, cols)` if
+#'   data_format='channels_first'
+#'   or 5D tensor with shape:
+#'   `(batch_size, depth, rows, cols, channels)` if
+#'   data_format='channels_last'.
+#'
+#' Output shape:
+#'   5D tensor with shape:
+#'   `(batch_size, filters, new_depth, new_rows, new_cols)` if
+#'     data_format='channels_first'
+#'   or 5D tensor with shape:
+#'   `(batch_size, new_depth, new_rows, new_cols, filters)` if
+#'     data_format='channels_last'.
+#'   `depth` and `rows` and `cols` values might have changed due to padding.
+#'   If `output_padding` is specified::
+#'   ```
+#'   new_depth = ((depth - 1) * strides[0] + kernel_size[0] - 2 * padding[0] +
+#'   output_padding[0])
+#'   new_rows = ((rows - 1) * strides[1] + kernel_size[1] - 2 * padding[1] +
+#'   output_padding[1])
+#'   new_cols = ((cols - 1) * strides[2] + kernel_size[2] - 2 * padding[2] +
+#'   output_padding[2])
+#'   ```
+#'
+#'   A tensor of rank 5 representing
+#'
+#' References:
+#'   - [A guide to convolution arithmetic for deep
+#'     learning](https://arxiv.org/abs/1603.07285v1)
+#'   - [Deconvolutional
+#'     Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space
 #' (i.e. the number of output filters in the convolution).
@@ -1929,6 +2667,40 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
 #' @details
 #' Similar to an LSTM layer, but the input transformations
 #' and recurrent transformations are both convolutional.
+#'
+#' Call arguments:
+#'   inputs: A 4D tensor.
+#'   mask: Binary tensor of shape `(samples, timesteps)` indicating whether a
+#'     given timestep should be masked.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. This argument is passed to the cell
+#'     when calling it. This is only relevant if `dropout` or
+#'     `recurrent_dropout` are set.
+#'   initial_state: List of initial state tensors to be passed to the first
+#'     call of the cell.
+#' Input shape: - If data_format='channels_first'
+#'       4D tensor with shape: `(samples, time, channels, rows)` - If
+#'         data_format='channels_last'
+#'       4D tensor with shape: `(samples, time, rows, channels)`
+#' Output shape:
+#'   - If `return_state`: a list of tensors. The first tensor is the output.
+#'     The remaining tensors are the last states,
+#'     each 3D tensor with shape: `(samples, filters, new_rows)` if
+#'       data_format='channels_first'
+#'     or shape: `(samples, new_rows, filters)` if data_format='channels_last'.
+#'       `rows` values might have changed due to padding.
+#'   - If `return_sequences`: 4D tensor with shape: `(samples, timesteps,
+#'     filters, new_rows)` if data_format='channels_first'
+#'     or shape: `(samples, timesteps, new_rows, filters)` if
+#'       data_format='channels_last'.
+#'   - Else, 3D tensor with shape: `(samples, filters, new_rows)` if
+#'     data_format='channels_first'
+#'     or shape: `(samples, new_rows, filters)` if data_format='channels_last'.
+#'
+#' References:
+#'   - [Shi et al., 2015](http://arxiv.org/abs/1506.04214v1)
+#'   (the current implementation does not include the feedback loop on the
+#'   cells output).
 #'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the number
@@ -2074,6 +2846,42 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
 #' Similar to an LSTM layer, but the input transformations
 #' and recurrent transformations are both convolutional.
 #'
+#' Call arguments:
+#'   inputs: A 5D tensor.
+#'   mask: Binary tensor of shape `(samples, timesteps)` indicating whether a
+#'     given timestep should be masked.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. This argument is passed to the cell
+#'     when calling it. This is only relevant if `dropout` or
+#'     `recurrent_dropout` are set.
+#'   initial_state: List of initial state tensors to be passed to the first
+#'     call of the cell.
+#' Input shape: - If data_format='channels_first'
+#'       5D tensor with shape: `(samples, time, channels, rows, cols)` - If
+#'         data_format='channels_last'
+#'       5D tensor with shape: `(samples, time, rows, cols, channels)`
+#' Output shape:
+#'   - If `return_state`: a list of tensors. The first tensor is the output.
+#'     The remaining tensors are the last states,
+#'     each 4D tensor with shape: `(samples, filters, new_rows, new_cols)` if
+#'       data_format='channels_first'
+#'     or shape: `(samples, new_rows, new_cols, filters)` if
+#'       data_format='channels_last'. `rows` and `cols` values might have
+#'       changed due to padding.
+#'   - If `return_sequences`: 5D tensor with shape: `(samples, timesteps,
+#'     filters, new_rows, new_cols)` if data_format='channels_first'
+#'     or shape: `(samples, timesteps, new_rows, new_cols, filters)` if
+#'       data_format='channels_last'.
+#'   - Else, 4D tensor with shape: `(samples, filters, new_rows, new_cols)` if
+#'     data_format='channels_first'
+#'     or shape: `(samples, new_rows, new_cols, filters)` if
+#'       data_format='channels_last'.
+#'
+#' References:
+#'   - [Shi et al., 2015](http://arxiv.org/abs/1506.04214v1)
+#'   (the current implementation does not include the feedback loop on the
+#'   cells output).
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the number
 #' of output filters in the convolution).
@@ -2217,6 +3025,42 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
 #' @details
 #' Similar to an LSTM layer, but the input transformations
 #' and recurrent transformations are both convolutional.
+#'
+#' Call arguments:
+#'   inputs: A 6D tensor.
+#'   mask: Binary tensor of shape `(samples, timesteps)` indicating whether a
+#'     given timestep should be masked.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. This argument is passed to the cell
+#'     when calling it. This is only relevant if `dropout` or
+#'     `recurrent_dropout` are set.
+#'   initial_state: List of initial state tensors to be passed to the first
+#'     call of the cell.
+#' Input shape: - If data_format='channels_first'
+#'       6D tensor with shape: `(samples, time, channels, rows, cols, depth)` -
+#'         If data_format='channels_last'
+#'       5D tensor with shape: `(samples, time, rows, cols, depth, channels)`
+#' Output shape:
+#'   - If `return_state`: a list of tensors. The first tensor is the output.
+#'     The remaining tensors are the last states,
+#'     each 5D tensor with shape: `(samples, filters, new_rows, new_cols,
+#'       new_depth)` if data_format='channels_first'
+#'     or shape: `(samples, new_rows, new_cols, new_depth, filters)` if
+#'       data_format='channels_last'. `rows`, `cols`, and `depth` values might
+#'       have changed due to padding.
+#'   - If `return_sequences`: 6D tensor with shape: `(samples, timesteps,
+#'     filters, new_rows, new_cols, new_depth)` if data_format='channels_first'
+#'     or shape: `(samples, timesteps, new_rows, new_cols, new_depth, filters)`
+#'       if data_format='channels_last'.
+#'   - Else, 5D tensor with shape: `(samples, filters, new_rows, new_cols,
+#'     new_depth)` if data_format='channels_first'
+#'     or shape: `(samples, new_rows, new_cols, new_depth, filters)` if
+#'       data_format='channels_last'.
+#'
+#' References:
+#'   - [Shi et al., 2015](http://arxiv.org/abs/1506.04214v1)
+#'   (the current implementation does not include the feedback loop on the
+#'   cells output).
 #'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the number
@@ -2372,6 +3216,38 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
 #' `(10, 128)` for sequences of 10 vectors of 128-dimensional vectors,
 #' or `(NULL, 128)` for variable-length sequences of 128-dimensional vectors.
 #'
+#' ```python
+#' >>> # The inputs are 128-length vectors with 10 timesteps, and the
+#' >>> # batch size is 4.
+#' >>> input_shape = (4, 10, 128)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv1D(
+#' ... 32, 3, activation='relu',input_shape=input_shape[1:])(x)
+#' >>> print(y.shape)
+#' (4, 8, 32)
+#' ```
+#'
+#' ```python
+#' >>> # With extended batch shape [4, 7] (e.g. weather data where batch
+#' >>> # dimensions correspond to spatial location and the third dimension
+#' >>> # corresponds to time.)
+#' >>> input_shape = (4, 7, 10, 128)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv1D(
+#' ... 32, 3, activation='relu', input_shape=input_shape[2:])(x)
+#' >>> print(y.shape)
+#' (4, 7, 8, 32)
+#' ```
+#'
+#' Input shape:
+#'   3+D tensor with shape: `batch_shape + (steps, input_dim)`
+#'
+#' Output shape:
+#'   3+D tensor with shape: `batch_shape + (new_steps, filters)`
+#'     `steps` value might have changed due to padding or strides.
+#'
+#'   A tensor of rank 3 representing
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space
 #' (i.e. the number of output filters in the convolution).
@@ -2493,6 +3369,27 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
 #' (list of integers or `NULL`, does not include the sample axis),
 #' e.g. `input_shape=(128, 3)` for data with 128 time steps and 3 channels.
 #'
+#' Input shape:
+#'   3D tensor with shape:
+#'   `(batch_size, steps, channels)`
+#'
+#' Output shape:
+#'   3D tensor with shape:
+#'   `(batch_size, new_steps, filters)`
+#'   If `output_padding` is specified:
+#'   ```
+#'   new_timesteps = ((timesteps - 1) * strides + kernel_size -
+#'   2 * padding + output_padding)
+#'   ```
+#'
+#'   A tensor of rank 3 representing
+#'
+#' References:
+#'   - [A guide to convolution arithmetic for deep learning](
+#'     https://arxiv.org/abs/1603.07285v1)
+#'   - [Deconvolutional Networks](
+#'     https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space
 #' (i.e. the number of output filters in the convolution).
@@ -2605,6 +3502,64 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
 #' e.g. `input_shape=(128, 128, 3)` for 128x128 RGB pictures
 #' in `data_format="channels_last"`. You can use `NULL` when
 #' a dimension has variable size.
+#'
+#' ```python
+#' >>> # The inputs are 28x28 RGB images with `channels_last` and the batch
+#' >>> # size is 4.
+#' >>> input_shape = (4, 28, 28, 3)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv2D(
+#' ... 2, 3, activation='relu', input_shape=input_shape[1:])(x)
+#' >>> print(y.shape)
+#' (4, 26, 26, 2)
+#' ```
+#'
+#' ```python
+#' >>> # With `dilation_rate` as 2.
+#' >>> input_shape = (4, 28, 28, 3)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv2D(
+#' ...     2, 3,
+#' ...     activation='relu',
+#' ...     dilation_rate=2,
+#' ...     input_shape=input_shape[1:])(x)
+#' >>> print(y.shape)
+#' (4, 24, 24, 2)
+#' ```
+#'
+#' ```python
+#' >>> # With `padding` as "same".
+#' >>> input_shape = (4, 28, 28, 3)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv2D(
+#' ... 2, 3, activation='relu', padding="same", input_shape=input_shape[1:])(x)
+#' >>> print(y.shape)
+#' (4, 28, 28, 2)
+#' ```
+#'
+#' ```python
+#' >>> # With extended batch shape [4, 7]:
+#' >>> input_shape = (4, 7, 28, 28, 3)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv2D(
+#' ... 2, 3, activation='relu', input_shape=input_shape[2:])(x)
+#' >>> print(y.shape)
+#' (4, 7, 26, 26, 2)
+#' ```
+#'
+#' Input shape:
+#'   4+D tensor with shape: `batch_shape + (channels, rows, cols)` if
+#'     `data_format='channels_first'`
+#'   or 4+D tensor with shape: `batch_shape + (rows, cols, channels)` if
+#'     `data_format='channels_last'`.
+#'
+#' Output shape:
+#'   4+D tensor with shape: `batch_shape + (filters, new_rows, new_cols)` if
+#'   `data_format='channels_first'` or 4+D tensor with shape: `batch_shape +
+#'     (new_rows, new_cols, filters)` if `data_format='channels_last'`.  `rows`
+#'     and `cols` values might have changed due to padding.
+#'
+#'   A tensor of rank 4+ representing
 #'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the number
@@ -2726,6 +3681,36 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
 #' (list of integers or `NULL`, does not include the sample axis),
 #' e.g. `input_shape=(128, 128, 3)` for 128x128 RGB pictures
 #' in `data_format="channels_last"`.
+#'
+#' Input shape:
+#'   4D tensor with shape:
+#'   `(batch_size, channels, rows, cols)` if data_format='channels_first'
+#'   or 4D tensor with shape:
+#'   `(batch_size, rows, cols, channels)` if data_format='channels_last'.
+#'
+#' Output shape:
+#'   4D tensor with shape:
+#'   `(batch_size, filters, new_rows, new_cols)` if
+#'   data_format='channels_first'
+#'   or 4D tensor with shape:
+#'   `(batch_size, new_rows, new_cols, filters)` if
+#'   data_format='channels_last'.  `rows` and `cols` values might have changed
+#'   due to padding.
+#'   If `output_padding` is specified:
+#'   ```
+#'   new_rows = ((rows - 1) * strides[0] + kernel_size[0] - 2 * padding[0] +
+#'   output_padding[0])
+#'   new_cols = ((cols - 1) * strides[1] + kernel_size[1] - 2 * padding[1] +
+#'   output_padding[1])
+#'   ```
+#'
+#'   A tensor of rank 4 representing
+#'
+#' References:
+#'   - [A guide to convolution arithmetic for deep
+#'     learning](https://arxiv.org/abs/1603.07285v1)
+#'   - [Deconvolutional
+#'     Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
 #'
 #' @param filters
 #' Integer, the dimensionality of the output space
@@ -2855,6 +3840,44 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
 #' with a single channel,
 #' in `data_format="channels_last"`.
 #'
+#' ```python
+#' >>> # The inputs are 28x28x28 volumes with a single channel, and the
+#' >>> # batch size is 4
+#' >>> input_shape =(4, 28, 28, 28, 1)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv3D(
+#' ... 2, 3, activation='relu', input_shape=input_shape[1:])(x)
+#' >>> print(y.shape)
+#' (4, 26, 26, 26, 2)
+#' ```
+#'
+#' ```python
+#' >>> # With extended batch shape [4, 7], e.g. a batch of 4 videos of
+#' >>> # 3D frames, with 7 frames per video.
+#' >>> input_shape = (4, 7, 28, 28, 28, 1)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.Conv3D(
+#' ... 2, 3, activation='relu', input_shape=input_shape[2:])(x)
+#' >>> print(y.shape)
+#' (4, 7, 26, 26, 26, 2)
+#' ```
+#'
+#' Input shape:
+#'   5+D tensor with shape: `batch_shape + (channels, conv_dim1, conv_dim2,
+#'     conv_dim3)` if data_format='channels_first'
+#'   or 5+D tensor with shape: `batch_shape + (conv_dim1, conv_dim2, conv_dim3,
+#'     channels)` if data_format='channels_last'.
+#'
+#' Output shape:
+#'   5+D tensor with shape: `batch_shape + (filters, new_conv_dim1,
+#'     new_conv_dim2, new_conv_dim3)` if data_format='channels_first'
+#'   or 5+D tensor with shape: `batch_shape + (new_conv_dim1, new_conv_dim2,
+#'     new_conv_dim3, filters)` if data_format='channels_last'.
+#'     `new_conv_dim1`, `new_conv_dim2` and `new_conv_dim3` values might have
+#'     changed due to padding.
+#'
+#'   A tensor of rank 5+ representing
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the number
 #' of output filters in the convolution).
@@ -2977,6 +4000,40 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
 #' e.g. `input_shape=(128, 128, 128, 3)` for a 128x128x128 volume with 3
 #' channels if `data_format="channels_last"`.
 #'
+#' Input shape:
+#'   5D tensor with shape:
+#'   `(batch_size, channels, depth, rows, cols)` if
+#'   data_format='channels_first'
+#'   or 5D tensor with shape:
+#'   `(batch_size, depth, rows, cols, channels)` if
+#'   data_format='channels_last'.
+#'
+#' Output shape:
+#'   5D tensor with shape:
+#'   `(batch_size, filters, new_depth, new_rows, new_cols)` if
+#'     data_format='channels_first'
+#'   or 5D tensor with shape:
+#'   `(batch_size, new_depth, new_rows, new_cols, filters)` if
+#'     data_format='channels_last'.
+#'   `depth` and `rows` and `cols` values might have changed due to padding.
+#'   If `output_padding` is specified::
+#'   ```
+#'   new_depth = ((depth - 1) * strides[0] + kernel_size[0] - 2 * padding[0] +
+#'   output_padding[0])
+#'   new_rows = ((rows - 1) * strides[1] + kernel_size[1] - 2 * padding[1] +
+#'   output_padding[1])
+#'   new_cols = ((cols - 1) * strides[2] + kernel_size[2] - 2 * padding[2] +
+#'   output_padding[2])
+#'   ```
+#'
+#'   A tensor of rank 5 representing
+#'
+#' References:
+#'   - [A guide to convolution arithmetic for deep
+#'     learning](https://arxiv.org/abs/1603.07285v1)
+#'   - [Deconvolutional
+#'     Networks](https://www.matthewzeiler.com/mattzeiler/deconvolutionalnetworks.pdf)
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space
 #' (i.e. the number of output filters in the convolution).
@@ -3095,7 +4152,31 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
 # <class 'keras.src.layers.reshaping.cropping1d.Cropping1D'>
 #' Cropping layer for 1D input (e.g. temporal sequence)
 #'
+#' @details
 #' It crops along the time dimension (axis 1).
+#'
+#' ```python
+#' >>> input_shape = (2, 3, 2)
+#' >>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+#' >>> print(x)
+#' [[[ 0  1]
+#'   [ 2  3]
+#'   [ 4  5]]
+#'  [[ 6  7]
+#'   [ 8  9]
+#'   [10 11]]]
+#' >>> y = tf.keras.layers.Cropping1D(cropping=1)(x)
+#' >>> print(y)
+#' tf.Tensor(
+#'   [[[2 3]]
+#'    [[8 9]]], shape=(2, 1, 2), dtype=int64)
+#' ```
+#'
+#' Input shape:
+#'   3D tensor with shape `(batch_size, axis_to_crop, features)`
+#'
+#' Output shape:
+#'   3D tensor with shape `(batch_size, cropped_axis, features)`
 #'
 #' @param cropping
 #' Int or list of int (length 2)
@@ -3121,7 +4202,30 @@ function(object, cropping = list(1L, 1L), ...)
 # <class 'keras.src.layers.reshaping.cropping2d.Cropping2D'>
 #' Cropping layer for 2D input (e.g. picture)
 #'
+#' @details
 #' It crops along spatial dimensions, i.e. height and width.
+#'
+#' ```python
+#' >>> input_shape = (2, 28, 28, 3)
+#' >>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+#' >>> y = tf.keras.layers.Cropping2D(cropping=((2, 2), (4, 4)))(x)
+#' >>> print(y.shape)
+#' (2, 24, 20, 3)
+#' ```
+#'
+#' Input shape:
+#'   4D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'     `(batch_size, rows, cols, channels)`
+#'   - If `data_format` is `"channels_first"`:
+#'     `(batch_size, channels, rows, cols)`
+#'
+#' Output shape:
+#'   4D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'     `(batch_size, cropped_rows, cropped_cols, channels)`
+#'   - If `data_format` is `"channels_first"`:
+#'     `(batch_size, channels, cropped_rows, cropped_cols)`
 #'
 #' @param cropping
 #' Int, or list of 2 ints, or list of 2 lists of 2 ints.
@@ -3177,6 +4281,24 @@ function(object, cropping = list(list(0L, 0L), list(0L, 0L)),
 #' >>> print(y.shape)
 #' (2, 24, 20, 6, 3)
 #' ```
+#'
+#' Input shape:
+#'   5D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'     `(batch_size, first_axis_to_crop, second_axis_to_crop,
+#'     third_axis_to_crop, depth)`
+#'   - If `data_format` is `"channels_first"`:
+#'     `(batch_size, depth, first_axis_to_crop, second_axis_to_crop,
+#'       third_axis_to_crop)`
+#'
+#' Output shape:
+#'   5D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'     `(batch_size, first_cropped_axis, second_cropped_axis,
+#'     third_cropped_axis, depth)`
+#'   - If `data_format` is `"channels_first"`:
+#'     `(batch_size, depth, first_cropped_axis, second_cropped_axis,
+#'       third_cropped_axis)`
 #'
 #' @param cropping
 #' Int, or list of 3 ints, or list of 3 lists of 2 ints.
@@ -3245,6 +4367,32 @@ function(object, cropping = list(list(1L, 1L), list(1L, 1L),
 #' an input layer to insert before the current layer. This can be treated
 #' equivalent to explicitly defining an `InputLayer`.
 #'
+#' Example:
+#'
+#' ```python
+#' >>> # Create a `Sequential` model and add a Dense layer as the first layer.
+#' >>> model = tf.keras.models.Sequential()
+#' >>> model.add(tf.keras.Input(shape=(16,)))
+#' >>> model.add(tf.keras.layers.Dense(32, activation='relu'))
+#' >>> # Now the model will take as input arrays of shape (NULL, 16)
+#' >>> # and output arrays of shape (NULL, 32).
+#' >>> # Note that after the first layer, you don't need to specify
+#' >>> # the size of the input anymore:
+#' >>> model.add(tf.keras.layers.Dense(32))
+#' >>> model.output_shape
+#' (NULL, 32)
+#' ```
+#'
+#' Input shape:
+#'     N-D tensor with shape: `(batch_size, ..., input_dim)`.
+#'     The most common situation would be
+#'     a 2D input with shape `(batch_size, input_dim)`.
+#'
+#' Output shape:
+#'     N-D tensor with shape: `(batch_size, ..., units)`.
+#'     For instance, for a 2D input with shape `(batch_size, input_dim)`,
+#'     the output would have shape `(batch_size, units)`.
+#'
 #' @param units
 #' Positive integer, dimensionality of the output space.
 #'
@@ -3312,6 +4460,26 @@ function(object, units, activation = NULL, use_bias = TRUE,
 #' variables instead of variable_scopes. But this approach currently lacks
 #' support for partitioned variables. In that case, use the V1 version instead.
 #'
+#' Example:
+#'
+#' ```python
+#' price = tf.feature_column.numeric_column('price')
+#' keywords_embedded = tf.feature_column.embedding_column(
+#'     tf.feature_column.categorical_column_with_hash_bucket("keywords",
+#'                                                           10000),
+#'     dimensions=16)
+#' columns = [price, keywords_embedded, ...]
+#' feature_layer = tf.keras.layers.DenseFeatures(columns)
+#'
+#' features = tf.io.parse_example(
+#'     ..., features=tf.feature_column.make_parse_example_spec(columns))
+#' dense_tensor = feature_layer(features)
+#' for units in [128, 64, 32]:
+#'   dense_tensor = tf.keras.layers.Dense(units, activation='relu')(
+#'     dense_tensor)
+#' prediction = tf.keras.layers.Dense(1)(dense_tensor)
+#' ```
+#'
 #' @param ... standard layer arguments.
 #'
 #' @seealso
@@ -3350,6 +4518,23 @@ function(object, feature_columns, trainable = TRUE, name = NULL,
 #' The `depth_multiplier` argument determines how many filter are applied to
 #' one input channel. As such, it controls the amount of output channels that
 #' are generated per input channel in the depthwise step.
+#'
+#' Input shape:
+#'   3D tensor with shape: `[batch_size, channels, input_dim]` if
+#'     data_format='channels_first'
+#'   or 3D tensor with shape: `[batch_size, input_dim, channels]` if
+#'     data_format='channels_last'.
+#'
+#' Output shape:
+#'   3D tensor with shape:
+#'    `[batch_size, channels * depth_multiplier, new_dims]`
+#'     if `data_format='channels_first'`
+#'     or 3D tensor with shape: `[batch_size,
+#'     new_dims, channels * depth_multiplier]` if
+#'     `data_format='channels_last'`. `new_dims` values might have
+#'     changed due to padding.
+#'
+#'   A tensor of rank 3 representing
 #'
 #' @param kernel_size
 #' An integer, specifying the height and width of the 1D
@@ -3470,6 +4655,22 @@ function(object, kernel_size, strides = 1L, padding = "valid",
 #' one input channel. As such, it controls the amount of output channels that
 #' are generated per input channel in the depthwise step.
 #'
+#' Input shape:
+#'   4D tensor with shape: `[batch_size, channels, rows, cols]` if
+#'     data_format='channels_first'
+#'   or 4D tensor with shape: `[batch_size, rows, cols, channels]` if
+#'     data_format='channels_last'.
+#'
+#' Output shape:
+#'   4D tensor with shape: `[batch_size, channels * depth_multiplier, new_rows,
+#'     new_cols]` if `data_format='channels_first'`
+#'     or 4D tensor with shape: `[batch_size,
+#'     new_rows, new_cols, channels * depth_multiplier]` if
+#'     `data_format='channels_last'`. `rows` and `cols` values might have
+#'     changed due to padding.
+#'
+#'   A tensor of rank 4 representing
+#'
 #' @param kernel_size
 #' An integer or list of 2 integers, specifying the height
 #' and width of the 2D convolution window. Can be a single integer to
@@ -3584,6 +4785,29 @@ function(object, kernel_size, strides = list(1L, 1L), padding = "valid",
 #'
 #' Output shape:
 #'   Same as input shape.
+#'
+#' Arguments:
+#'
+#' Bucketize float values based on provided buckets.
+#' ```python
+#' >>> input = np.array([[-1.5, 1.0, 3.4, .5], [0.0, 3.0, 1.3, 0.0]])
+#' >>> layer = tf.keras.layers.Discretization(bin_boundaries=[0., 1., 2.])
+#' >>> layer(input)
+#' <tf.Tensor: shape=(2, 4), dtype=int64, numpy=
+#' array([[0, 2, 3, 1],
+#'        [1, 3, 2, 1]])>
+#' ```
+#'
+#' Bucketize float values based on a number of buckets to compute.
+#' ```python
+#' >>> input = np.array([[-1.5, 1.0, 3.4, .5], [0.0, 3.0, 1.3, 0.0]])
+#' >>> layer = tf.keras.layers.Discretization(num_bins=4, epsilon=0.01)
+#' >>> layer.adapt(input)
+#' >>> layer(input)
+#' <tf.Tensor: shape=(2, 4), dtype=int64, numpy=
+#' array([[0, 2, 3, 2],
+#'        [1, 3, 3, 1]])>
+#' ```
 #'
 #' @param bin_boundaries
 #' A list of bin boundaries. The leftmost and rightmost bins
@@ -3740,6 +4964,11 @@ function(inputs, ..., axes, normalize = FALSE)
 #'  [10.    0.  ]], shape=(5, 2), dtype=float32)
 #' ```
 #'
+#' Call arguments:
+#'   inputs: Input tensor (of any rank).
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode (adding dropout) or in inference mode (doing nothing).
+#'
 #' @param rate
 #' Float between 0 and 1. Fraction of the input units to drop.
 #'
@@ -3772,7 +5001,63 @@ function(object, rate, noise_shape = NULL, seed = NULL, ...)
 # <class 'keras.src.layers.core.einsum_dense.EinsumDense'>
 #' A layer that uses `tf.einsum` as the backing computation
 #'
+#' @details
 #' This layer can perform einsum calculations of arbitrary dimensionality.
+#'
+#' **Biased dense layer with einsums**
+#'
+#' This example shows how to instantiate a standard Keras dense layer using
+#' einsum operations. This example is equivalent to
+#' `tf.keras.layers.Dense(64, use_bias=TRUE)`.
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.EinsumDense("ab,bc->ac",
+#' ...                                     output_shape=64,
+#' ...                                     bias_axes="c")
+#' >>> input_tensor = tf.keras.Input(shape=[32])
+#' >>> output_tensor = layer(input_tensor)
+#' >>> output_tensor
+#' <... shape=(NULL, 64) dtype=...>
+#' ```
+#'
+#' **Applying a dense layer to a sequence**
+#'
+#' This example shows how to instantiate a layer that applies the same dense
+#' operation to every element in a sequence. Here, the `output_shape` has two
+#' values (since there are two non-batch dimensions in the output); the first
+#' dimension in the `output_shape` is `NULL`, because the sequence dimension
+#' `b` has an unknown shape.
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.EinsumDense("abc,cd->abd",
+#' ...                                     output_shape=(NULL, 64),
+#' ...                                     bias_axes="d")
+#' >>> input_tensor = tf.keras.Input(shape=[32, 128])
+#' >>> output_tensor = layer(input_tensor)
+#' >>> output_tensor
+#' <... shape=(NULL, 32, 64) dtype=...>
+#' ```
+#'
+#' **Applying a dense layer to a sequence using ellipses**
+#'
+#' This example shows how to instantiate a layer that applies the same dense
+#' operation to every element in a sequence, but uses the ellipsis notation
+#' instead of specifying the batch and sequence dimensions.
+#'
+#' Because we are using ellipsis notation and have specified only one axis, the
+#' `output_shape` arg is a single value. When instantiated in this way, the
+#' layer can handle any number of sequence dimensions - including the case
+#' where no sequence dimension exists.
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.EinsumDense("...x,xy->...y",
+#' ...                                     output_shape=64,
+#' ...                                     bias_axes="y")
+#' >>> input_tensor = tf.keras.Input(shape=[32, 128])
+#' >>> output_tensor = layer(input_tensor)
+#' >>> output_tensor
+#' <... shape=(NULL, 32, 64) dtype=...>
+#' ```
 #'
 #' @param equation
 #' An equation describing the einsum to perform. This equation must
@@ -3889,6 +5174,51 @@ function(object, alpha = 1, ...)
 #' This layer accepts `tf.Tensor`, `tf.RaggedTensor` and `tf.SparseTensor`
 #' input.
 #'
+#' Example:
+#'
+#' ```python
+#' >>> model = tf.keras.Sequential()
+#' >>> model.add(tf.keras.layers.Embedding(1000, 64, input_length=10))
+#' >>> # The model will take as input an integer matrix of size (batch,
+#' >>> # input_length), and the largest integer (i.e. word index) in the input
+#' >>> # should be no larger than 999 (vocabulary size).
+#' >>> # Now model.output_shape is (NULL, 10, 64), where `NULL` is the batch
+#' >>> # dimension.
+#' >>> input_array = np.random.randint(1000, size=(32, 10))
+#' >>> model.compile('rmsprop', 'mse')
+#' >>> output_array = model.predict(input_array)
+#' >>> print(output_array.shape)
+#' (32, 10, 64)
+#' ```
+#'
+#' Input shape:
+#'   2D tensor with shape: `(batch_size, input_length)`.
+#'
+#' Output shape:
+#'   3D tensor with shape: `(batch_size, input_length, output_dim)`.
+#'
+#' **Note on variable placement:**
+#' By default, if a GPU is available, the embedding matrix will be placed on
+#' the GPU. This achieves the best performance, but it might cause issues:
+#'
+#' - You may be using an optimizer that does not support sparse GPU kernels.
+#' In this case you will see an error upon training your model.
+#' - Your embedding matrix may be too large to fit on your GPU. In this case
+#' you will see an Out Of Memory (OOM) error.
+#'
+#' In such cases, you should place the embedding matrix on the CPU memory.
+#' You can do so with a device scope, as such:
+#'
+#' ```python
+#' with tf.device('cpu:0'):
+#'   embedding_layer = Embedding(...)
+#'   embedding_layer.build()
+#' ```
+#'
+#' The pre-built `embedding_layer` instance can then be added to a `Sequential`
+#' model (e.g. `model.add(embedding_layer)`), called in a Functional model
+#' (e.g. `x = embedding_layer(x)`), or used in a subclassed model.
+#'
 #' @param input_dim
 #' Integer. Size of the vocabulary,
 #' i.e. maximum integer index + 1.
@@ -3955,6 +5285,21 @@ function(object, input_dim, output_dim, embeddings_initializer = "uniform",
 #' Note: If inputs are shaped `(batch,)` without a feature axis, then
 #' flattening adds an extra channel dimension and output shape is `(batch, 1)`.
 #'
+#' Example:
+#'
+#' ```python
+#' >>> model = tf.keras.Sequential()
+#' >>> model.add(tf.keras.layers.Conv2D(64, 3, 3, input_shape=(3, 32, 32)))
+#' >>> model.output_shape
+#' (NULL, 1, 10, 64)
+#' ```
+#'
+#' ```python
+#' >>> model.add(Flatten())
+#' >>> model.output_shape
+#' (NULL, 640)
+#' ```
+#'
 #' @param data_format
 #' A string,
 #' one of `channels_last` (default) or `channels_first`.
@@ -3985,7 +5330,21 @@ function(object, data_format = NULL, ...)
 # <class 'keras.src.layers.regularization.gaussian_dropout.GaussianDropout'>
 #' Apply multiplicative 1-centered Gaussian noise
 #'
+#' @details
 #' As it is a regularization layer, it is only active at training time.
+#'
+#' Call arguments:
+#'   inputs: Input tensor (of any rank).
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode (adding dropout) or in inference mode (doing nothing).
+#'
+#' Input shape:
+#'   Arbitrary. Use the keyword argument `input_shape`
+#'   (list of integers, does not include the samples axis)
+#'   when using this layer as the first layer in a model.
+#'
+#' Output shape:
+#'   Same shape as input.
 #'
 #' @param rate
 #' Float, drop probability (as with `Dropout`).
@@ -4021,6 +5380,19 @@ function(object, rate, seed = NULL, ...)
 #'
 #' As it is a regularization layer, it is only active at training time.
 #'
+#' Call arguments:
+#'   inputs: Input tensor (of any rank).
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode (adding noise) or in inference mode (doing nothing).
+#'
+#' Input shape:
+#'   Arbitrary. Use the keyword argument `input_shape`
+#'   (list of integers, does not include the samples axis)
+#'   when using this layer as the first layer in a model.
+#'
+#' Output shape:
+#'   Same shape as input.
+#'
 #' @param stddev
 #' Float, standard deviation of the noise distribution.
 #'
@@ -4044,6 +5416,38 @@ function(object, stddev, seed = NULL, ...)
 
 # <class 'keras.src.layers.pooling.global_average_pooling1d.GlobalAveragePooling1D'>
 #' Global average pooling operation for temporal data
+#'
+#' @details
+#'
+#' ```python
+#' >>> input_shape = (2, 3, 4)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.GlobalAveragePooling1D()(x)
+#' >>> print(y.shape)
+#' (2, 4)
+#' ```
+#'
+#' Call arguments:
+#'   inputs: A 3D tensor.
+#'   mask: Binary tensor of shape `(batch_size, steps)` indicating whether
+#'     a given step should be masked (excluded from the average).
+#'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     3D tensor with shape:
+#'     `(batch_size, steps, features)`
+#'   - If `data_format='channels_first'`:
+#'     3D tensor with shape:
+#'     `(batch_size, features, steps)`
+#'
+#' Output shape:
+#'   - If `keepdims`=FALSE:
+#'     2D tensor with shape `(batch_size, features)`.
+#'   - If `keepdims`=TRUE:
+#'     - If `data_format='channels_last'`:
+#'       3D tensor with shape `(batch_size, 1, features)`
+#'     - If `data_format='channels_first'`:
+#'       3D tensor with shape `(batch_size, features, 1)`
 #'
 #' @param data_format
 #' A string,
@@ -4081,6 +5485,31 @@ function(object, data_format = "channels_last", ...)
 
 # <class 'keras.src.layers.pooling.global_average_pooling2d.GlobalAveragePooling2D'>
 #' Global average pooling operation for spatial data
+#'
+#' @details
+#'
+#' ```python
+#' >>> input_shape = (2, 4, 5, 3)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.GlobalAveragePooling2D()(x)
+#' >>> print(y.shape)
+#' (2, 3)
+#' ```
+#'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     4D tensor with shape `(batch_size, rows, cols, channels)`.
+#'   - If `data_format='channels_first'`:
+#'     4D tensor with shape `(batch_size, channels, rows, cols)`.
+#'
+#' Output shape:
+#'   - If `keepdims`=FALSE:
+#'     2D tensor with shape `(batch_size, channels)`.
+#'   - If `keepdims`=TRUE:
+#'     - If `data_format='channels_last'`:
+#'       4D tensor with shape `(batch_size, 1, 1, channels)`
+#'     - If `data_format='channels_first'`:
+#'       4D tensor with shape `(batch_size, channels, 1, 1)`
 #'
 #' @param data_format
 #' A string,
@@ -4121,6 +5550,25 @@ function(object, ...)
 
 # <class 'keras.src.layers.pooling.global_average_pooling3d.GlobalAveragePooling3D'>
 #' Global Average pooling operation for 3D data
+#'
+#' @details
+#'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     5D tensor with shape:
+#'     `(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#'   - If `data_format='channels_first'`:
+#'     5D tensor with shape:
+#'     `(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)`
+#'
+#' Output shape:
+#'   - If `keepdims`=FALSE:
+#'     2D tensor with shape `(batch_size, channels)`.
+#'   - If `keepdims`=TRUE:
+#'     - If `data_format='channels_last'`:
+#'       5D tensor with shape `(batch_size, 1, 1, 1, channels)`
+#'     - If `data_format='channels_first'`:
+#'       5D tensor with shape `(batch_size, channels, 1, 1, 1)`
 #'
 #' @param data_format
 #' A string,
@@ -4185,6 +5633,23 @@ function(object, ...)
 #'        [9.], dtype=float32)>
 #' ```
 #'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     3D tensor with shape:
+#'     `(batch_size, steps, features)`
+#'   - If `data_format='channels_first'`:
+#'     3D tensor with shape:
+#'     `(batch_size, features, steps)`
+#'
+#' Output shape:
+#'   - If `keepdims`=FALSE:
+#'     2D tensor with shape `(batch_size, features)`.
+#'   - If `keepdims`=TRUE:
+#'     - If `data_format='channels_last'`:
+#'       3D tensor with shape `(batch_size, 1, features)`
+#'     - If `data_format='channels_first'`:
+#'       3D tensor with shape `(batch_size, features, 1)`
+#'
 #' @param data_format
 #' A string,
 #' one of `channels_last` (default) or `channels_first`.
@@ -4220,6 +5685,31 @@ function(object, ...)
 
 # <class 'keras.src.layers.pooling.global_max_pooling2d.GlobalMaxPooling2D'>
 #' Global max pooling operation for spatial data
+#'
+#' @details
+#'
+#' ```python
+#' >>> input_shape = (2, 4, 5, 3)
+#' >>> x = tf.random.normal(input_shape)
+#' >>> y = tf.keras.layers.GlobalMaxPooling2D()(x)
+#' >>> print(y.shape)
+#' (2, 3)
+#' ```
+#'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     4D tensor with shape `(batch_size, rows, cols, channels)`.
+#'   - If `data_format='channels_first'`:
+#'     4D tensor with shape `(batch_size, channels, rows, cols)`.
+#'
+#' Output shape:
+#'   - If `keepdims`=FALSE:
+#'     2D tensor with shape `(batch_size, channels)`.
+#'   - If `keepdims`=TRUE:
+#'     - If `data_format='channels_last'`:
+#'       4D tensor with shape `(batch_size, 1, 1, channels)`
+#'     - If `data_format='channels_first'`:
+#'       4D tensor with shape `(batch_size, channels, 1, 1)`
 #'
 #' @param data_format
 #' A string,
@@ -4260,6 +5750,25 @@ function(object, ...)
 
 # <class 'keras.src.layers.pooling.global_max_pooling3d.GlobalMaxPooling3D'>
 #' Global Max pooling operation for 3D data
+#'
+#' @details
+#'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     5D tensor with shape:
+#'     `(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#'   - If `data_format='channels_first'`:
+#'     5D tensor with shape:
+#'     `(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)`
+#'
+#' Output shape:
+#'   - If `keepdims`=FALSE:
+#'     2D tensor with shape `(batch_size, channels)`.
+#'   - If `keepdims`=TRUE:
+#'     - If `data_format='channels_last'`:
+#'       5D tensor with shape `(batch_size, 1, 1, 1, channels)`
+#'     - If `data_format='channels_first'`:
+#'       5D tensor with shape `(batch_size, channels, 1, 1, 1)`
 #'
 #' @param data_format
 #' A string,
@@ -4316,6 +5825,13 @@ function(object, ...)
 #' If the number of groups is set to the input dimension (number of groups is
 #' equal to number of channels), then this operation becomes identical to
 #' Instance Normalization.
+#'
+#' Call arguments:
+#'   inputs: Input tensor (of any rank).
+#'   mask: The mask parameter is a tensor that indicates the weight for each
+#'     position in the input tensor when computing the mean and variance.
+#'
+#' Reference: - [Yuxin Wu & Kaiming He, 2018](https://arxiv.org/abs/1803.08494)
 #'
 #' @param groups
 #' Integer, the number of groups for Group Normalization. Can be in
@@ -4432,6 +5948,21 @@ function(object, groups = 32L, axis = -1L, epsilon = 0.001,
 #' >>> print(final_state.shape)
 #' (32, 4)
 #' ```
+#'
+#' Call arguments:
+#'   inputs: A 3D tensor, with shape `[batch, timesteps, feature]`.
+#'   mask: Binary tensor of shape `[samples, timesteps]` indicating whether
+#'     a given timestep should be masked  (optional).
+#'     An individual `TRUE` entry indicates that the corresponding timestep
+#'     should be utilized, while a `FALSE` entry indicates that the
+#'     corresponding timestep should be ignored. Defaults to `NULL`.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. This argument is passed to the cell
+#'     when calling it. This is only relevant if `dropout` or
+#'     `recurrent_dropout` is used  (optional). Defaults to `NULL`.
+#'   initial_state: List of initial state tensors to be passed to the first
+#'     call of the cell  (optional, `NULL` causes creation
+#'     of zero-filled initial state tensors). Defaults to `NULL`.
 #'
 #' @param units
 #' Positive integer, dimensionality of the output space.
@@ -4593,6 +6124,15 @@ function(object, units, activation = "tanh", recurrent_activation = "sigmoid",
 #' (32, 4)
 #' ```
 #'
+#' Call arguments:
+#'   inputs: A 2D tensor, with shape of `[batch, feature]`.
+#'   states: A 2D tensor with shape of `[batch, units]`, which is the state
+#'     from the previous time step. For timestep 0, the initial state provided
+#'     by user will be feed to cell.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. Only relevant when `dropout` or
+#'     `recurrent_dropout` is used.
+#'
 #' @param units
 #' Positive integer, dimensionality of the output space.
 #'
@@ -4693,6 +6233,33 @@ function(units, activation = "tanh", recurrent_activation = "sigmoid",
 #'
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#'
+#' **Crossing two scalar features.**
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.HashedCrossing(
+#' ...     num_bins=5)
+#' >>> feat1 = tf.constant(['A', 'B', 'A', 'B', 'A'])
+#' >>> feat2 = tf.constant([101, 101, 101, 102, 102])
+#' >>> layer((feat1, feat2))
+#' <tf.Tensor: shape=(5,), dtype=int64, numpy=array([1, 4, 1, 1, 3])>
+#' ```
+#'
+#' **Crossing and one-hotting two scalar features.**
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.HashedCrossing(
+#' ...     num_bins=5, output_mode='one_hot')
+#' >>> feat1 = tf.constant(['A', 'B', 'A', 'B', 'A'])
+#' >>> feat2 = tf.constant([101, 101, 101, 102, 102])
+#' >>> layer((feat1, feat2))
+#' <tf.Tensor: shape=(5, 5), dtype=float32, numpy=
+#'   array([[0., 1., 0., 0., 0.],
+#'          [0., 0., 0., 0., 1.],
+#'          [0., 1., 0., 0., 0.],
+#'          [0., 1., 0., 0., 0.],
+#'          [0., 0., 0., 1., 0.]], dtype=float32)>
+#' ```
 #'
 #' @param num_bins
 #' Number of hash bins.
@@ -4807,6 +6374,19 @@ function(object, num_bins, output_mode = "int", sparse = FALSE,
 #'          [0]])>
 #' ```
 #'
+#' Input shape:
+#'   A single or list of string, int32 or int64 `Tensor`,
+#'   `SparseTensor` or `RaggedTensor` of shape `(batch_size, ...,)`
+#'
+#' Output shape:
+#'   An int64 `Tensor`, `SparseTensor` or `RaggedTensor` of shape
+#'   `(batch_size, ...)`. If any input is `RaggedTensor` then output is
+#'   `RaggedTensor`, otherwise if any input is `SparseTensor` then output is
+#'   `SparseTensor`, otherwise the output is `Tensor`.
+#'
+#' Reference:
+#'   - [SipHash with salt](https://www.131002.net/siphash/siphash.pdf)
+#'
 #' @param num_bins
 #' Number of hash bins. Note that this includes the `mask_value`
 #' bin, so the effective number of bins is `(num_bins - 1)` if `mask_value`
@@ -4903,6 +6483,47 @@ function(object, ...)
 #' For instance, if `a`, `b` and `c` are Keras tensors,
 #' it becomes possible to do:
 #' `model = Model(input=[a, b], output=c)`
+#'
+#'   A `tensor`.
+#'
+#' Example:
+#'
+#' ```python
+#' # this is a logistic regression in Keras
+#' x = Input(shape=(32,))
+#' y = Dense(16, activation='softmax')(x)
+#' model = Model(x, y)
+#' ```
+#'
+#' Note that even if eager execution is enabled,
+#' `Input` produces a symbolic tensor-like object (i.e. a placeholder).
+#' This symbolic tensor-like object can be used with lower-level
+#' TensorFlow ops that take tensors as inputs, as such:
+#'
+#' ```python
+#' x = Input(shape=(32,))
+#' y = tf.square(x)  # This op will be treated like a layer
+#' model = Model(x, y)
+#' ```
+#'
+#' (This behavior does not work for higher-order TensorFlow APIs such as
+#' control flow and being directly watched by a `tf.GradientTape`).
+#'
+#' However, the resulting model will not track any variables that were
+#' used as inputs to TensorFlow ops. All variable usages must happen within
+#' Keras layers to make sure they will be tracked by the model's weights.
+#'
+#' The Keras Input can also create a placeholder from an arbitrary
+#' `tf.TypeSpec`, e.g:
+#'
+#' ```python
+#' x = Input(type_spec=tf.RaggedTensorSpec(shape=[NULL, NULL],
+#'                                         dtype=tf.float32, ragged_rank=1))
+#' y = x.values
+#' model = Model(x, y)
+#' ```
+#' When passing an arbitrary `tf.TypeSpec`, it must represent the signature of
+#' an entire batch instead of just one example.
 #'
 #' @param shape
 #' A shape list (integers), not including the batch size.
@@ -5027,7 +6648,6 @@ function(shape = NULL, batch_size = NULL, name = NULL, dtype = NULL,
 #'
 #' @seealso
 #'   +  <https://keras.io/api/layers>
-#' @export
 layer_input_layer <-
 function(object, input_shape = NULL, batch_size = NULL, dtype = NULL,
     input_tensor = NULL, sparse = NULL, name = NULL, ragged = NULL,
@@ -5075,6 +6695,208 @@ function(object, input_shape = NULL, batch_size = NULL, dtype = NULL,
 #'
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#'
+#' **Creating a lookup layer with a known vocabulary**
+#'
+#' This example creates a lookup layer with a pre-existing vocabulary.
+#'
+#' ```python
+#' >>> vocab = [12, 36, 1138, 42]
+#' >>> data = tf.constant([[12, 1138, 42], [42, 1000, 36]])  # Note OOV tokens
+#' >>> layer = tf.keras.layers.IntegerLookup(vocabulary=vocab)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+#' array([[1, 3, 4],
+#'        [4, 0, 2]])>
+#' ```
+#'
+#' **Creating a lookup layer with an adapted vocabulary**
+#'
+#' This example creates a lookup layer and generates the vocabulary by
+#' analyzing the dataset.
+#'
+#' ```python
+#' >>> data = tf.constant([[12, 1138, 42], [42, 1000, 36]])
+#' >>> layer = tf.keras.layers.IntegerLookup()
+#' >>> layer.adapt(data)
+#' >>> layer.get_vocabulary()
+#' [-1, 42, 1138, 1000, 36, 12]
+#' ```
+#'
+#' Note that the OOV token -1 have been added to the vocabulary. The remaining
+#' tokens are sorted by frequency (42, which has 2 occurrences, is first) then
+#' by inverse sort order.
+#'
+#' ```python
+#' >>> data = tf.constant([[12, 1138, 42], [42, 1000, 36]])
+#' >>> layer = tf.keras.layers.IntegerLookup()
+#' >>> layer.adapt(data)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+#' array([[5, 2, 1],
+#'        [1, 3, 4]])>
+#' ```
+#'
+#' **Lookups with multiple OOV indices**
+#'
+#' This example demonstrates how to use a lookup layer with multiple OOV
+#' indices.  When a layer is created with more than one OOV index, any OOV
+#' tokens are hashed into the number of OOV buckets, distributing OOV tokens in
+#' a deterministic fashion across the set.
+#'
+#' ```python
+#' >>> vocab = [12, 36, 1138, 42]
+#' >>> data = tf.constant([[12, 1138, 42], [37, 1000, 36]])
+#' >>> layer = tf.keras.layers.IntegerLookup(
+#' ...     vocabulary=vocab, num_oov_indices=2)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+#' array([[2, 4, 5],
+#'        [1, 0, 3]])>
+#' ```
+#'
+#' Note that the output for OOV token 37 is 1, while the output for OOV token
+#' 1000 is 0. The in-vocab terms have their output index increased by 1 from
+#' earlier examples (12 maps to 2, etc) in order to make space for the extra
+#' OOV token.
+#'
+#' **One-hot output**
+#'
+#' Configure the layer with `output_mode='one_hot'`. Note that the first
+#' `num_oov_indices` dimensions in the one_hot encoding represent OOV values.
+#'
+#' ```python
+#' >>> vocab = [12, 36, 1138, 42]
+#' >>> data = tf.constant([12, 36, 1138, 42, 7]) # Note OOV tokens
+#' >>> layer = tf.keras.layers.IntegerLookup(
+#' ...     vocabulary=vocab, output_mode='one_hot')
+#' >>> layer(data)
+#' <tf.Tensor: shape=(5, 5), dtype=float32, numpy=
+#'   array([[0., 1., 0., 0., 0.],
+#'          [0., 0., 1., 0., 0.],
+#'          [0., 0., 0., 1., 0.],
+#'          [0., 0., 0., 0., 1.],
+#'          [1., 0., 0., 0., 0.]], dtype=float32)>
+#' ```
+#'
+#' **Multi-hot output**
+#'
+#' Configure the layer with `output_mode='multi_hot'`. Note that the first
+#' `num_oov_indices` dimensions in the multi_hot encoding represent OOV tokens
+#'
+#' ```python
+#' >>> vocab = [12, 36, 1138, 42]
+#' >>> data = tf.constant([[12, 1138, 42, 42],
+#' ...                     [42, 7, 36, 7]]) # Note OOV tokens
+#' >>> layer = tf.keras.layers.IntegerLookup(
+#' ...     vocabulary=vocab, output_mode='multi_hot')
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+#'   array([[0., 1., 0., 1., 1.],
+#'          [1., 0., 1., 0., 1.]], dtype=float32)>
+#' ```
+#'
+#' **Token count output**
+#'
+#' Configure the layer with `output_mode='count'`. As with multi_hot output,
+#' the first `num_oov_indices` dimensions in the output represent OOV tokens.
+#'
+#' ```python
+#' >>> vocab = [12, 36, 1138, 42]
+#' >>> data = tf.constant([[12, 1138, 42, 42],
+#' ...                     [42, 7, 36, 7]]) # Note OOV tokens
+#' >>> layer = tf.keras.layers.IntegerLookup(
+#' ...     vocabulary=vocab, output_mode='count')
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+#'   array([[0., 1., 0., 1., 2.],
+#'          [2., 0., 1., 0., 1.]], dtype=float32)>
+#' ```
+#'
+#' **TF-IDF output**
+#'
+#' Configure the layer with `output_mode='tf_idf'`. As with multi_hot output,
+#' the first `num_oov_indices` dimensions in the output represent OOV tokens.
+#'
+#' Each token bin will output `token_count * idf_weight`, where the idf weights
+#' are the inverse document frequency weights per token. These should be
+#' provided along with the vocabulary. Note that the `idf_weight` for OOV
+#' tokens will default to the average of all idf weights passed in.
+#'
+#' ```python
+#' >>> vocab = [12, 36, 1138, 42]
+#' >>> idf_weights = [0.25, 0.75, 0.6, 0.4]
+#' >>> data = tf.constant([[12, 1138, 42, 42],
+#' ...                     [42, 7, 36, 7]]) # Note OOV tokens
+#' >>> layer = tf.keras.layers.IntegerLookup(
+#' ...     output_mode='tf_idf', vocabulary=vocab, idf_weights=idf_weights)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+#'   array([[0.  , 0.25, 0.  , 0.6 , 0.8 ],
+#'          [1.0 , 0.  , 0.75, 0.  , 0.4 ]], dtype=float32)>
+#' ```
+#'
+#' To specify the idf weights for oov tokens, you will need to pass the entire
+#' vocabularly including the leading oov token.
+#'
+#' ```python
+#' >>> vocab = [-1, 12, 36, 1138, 42]
+#' >>> idf_weights = [0.9, 0.25, 0.75, 0.6, 0.4]
+#' >>> data = tf.constant([[12, 1138, 42, 42],
+#' ...                     [42, 7, 36, 7]]) # Note OOV tokens
+#' >>> layer = tf.keras.layers.IntegerLookup(
+#' ...     output_mode='tf_idf', vocabulary=vocab, idf_weights=idf_weights)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+#'   array([[0.  , 0.25, 0.  , 0.6 , 0.8 ],
+#'          [1.8 , 0.  , 0.75, 0.  , 0.4 ]], dtype=float32)>
+#' ```
+#'
+#' When adapting the layer in tf_idf mode, each input sample will be considered
+#' a document, and idf weight per token will be calculated as
+#' `log(1 + num_documents / (1 + token_document_count))`.
+#'
+#' **Inverse lookup**
+#'
+#' This example demonstrates how to map indices to tokens using this layer.
+#' (You can also use `adapt()` with `inverse=TRUE`, but for simplicity we'll
+#' pass the vocab in this example.)
+#'
+#' ```python
+#' >>> vocab = [12, 36, 1138, 42]
+#' >>> data = tf.constant([[1, 3, 4], [4, 0, 2]])
+#' >>> layer = tf.keras.layers.IntegerLookup(vocabulary=vocab, invert=TRUE)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+#' array([[  12, 1138,   42],
+#'        [  42,   -1,   36]])>
+#' ```
+#'
+#' Note that the first index correspond to the oov token by default.
+#'
+#' **Forward and inverse lookup pairs**
+#'
+#' This example demonstrates how to use the vocabulary of a standard lookup
+#' layer to create an inverse lookup layer.
+#'
+#' ```python
+#' >>> vocab = [12, 36, 1138, 42]
+#' >>> data = tf.constant([[12, 1138, 42], [42, 1000, 36]])
+#' >>> layer = tf.keras.layers.IntegerLookup(vocabulary=vocab)
+#' >>> i_layer = tf.keras.layers.IntegerLookup(
+#' ...     vocabulary=layer.get_vocabulary(), invert=TRUE)
+#' >>> int_data = layer(data)
+#' >>> i_layer(int_data)
+#' <tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+#' array([[  12, 1138,   42],
+#'        [  42,   -1,   36]])>
+#' ```
+#'
+#' In this example, the input token 1000 resulted in an output of -1, since
+#' 1000 was not in the vocabulary - it got represented as an OOV, and all OOV
+#' tokens are returned as -1 in the inverse layer. Also, note that for the
+#' inverse to work, you must have already set the forward layer vocabulary
+#' either directly or via `adapt()` before calling `get_vocabulary()`.
 #'
 #' @param max_tokens
 #' Maximum size of the vocabulary for this layer. This should
@@ -5201,6 +7023,62 @@ function(object, max_tokens = NULL, num_oov_indices = 1L, mask_token = NULL,
 #' by overriding their `get_config()` method. Models that rely on
 #' subclassed Layers are also often easier to visualize and reason about.
 #'
+#' ```python
+#' # add a x -> x^2 layer
+#' model.add(Lambda(lambda x: x ** 2))
+#' ```
+#'
+#' ```python
+#' # add a layer that returns the concatenation
+#' # of the positive part of the input and
+#' # the opposite of the negative part
+#'
+#' def antirectifier(x):
+#'     x -= K.mean(x, axis=1, keepdims=TRUE)
+#'     x = K.l2_normalize(x, axis=1)
+#'     pos = K.relu(x)
+#'     neg = K.relu(-x)
+#'     return K.concatenate([pos, neg], axis=1)
+#'
+#' model.add(Lambda(antirectifier))
+#' ```
+#'
+#' **Note on Variables:**
+#'
+#' While it is possible to use Variables with Lambda layers,
+#' this practice is discouraged as it can easily lead to bugs.
+#' For instance, consider the following layer:
+#'
+#' ```python
+#' scale = tf.Variable(1.)
+#' scale_layer = tf.keras.layers.Lambda(lambda x: x * scale)
+#' ```
+#'
+#' Because `scale_layer` does not directly track the `scale` variable, it will
+#' not appear in `scale_layer.trainable_weights` and will therefore not be
+#' trained if `scale_layer` is used in a Model.
+#'
+#' A better pattern is to write a subclassed Layer:
+#'
+#' ```python
+#' class ScaleLayer(tf.keras.layers.Layer):
+#'     def __init__(self, **kwargs):
+#'         super().__init__(**kwargs)
+#'         self.scale = tf.Variable(1.)
+#'
+#'     def call(self, inputs):
+#'         return inputs * self.scale
+#' ```
+#'
+#' In general, `Lambda` layers can be convenient for simple stateless
+#' computation, but anything more complex should use a subclass Layer instead.
+#'
+#' Input shape: Arbitrary. Use the keyword argument input_shape (list of
+#'   integers, does not include the samples axis) when using this layer as the
+#'   first layer in a model.
+#'
+#' Output shape: Specified by `output_shape` argument
+#'
 #' @param function
 #' The function to be evaluated. Takes input tensor as first
 #' argument.
@@ -5241,6 +7119,214 @@ function(object, `function`, output_shape = NULL, mask = NULL,
 }
 
 
+# <class 'keras.src.engine.base_layer.Layer'>
+#' This is the class from which all layers inherit
+#'
+#' @details
+#' A layer is a callable object that takes as input one or more tensors and
+#' that outputs one or more tensors. It involves *computation*, defined
+#' in the `call()` method, and a *state* (weight variables). State can be
+#' created in various places, at the convenience of the subclass implementer:
+#'
+#' * in `__init__()`;
+#' * in the optional `build()` method, which is invoked by the first
+#'   `__call__()` to the layer, and supplies the shape(s) of the input(s),
+#'   which may not have been known at initialization time;
+#' * in the first invocation of `call()`, with some caveats discussed
+#'   below.
+#'
+#' Layers are recursively composable: If you assign a Layer instance as an
+#' attribute of another Layer, the outer layer will start tracking the weights
+#' created by the inner layer. Nested layers should be instantiated in the
+#' `__init__()` method.
+#'
+#' Users will just instantiate a layer and then treat it as a callable.
+#'
+#' We recommend that descendants of `Layer` implement the following methods:
+#'
+#' * `__init__()`: Defines custom layer attributes, and creates layer weights
+#'   that do not depend on input shapes, using `add_weight()`, or other state.
+#' * `build(self, input_shape)`: This method can be used to create weights that
+#'   depend on the shape(s) of the input(s), using `add_weight()`, or other
+#'   state. `__call__()` will automatically build the layer (if it has not been
+#'   built yet) by calling `build()`.
+#' * `call(self, inputs, *args, **kwargs)`: Called in `__call__` after making
+#'   sure `build()` has been called. `call()` performs the logic of applying
+#'   the layer to the `inputs`. The first invocation may additionally create
+#'   state that could not be conveniently created in `build()`; see its
+#'   docstring for details.
+#'   Two reserved keyword arguments you can optionally use in `call()` are:
+#'     - `training` (boolean, whether the call is in inference mode or training
+#'       mode). See more details in [the layer/model subclassing guide](
+#'       https://www.tensorflow.org/guide/keras/custom_layers_and_models#privileged_training_argument_in_the_call_method)
+#'     - `mask` (boolean tensor encoding masked timesteps in the input, used
+#'       in RNN layers). See more details in
+#'       [the layer/model subclassing guide](
+#'       https://www.tensorflow.org/guide/keras/custom_layers_and_models#privileged_mask_argument_in_the_call_method)
+#'   A typical signature for this method is `call(self, inputs)`, and user
+#'   could optionally add `training` and `mask` if the layer need them. `*args`
+#'   and `**kwargs` is only useful for future extension when more input
+#'   parameters are planned to be added.
+#' * `get_config(self)`: Returns a dictionary containing the configuration used
+#'   to initialize this layer. If the keys differ from the arguments
+#'   in `__init__`, then override `from_config(self)` as well.
+#'   This method is used when saving
+#'   the layer or a model that contains this layer.
+#'
+#' Here's a basic example: a layer with two variables, `w` and `b`,
+#' that returns `y = w . x + b`.
+#' It shows how to implement `build()` and `call()`.
+#' Variables set as attributes of a layer are tracked as weights
+#' of the layers (in `layer.weights`).
+#'
+#' ```python
+#' class SimpleDense(Layer):
+#'
+#'   def __init__(self, units=32):
+#'       super(SimpleDense, self).__init__()
+#'       self.units = units
+#'
+#'   def build(self, input_shape):  # Create the state of the layer (weights)
+#'     w_init = tf.random_normal_initializer()
+#'     self.w = tf.Variable(
+#'         initial_value=w_init(shape=(input_shape[-1], self.units),
+#'                              dtype='float32'),
+#'         trainable=TRUE)
+#'     b_init = tf.zeros_initializer()
+#'     self.b = tf.Variable(
+#'         initial_value=b_init(shape=(self.units,), dtype='float32'),
+#'         trainable=TRUE)
+#'
+#'   def call(self, inputs):  # Defines the computation from inputs to outputs
+#'       return tf.matmul(inputs, self.w) + self.b
+#'
+#' # Instantiates the layer.
+#' linear_layer = SimpleDense(4)
+#'
+#' # This will also call `build(input_shape)` and create the weights.
+#' y = linear_layer(tf.ones((2, 2)))
+#' assert len(linear_layer.weights) == 2
+#'
+#' # These weights are trainable, so they're listed in `trainable_weights`:
+#' assert len(linear_layer.trainable_weights) == 2
+#' ```
+#'
+#' Note that the method `add_weight()` offers a shortcut to create weights:
+#'
+#' ```python
+#' class SimpleDense(Layer):
+#'
+#'   def __init__(self, units=32):
+#'       super(SimpleDense, self).__init__()
+#'       self.units = units
+#'
+#'   def build(self, input_shape):
+#'       self.w = self.add_weight(shape=(input_shape[-1], self.units),
+#'                                initializer='random_normal',
+#'                                trainable=TRUE)
+#'       self.b = self.add_weight(shape=(self.units,),
+#'                                initializer='random_normal',
+#'                                trainable=TRUE)
+#'
+#'   def call(self, inputs):
+#'       return tf.matmul(inputs, self.w) + self.b
+#' ```
+#'
+#' Besides trainable weights, updated via backpropagation during training,
+#' layers can also have non-trainable weights. These weights are meant to
+#' be updated manually during `call()`. Here's a example layer that computes
+#' the running sum of its inputs:
+#'
+#' ```python
+#' class ComputeSum(Layer):
+#'
+#'   def __init__(self, input_dim):
+#'       super(ComputeSum, self).__init__()
+#'       # Create a non-trainable weight.
+#'       self.total = tf.Variable(initial_value=tf.zeros((input_dim,)),
+#'                                trainable=FALSE)
+#'
+#'   def call(self, inputs):
+#'       self.total.assign_add(tf.reduce_sum(inputs, axis=0))
+#'       return self.total
+#'
+#' my_sum = ComputeSum(2)
+#' x = tf.ones((2, 2))
+#'
+#' y = my_sum(x)
+#' print(y.numpy())  # [2. 2.]
+#'
+#' y = my_sum(x)
+#' print(y.numpy())  # [4. 4.]
+#'
+#' assert my_sum.weights == [my_sum.total]
+#' assert my_sum.non_trainable_weights == [my_sum.total]
+#' assert my_sum.trainable_weights == []
+#' ```
+#'
+#' For more information about creating layers, see the guide
+#' [Making new Layers and Models via subclassing](
+#'   https://www.tensorflow.org/guide/keras/custom_layers_and_models)
+#'
+#' @param trainable
+#' Boolean, whether the layer's variables should be trainable.
+#'
+#' @param dynamic
+#' Set this to `TRUE` if your layer should only be run eagerly, and
+#' should not be used to generate a static computation graph.
+#' This would be the case for a Tree-RNN or a recursive network,
+#' for example, or generally for any layer that manipulates tensors
+#' using Python control flow. If `FALSE`, we assume that the layer can
+#' safely be used to generate a static computation graph.
+#'
+#' @param variable_dtype
+#' Alias of `dtype`.
+#'
+#' @param compute_dtype
+#' The dtype of the layer's computations. Layers automatically
+#' cast inputs to this dtype which causes the computations and output to
+#' also be in this dtype. When mixed precision is used with a
+#' `tf.keras.mixed_precision.Policy`, this will be different than
+#' `variable_dtype`.
+#'
+#' @param dtype_policy
+#' The layer's dtype policy. See the
+#' `tf.keras.mixed_precision.Policy` documentation for details.
+#'
+#' @param trainable_weights
+#' List of variables to be included in backprop.
+#'
+#' @param non_trainable_weights
+#' List of variables that should not be
+#' included in backprop.
+#'
+#' @param weights
+#' The concatenation of the lists trainable_weights and
+#' non_trainable_weights (in this order).
+#'
+#' @param trainable
+#' Whether the layer should be trained (boolean), i.e. whether
+#' its potentially-trainable weights should be returned as part of
+#' `layer.trainable_weights`.
+#'
+#' @param input_spec
+#' Optional (list of) `InputSpec` object(s) specifying the
+#' constraints on inputs that can be accepted by the layer.
+#'
+#' @param ... standard layer arguments.
+#'
+#' @seealso
+#'   +  <https://keras.io/api/layers>
+layer_layer <-
+function(object, ...)
+{
+    args <- capture_args(match.call(), list(input_shape = normalize_shape,
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape),
+        ignore = "object")
+    create_layer(keras$layers$Layer, object, args)
+}
+
+
 # <class 'keras.src.layers.normalization.layer_normalization.LayerNormalization'>
 #' Layer normalization layer (Ba et al., 2016)
 #'
@@ -5252,6 +7338,102 @@ function(object, `function`, output_shape = NULL, mask = NULL,
 #'
 #' Given a tensor `inputs`, moments are calculated and normalization
 #' is performed across the axes specified in `axis`.
+#'
+#' Example:
+#'
+#' ```python
+#' >>> data = tf.constant(np.arange(10).reshape(5, 2) * 10, dtype=tf.float32)
+#' >>> print(data)
+#' tf.Tensor(
+#' [[ 0. 10.]
+#'  [20. 30.]
+#'  [40. 50.]
+#'  [60. 70.]
+#'  [80. 90.]], shape=(5, 2), dtype=float32)
+#' ```
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.LayerNormalization(axis=1)
+#' >>> output = layer(data)
+#' >>> print(output)
+#' tf.Tensor(
+#' [[-1. 1.]
+#'  [-1. 1.]
+#'  [-1. 1.]
+#'  [-1. 1.]
+#'  [-1. 1.]], shape=(5, 2), dtype=float32)
+#' ```
+#'
+#' Notice that with Layer Normalization the normalization happens across the
+#' axes *within* each example, rather than across different examples in the
+#' batch.
+#'
+#' If `scale` or `center` are enabled, the layer will scale the normalized
+#' outputs by broadcasting them with a trainable variable `gamma`, and center
+#' the outputs by broadcasting with a trainable variable `beta`. `gamma` will
+#' default to a ones tensor and `beta` will default to a zeros tensor, so that
+#' centering and scaling are no-ops before training has begun.
+#'
+#' So, with scaling and centering enabled the normalization equations
+#' are as follows:
+#'
+#' Let the intermediate activations for a mini-batch to be the `inputs`.
+#'
+#' For each sample `x_i` in `inputs` with `k` features, we compute the mean and
+#' variance of the sample:
+#'
+#' ```python
+#' mean_i = sum(x_i[j] for j in range(k)) / k
+#' var_i = sum((x_i[j] - mean_i) ** 2 for j in range(k)) / k
+#' ```
+#'
+#' and then compute a normalized `x_i_normalized`, including a small factor
+#' `epsilon` for numerical stability.
+#'
+#' ```python
+#' x_i_normalized = (x_i - mean_i) / sqrt(var_i + epsilon)
+#' ```
+#'
+#' And finally `x_i_normalized ` is linearly transformed by `gamma` and `beta`,
+#' which are learned parameters:
+#'
+#' ```python
+#' output_i = x_i_normalized * gamma + beta
+#' ```
+#'
+#' `gamma` and `beta` will span the axes of `inputs` specified in `axis`, and
+#' this part of the inputs' shape must be fully defined.
+#'
+#' For example:
+#'
+#' ```python
+#' >>> layer = tf.keras.layers.LayerNormalization(axis=[1, 2, 3])
+#' >>> layer.build([5, 20, 30, 40])
+#' >>> print(layer.beta.shape)
+#' (20, 30, 40)
+#' >>> print(layer.gamma.shape)
+#' (20, 30, 40)
+#' ```
+#'
+#' Note that other implementations of layer normalization may choose to define
+#' `gamma` and `beta` over a separate set of axes from the axes being
+#' normalized across. For example, Group Normalization
+#' ([Wu et al. 2018](https://arxiv.org/abs/1803.08494)) with group size of 1
+#' corresponds to a Layer Normalization that normalizes across height, width,
+#' and channel and has `gamma` and `beta` span only the channel dimension.
+#' So, this Layer Normalization implementation will not match a Group
+#' Normalization layer with group size set to 1.
+#'
+#' Input shape:
+#'   Arbitrary. Use the keyword argument `input_shape` (list of
+#'   integers, does not include the samples axis) when using this layer as the
+#'   first layer in a model.
+#'
+#' Output shape:
+#'   Same shape as input.
+#'
+#' Reference:
+#'   - [Lei Ba et al., 2016](https://arxiv.org/abs/1607.06450).
 #'
 #' @param axis
 #' Integer or List/Tuple. The axis or axes to normalize across.
@@ -5374,6 +7556,24 @@ function(object, alpha = 0.3, ...)
 #' Note: layer attributes cannot be modified after the layer has been called
 #' once (except the `trainable` attribute).
 #'
+#' Example:
+#' ```python
+#'     # apply a unshared weight convolution 1d of length 3 to a sequence with
+#'     # 10 timesteps, with 64 output filters
+#'     model = Sequential()
+#'     model.add(LocallyConnected1D(64, 3, input_shape=(10, 32)))
+#'     # now model.output_shape == (NULL, 8, 64)
+#'     # add a new conv1d on top
+#'     model.add(LocallyConnected1D(32, 3))
+#'     # now model.output_shape == (NULL, 6, 32)
+#' ```
+#'
+#' Input shape:
+#'     3D tensor with shape: `(batch_size, steps, input_dim)`
+#' Output shape:
+#'     3D tensor with shape: `(batch_size, new_steps, filters)` `steps` value
+#'       might have changed due to padding or strides.
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the
 #' number of output filters in the convolution).
@@ -5486,6 +7686,33 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
 #'
 #' Note: layer attributes cannot be modified after the layer has been called
 #' once (except the `trainable` attribute).
+#'
+#' ```python
+#'     # apply a 3x3 unshared weights convolution with 64 output filters on a
+#'     32x32 image
+#'     # with `data_format="channels_last"`:
+#'     model = Sequential()
+#'     model.add(LocallyConnected2D(64, (3, 3), input_shape=(32, 32, 3)))
+#'     # now model.output_shape == (NULL, 30, 30, 64)
+#'     # notice that this layer will consume (30*30)*(3*3*3*64) + (30*30)*64
+#'     parameters
+#'
+#'     # add a 3x3 unshared weights convolution on top, with 32 output filters:
+#'     model.add(LocallyConnected2D(32, (3, 3)))
+#'     # now model.output_shape == (NULL, 28, 28, 32)
+#' ```
+#'
+#' Input shape:
+#'     4D tensor with shape: `(samples, channels, rows, cols)` if
+#'       data_format='channels_first'
+#'     or 4D tensor with shape: `(samples, rows, cols, channels)` if
+#'       data_format='channels_last'.
+#' Output shape:
+#'     4D tensor with shape: `(samples, filters, new_rows, new_cols)` if
+#'       data_format='channels_first'
+#'     or 4D tensor with shape: `(samples, new_rows, new_cols, filters)` if
+#'       data_format='channels_last'. `rows` and `cols` values might have
+#'       changed due to padding.
 #'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the
@@ -5632,6 +7859,21 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
 #' >>> print(final_carry_state.shape)
 #' (32, 4)
 #' ```
+#'
+#' Call arguments:
+#'   inputs: A 3D tensor with shape `[batch, timesteps, feature]`.
+#'   mask: Binary tensor of shape `[batch, timesteps]` indicating whether
+#'     a given timestep should be masked (optional).
+#'     An individual `TRUE` entry indicates that the corresponding timestep
+#'     should be utilized, while a `FALSE` entry indicates that the
+#'     corresponding timestep should be ignored. Defaults to `NULL`.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. This argument is passed to the cell
+#'     when calling it. This is only relevant if `dropout` or
+#'     `recurrent_dropout` is used (optional). Defaults to `NULL`.
+#'   initial_state: List of initial state tensors to be passed to the first
+#'     call of the cell (optional, `NULL` causes creation
+#'     of zero-filled initial state tensors). Defaults to `NULL`.
 #'
 #' @param units
 #' Positive integer, dimensionality of the output space.
@@ -5789,6 +8031,17 @@ function(object, units, activation = "tanh", recurrent_activation = "sigmoid",
 #' (32, 4)
 #' ```
 #'
+#' Call arguments:
+#'   inputs: A 2D tensor, with shape of `[batch, feature]`.
+#'   states: List of 2 tensors that corresponding to the cell's units. Both of
+#'     them have shape `[batch, units]`, the first tensor is the memory state
+#'     from previous time step, the second tensor is the carry state from
+#'     previous time step. For timestep 0, the initial state provided by user
+#'     will be feed to cell.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. Only relevant when `dropout` or
+#'     `recurrent_dropout` is used.
+#'
 #' @param units
 #' Positive integer, dimensionality of the output space.
 #'
@@ -5886,6 +8139,34 @@ function(units, activation = "tanh", recurrent_activation = "sigmoid",
 #'
 #' If any downstream layer does not support masking yet receives such
 #' an input mask, an exception will be raised.
+#'
+#' Example:
+#'
+#' Consider a Numpy data array `x` of shape `(samples, timesteps, features)`,
+#' to be fed to an LSTM layer. You want to mask timestep #3 and #5 because you
+#' lack data for these timesteps. You can:
+#'
+#' - Set `x[:, 3, :] = 0.` and `x[:, 5, :] = 0.`
+#' - Insert a `Masking` layer with `mask_value=0.` before the LSTM layer:
+#'
+#' ```python
+#' samples, timesteps, features = 32, 10, 8
+#' inputs = np.random.random([samples, timesteps, features]).astype(np.float32)
+#' inputs[:, 3, :] = 0.
+#' inputs[:, 5, :] = 0.
+#'
+#' model = tf.keras.models.Sequential()
+#' model.add(tf.keras.layers.Masking(mask_value=0.,
+#'                                   input_shape=(timesteps, features)))
+#' model.add(tf.keras.layers.LSTM(32))
+#'
+#' output = model(inputs)
+#' # The time step 3 and 5 will be skipped from LSTM calculation.
+#' ```
+#'
+#' See [the masking and padding guide](
+#'   https://www.tensorflow.org/guide/keras/masking_and_padding)
+#' for more details.
 #'
 #' @param ... standard layer arguments.
 #'
@@ -6009,6 +8290,18 @@ function(inputs, ...)
 #'         [5.]]], dtype=float32)>
 #' ```
 #'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     3D tensor with shape `(batch_size, steps, features)`.
+#'   - If `data_format='channels_first'`:
+#'     3D tensor with shape `(batch_size, features, steps)`.
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     3D tensor with shape `(batch_size, downsampled_steps, features)`.
+#'   - If `data_format='channels_first'`:
+#'     3D tensor with shape `(batch_size, features, downsampled_steps)`.
+#'
 #' @param pool_size
 #' Integer, size of the max pooling window.
 #'
@@ -6141,6 +8434,20 @@ function(object, pool_size = 2L, strides = NULL, padding = "valid",
 #'            [9.]]]], dtype=float32)>
 #' ```
 #'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     4D tensor with shape `(batch_size, rows, cols, channels)`.
+#'   - If `data_format='channels_first'`:
+#'     4D tensor with shape `(batch_size, channels, rows, cols)`.
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     4D tensor with shape `(batch_size, pooled_rows, pooled_cols, channels)`.
+#'   - If `data_format='channels_first'`:
+#'     4D tensor with shape `(batch_size, channels, pooled_rows, pooled_cols)`.
+#'
+#'   A tensor of rank 4 representing the maximum pooled values.  See above for
+#'
 #' @param pool_size
 #' integer or list of 2 integers,
 #' window size over which to take the maximum.
@@ -6197,6 +8504,35 @@ function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid",
 #' width) by taking the maximum value over an input window (of size defined by
 #' `pool_size`) for each channel of the input.  The window is shifted by
 #' `strides` along each dimension.
+#'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     5D tensor with shape:
+#'     `(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#'   - If `data_format='channels_first'`:
+#'     5D tensor with shape:
+#'     `(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)`
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     5D tensor with shape:
+#'     `(batch_size, pooled_dim1, pooled_dim2, pooled_dim3, channels)`
+#'   - If `data_format='channels_first'`:
+#'     5D tensor with shape:
+#'     `(batch_size, channels, pooled_dim1, pooled_dim2, pooled_dim3)`
+#'
+#' Example:
+#'
+#' ```python
+#' depth = 30
+#' height = 30
+#' width = 30
+#' input_channels = 3
+#'
+#' inputs = tf.keras.Input(shape=(depth, height, width, input_channels))
+#' layer = tf.keras.layers.MaxPooling3D(pool_size=3)
+#' outputs = layer(inputs)  # Shape: (batch_size, 10, 10, 10, 3)
+#' ```
 #'
 #' @param pool_size
 #' Tuple of 3 integers,
@@ -6298,6 +8634,18 @@ function(object, pool_size = list(2L, 2L, 2L), strides = NULL,
 #'         [5.]]], dtype=float32)>
 #' ```
 #'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     3D tensor with shape `(batch_size, steps, features)`.
+#'   - If `data_format='channels_first'`:
+#'     3D tensor with shape `(batch_size, features, steps)`.
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     3D tensor with shape `(batch_size, downsampled_steps, features)`.
+#'   - If `data_format='channels_first'`:
+#'     3D tensor with shape `(batch_size, features, downsampled_steps)`.
+#'
 #' @param pool_size
 #' Integer, size of the max pooling window.
 #'
@@ -6430,6 +8778,20 @@ function(object, pool_size = 2L, strides = NULL, padding = "valid",
 #'            [9.]]]], dtype=float32)>
 #' ```
 #'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     4D tensor with shape `(batch_size, rows, cols, channels)`.
+#'   - If `data_format='channels_first'`:
+#'     4D tensor with shape `(batch_size, channels, rows, cols)`.
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     4D tensor with shape `(batch_size, pooled_rows, pooled_cols, channels)`.
+#'   - If `data_format='channels_first'`:
+#'     4D tensor with shape `(batch_size, channels, pooled_rows, pooled_cols)`.
+#'
+#'   A tensor of rank 4 representing the maximum pooled values.  See above for
+#'
 #' @param pool_size
 #' integer or list of 2 integers,
 #' window size over which to take the maximum.
@@ -6486,6 +8848,35 @@ function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid",
 #' width) by taking the maximum value over an input window (of size defined by
 #' `pool_size`) for each channel of the input.  The window is shifted by
 #' `strides` along each dimension.
+#'
+#' Input shape:
+#'   - If `data_format='channels_last'`:
+#'     5D tensor with shape:
+#'     `(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#'   - If `data_format='channels_first'`:
+#'     5D tensor with shape:
+#'     `(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)`
+#'
+#' Output shape:
+#'   - If `data_format='channels_last'`:
+#'     5D tensor with shape:
+#'     `(batch_size, pooled_dim1, pooled_dim2, pooled_dim3, channels)`
+#'   - If `data_format='channels_first'`:
+#'     5D tensor with shape:
+#'     `(batch_size, channels, pooled_dim1, pooled_dim2, pooled_dim3)`
+#'
+#' Example:
+#'
+#' ```python
+#' depth = 30
+#' height = 30
+#' width = 30
+#' input_channels = 3
+#'
+#' inputs = tf.keras.Input(shape=(depth, height, width, input_channels))
+#' layer = tf.keras.layers.MaxPooling3D(pool_size=3)
+#' outputs = layer(inputs)  # Shape: (batch_size, 10, 10, 10, 3)
+#' ```
 #'
 #' @param pool_size
 #' Tuple of 3 integers,
@@ -6610,6 +9001,54 @@ function(inputs, ...)
 #' implement its own `build()` method and call `MultiHeadAttention`'s
 #' `_build_from_signature()` there.
 #' This enables weights to be restored correctly when the model is loaded.
+#'
+#' Performs 1D cross-attention over two sequence inputs with an attention mask.
+#' Returns the additional attention weights over heads.
+#'
+#' ```python
+#' >>> layer = MultiHeadAttention(num_heads=2, key_dim=2)
+#' >>> target = tf.keras.Input(shape=[8, 16])
+#' >>> source = tf.keras.Input(shape=[4, 16])
+#' >>> output_tensor, weights = layer(target, source,
+#' ...                                return_attention_scores=TRUE)
+#' >>> print(output_tensor.shape)
+#' (NULL, 8, 16)
+#' >>> print(weights.shape)
+#' (NULL, 2, 8, 4)
+#' ```
+#'
+#' Performs 2D self-attention over a 5D input tensor on axes 2 and 3.
+#'
+#' ```python
+#' >>> layer = MultiHeadAttention(
+#' ...     num_heads=2, key_dim=2, attention_axes=(2, 3))
+#' >>> input_tensor = tf.keras.Input(shape=[5, 3, 4, 16])
+#' >>> output_tensor = layer(input_tensor, input_tensor)
+#' >>> print(output_tensor.shape)
+#' (NULL, 5, 3, 4, 16)
+#' ```
+#'
+#' Call arguments:
+#'     query: Query `Tensor` of shape `(B, T, dim)`.
+#'     value: Value `Tensor` of shape `(B, S, dim)`.
+#'     key: Optional key `Tensor` of shape `(B, S, dim)`. If not given, will
+#'         use `value` for both `key` and `value`, which is the most common
+#'         case.
+#'     attention_mask: a boolean mask of shape `(B, T, S)`, that prevents
+#'         attention to certain positions. The boolean mask specifies which
+#'         query elements can attend to which key elements, 1 indicates
+#'         attention and 0 indicates no attention. Broadcasting can happen for
+#'         the missing batch dimensions and the head dimension.
+#'     return_attention_scores: A boolean to indicate whether the output should
+#'         be `(attention_output, attention_scores)` if `TRUE`, or
+#'         `attention_output` if `FALSE`. Defaults to `FALSE`.
+#'     training: Python boolean indicating whether the layer should behave in
+#'         training mode (adding dropout) or in inference mode (no dropout).
+#'         Will go with either using the training mode of the parent
+#'         layer/model, or FALSE (inference) if there is no parent layer.
+#'     use_causal_mask: A boolean to indicate whether to apply a causal mask to
+#'         prevent tokens from attending to future tokens (e.g., used in a
+#'         decoder Transformer).
 #'
 #' @param num_heads
 #' Number of attention heads.
@@ -6749,6 +9188,60 @@ function(inputs, ...)
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
 #'
+#' Calculate a global mean and variance by analyzing the dataset in `adapt()`.
+#'
+#' ```python
+#' >>> adapt_data = np.array([1., 2., 3., 4., 5.], dtype='float32')
+#' >>> input_data = np.array([1., 2., 3.], dtype='float32')
+#' >>> layer = tf.keras.layers.Normalization(axis=NULL)
+#' >>> layer.adapt(adapt_data)
+#' >>> layer(input_data)
+#' <tf.Tensor: shape=(3,), dtype=float32, numpy=
+#' array([-1.4142135, -0.70710677, 0.], dtype=float32)>
+#' ```
+#'
+#' Calculate a mean and variance for each index on the last axis.
+#'
+#' ```python
+#' >>> adapt_data = np.array([[0., 7., 4.],
+#' ...                        [2., 9., 6.],
+#' ...                        [0., 7., 4.],
+#' ...                        [2., 9., 6.]], dtype='float32')
+#' >>> input_data = np.array([[0., 7., 4.]], dtype='float32')
+#' >>> layer = tf.keras.layers.Normalization(axis=-1)
+#' >>> layer.adapt(adapt_data)
+#' >>> layer(input_data)
+#' <tf.Tensor: shape=(1, 3), dtype=float32, numpy=
+#' array([-1., -1., -1.], dtype=float32)>
+#' ```
+#'
+#' Pass the mean and variance directly.
+#'
+#' ```python
+#' >>> input_data = np.array([[1.], [2.], [3.]], dtype='float32')
+#' >>> layer = tf.keras.layers.Normalization(mean=3., variance=2.)
+#' >>> layer(input_data)
+#' <tf.Tensor: shape=(3, 1), dtype=float32, numpy=
+#' array([[-1.4142135 ],
+#'        [-0.70710677],
+#'        [ 0.        ]], dtype=float32)>
+#' ```
+#'
+#' Use the layer to de-normalize inputs (after adapting the layer).
+#'
+#' ```python
+#' >>> adapt_data = np.array([[0., 7., 4.],
+#' ...                        [2., 9., 6.],
+#' ...                        [0., 7., 4.],
+#' ...                        [2., 9., 6.]], dtype='float32')
+#' >>> input_data = np.array([[1., 2., 3.]], dtype='float32')
+#' >>> layer = tf.keras.layers.Normalization(axis=-1, invert=TRUE)
+#' >>> layer.adapt(adapt_data)
+#' >>> layer(input_data)
+#' <tf.Tensor: shape=(1, 3), dtype=float32, numpy=
+#' array([2., 10., 8.], dtype=float32)>
+#' ```
+#'
 #' @param axis
 #' Integer, list of integers, or NULL. The axis or axes that should
 #' have a separate mean and variance for each index in the shape. For
@@ -6798,7 +9291,26 @@ function(object, axis = -1L, mean = NULL, variance = NULL, invert = FALSE,
 # <class 'keras.src.layers.reshaping.permute.Permute'>
 #' Permutes the dimensions of the input according to a given pattern
 #'
+#' @details
 #' Useful e.g. connecting RNNs and convnets.
+#'
+#' Example:
+#'
+#' ```python
+#' model = Sequential()
+#' model.add(Permute((2, 1), input_shape=(10, 64)))
+#' # now: model.output_shape == (NULL, 64, 10)
+#' # note: `NULL` is the batch dimension
+#' ```
+#'
+#' Input shape:
+#'   Arbitrary. Use the keyword argument `input_shape`
+#'   (list of integers, does not include the samples axis)
+#'   when using this layer as the first layer in a model.
+#'
+#' Output shape:
+#'   Same as the input shape, but with the dimensions re-ordered according
+#'   to the specified pattern.
 #'
 #' @param dims
 #' Tuple of integers. Permutation pattern does not include the
@@ -6891,6 +9403,35 @@ function(object, alpha_initializer = "zeros", alpha_regularizer = NULL,
 #'
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#'
+#' Inputs: 3D (HWC) or 4D (NHWC) tensor, with float or int dtype. Input pixel
+#'     values can be of any range (e.g. `[0., 1.)` or `[0, 255]`)
+#'
+#' Output: 3D (HWC) or 4D (NHWC) tensor with brightness adjusted based on the
+#'     `factor`. By default, the layer will output floats.
+#'     The output value will be clipped to the range `[0, 255]`,
+#'     the valid range of RGB colors, and
+#'     rescaled based on the `value_range` if needed.
+#'
+#' Sample usage:
+#'
+#' ```python
+#' random_bright = tf.keras.layers.RandomBrightness(factor=0.2)
+#'
+#' # An image with shape [2, 2, 3]
+#' image = [[[1, 2, 3], [4 ,5 ,6]], [[7, 8, 9], [10, 11, 12]]]
+#'
+#' # Assume we randomly select the factor to be 0.1, then it will apply
+#' # 0.1 * 255 to all the channel
+#' output = random_bright(image, training=TRUE)
+#'
+#' # output will be int64 with 25.5 added to each channel and round down.
+#' tf.Tensor([[[26.5, 27.5, 28.5]
+#'             [29.5, 30.5, 31.5]]
+#'            [[32.5, 33.5, 34.5]
+#'             [35.5, 36.5, 37.5]]],
+#'           shape=(2, 2, 3), dtype=int64)
+#' ```
 #'
 #' @param factor
 #' Float or a list of 2 floats between -1.0 and 1.0. The
@@ -7102,6 +9643,14 @@ function(object, mode = "horizontal_and_vertical", seed = NULL,
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
 #'
+#' Input shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format.
+#'
+#' Output shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., random_height, width, channels)`.
+#'
 #' @param factor
 #' A positive float (fraction of original height),
 #' or a list of size 2 representing lower and upper bound
@@ -7238,6 +9787,14 @@ function(object, factor, fill_mode = "reflect", interpolation = "bilinear",
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
 #'
+#' Input shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`,  in `"channels_last"` format.
+#'
+#' Output shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`,  in `"channels_last"` format.
+#'
 #' @param height_factor
 #' a float represented as fraction of value, or a list of
 #' size 2 representing lower and upper bound for shifting vertically. A
@@ -7315,6 +9872,14 @@ function(object, height_factor, width_factor, fill_mode = "reflect",
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
 #'
+#' Input shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format.
+#'
+#' Output shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, random_width, channels)`.
+#'
 #' @param factor
 #' A positive float (fraction of original width),
 #' or a list of size 2 representing lower and upper bound
@@ -7366,6 +9931,24 @@ function(object, factor, interpolation = "bilinear", seed = NULL,
 #'
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#'
+#' Example:
+#'
+#' ```python
+#' >>> input_img = np.random.random((32, 224, 224, 3))
+#' >>> layer = tf.keras.layers.RandomZoom(.5, .2)
+#' >>> out_img = layer(input_img)
+#' >>> out_img.shape
+#' TensorShape([32, 224, 224, 3])
+#' ```
+#'
+#' Input shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format.
+#'
+#' Output shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format.
 #'
 #' @param height_factor
 #' a float represented as fraction of value,
@@ -7511,6 +10094,23 @@ function(object, max_value = NULL, negative_slope = 0, threshold = 0,
 # <class 'keras.src.layers.reshaping.repeat_vector.RepeatVector'>
 #' Repeats the input n times
 #'
+#' @details
+#'
+#' Example:
+#'
+#' ```python
+#' model = Sequential()
+#' model.add(Dense(32, input_dim=32))
+#' # now: model.output_shape == (NULL, 32)
+#' # note: `NULL` is the batch dimension
+#'
+#' model.add(RepeatVector(3))
+#' # now: model.output_shape == (NULL, 3, 32)
+#' ```
+#'
+#' Input shape: 2D tensor of shape `(num_samples, features)`.
+#' Output shape: 3D tensor of shape `(num_samples, n, features)`.
+#'
 #' @param n
 #' Integer, repetition factor.
 #'
@@ -7591,6 +10191,31 @@ function(object, scale, offset = 0, ...)
 #' Output shape:
 #'   `(batch_size,) + target_shape`
 #'
+#' Example:
+#'
+#' ```python
+#' >>> # as first layer in a Sequential model
+#' >>> model = tf.keras.Sequential()
+#' >>> model.add(tf.keras.layers.Reshape((3, 4), input_shape=(12,)))
+#' >>> # model.output_shape == (NULL, 3, 4), `NULL` is the batch size.
+#' >>> model.output_shape
+#' (NULL, 3, 4)
+#' ```
+#'
+#' ```python
+#' >>> # as intermediate layer in a Sequential model
+#' >>> model.add(tf.keras.layers.Reshape((6, 2)))
+#' >>> model.output_shape
+#' (NULL, 6, 2)
+#' ```
+#'
+#' ```python
+#' >>> # also supports shape inference using `-1` as dimension
+#' >>> model.add(tf.keras.layers.Reshape((-1, 2, 2)))
+#' >>> model.output_shape
+#' (NULL, 3, 2, 2)
+#' ```
+#'
 #' @param ... standard layer arguments.
 #'
 #' @seealso
@@ -7666,6 +10291,125 @@ function(object, height, width, interpolation = "bilinear",
 #' @details
 #' See [the Keras RNN API guide](https://www.tensorflow.org/guide/keras/rnn)
 #' for details about the usage of RNN API.
+#'
+#' Call arguments:
+#'   inputs: Input tensor.
+#'   mask: Binary tensor of shape `[batch_size, timesteps]` indicating whether
+#'     a given timestep should be masked. An individual `TRUE` entry indicates
+#'     that the corresponding timestep should be utilized, while a `FALSE`
+#'     entry indicates that the corresponding timestep should be ignored.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. This argument is passed to the cell
+#'     when calling it. This is for use with cells that use dropout.
+#'   initial_state: List of initial state tensors to be passed to the first
+#'     call of the cell.
+#'   constants: List of constant tensors to be passed to the cell at each
+#'     timestep.
+#'
+#' Input shape:
+#'   N-D tensor with shape `[batch_size, timesteps, ...]` or
+#'   `[timesteps, batch_size, ...]` when time_major is TRUE.
+#'
+#' Output shape:
+#'   - If `return_state`: a list of tensors. The first tensor is
+#'     the output. The remaining tensors are the last states,
+#'     each with shape `[batch_size, state_size]`, where `state_size` could
+#'     be a high dimension tensor shape.
+#'   - If `return_sequences`: N-D tensor with shape
+#'     `[batch_size, timesteps, output_size]`, where `output_size` could
+#'     be a high dimension tensor shape, or
+#'     `[timesteps, batch_size, output_size]` when `time_major` is TRUE.
+#'   - Else, N-D tensor with shape `[batch_size, output_size]`, where
+#'     `output_size` could be a high dimension tensor shape.
+#'
+#' Masking:
+#'   This layer supports masking for input data with a variable number
+#'   of timesteps. To introduce masks to your data,
+#'   use an [tf.keras.layers.Embedding] layer with the `mask_zero` parameter
+#'   set to `TRUE`.
+#'
+#' Note on using statefulness in RNNs:
+#'   You can set RNN layers to be 'stateful', which means that the states
+#'   computed for the samples in one batch will be reused as initial states
+#'   for the samples in the next batch. This assumes a one-to-one mapping
+#'   between samples in different successive batches.
+#'
+#'   To enable statefulness:
+#'     - Specify `stateful=TRUE` in the layer constructor.
+#'     - Specify a fixed batch size for your model, by passing
+#'       If sequential model:
+#'         `batch_input_shape=(...)` to the first layer in your model.
+#'       Else for functional model with 1 or more Input layers:
+#'         `batch_shape=(...)` to all the first layers in your model.
+#'       This is the expected shape of your inputs
+#'       *including the batch size*.
+#'       It should be a list of integers, e.g. `(32, 10, 100)`.
+#'     - Specify `shuffle=FALSE` when calling `fit()`.
+#'
+#'   To reset the states of your model, call `.reset_states()` on either
+#'   a specific layer, or on your entire model.
+#'
+#' Note on specifying the initial state of RNNs:
+#'   You can specify the initial state of RNN layers symbolically by
+#'   calling them with the keyword argument `initial_state`. The value of
+#'   `initial_state` should be a tensor or list of tensors representing
+#'   the initial state of the RNN layer.
+#'
+#'   You can specify the initial state of RNN layers numerically by
+#'   calling `reset_states` with the keyword argument `states`. The value of
+#'   `states` should be a numpy array or list of numpy arrays representing
+#'   the initial state of the RNN layer.
+#'
+#' Note on passing external constants to RNNs:
+#'   You can pass "external" constants to the cell using the `constants`
+#'   keyword argument of `RNN.__call__` (as well as `RNN.call`) method. This
+#'   requires that the `cell.call` method accepts the same keyword argument
+#'   `constants`. Such constants can be used to condition the cell
+#'   transformation on additional static inputs (not changing over time),
+#'   a.k.a. an attention mechanism.
+#'
+#' ```python
+#' from keras.src.layers import RNN
+#' from keras.src import backend
+#'
+#' # First, let's define a RNN Cell, as a layer subclass.
+#' class MinimalRNNCell(keras.layers.Layer):
+#'
+#'     def __init__(self, units, **kwargs):
+#'         self.units = units
+#'         self.state_size = units
+#'         super(MinimalRNNCell, self).__init__(**kwargs)
+#'
+#'     def build(self, input_shape):
+#'         self.kernel = self.add_weight(shape=(input_shape[-1], self.units),
+#'                                       initializer='uniform',
+#'                                       name='kernel')
+#'         self.recurrent_kernel = self.add_weight(
+#'             shape=(self.units, self.units),
+#'             initializer='uniform',
+#'             name='recurrent_kernel')
+#'         self.built = TRUE
+#'
+#'     def call(self, inputs, states):
+#'         prev_output = states[0]
+#'         h = backend.dot(inputs, self.kernel)
+#'         output = h + backend.dot(prev_output, self.recurrent_kernel)
+#'         return output, [output]
+#'
+#' # Let's use this cell in a RNN layer:
+#'
+#' cell = MinimalRNNCell(32)
+#' x = keras.Input((NULL, 5))
+#' layer = RNN(cell)
+#' y = layer(x)
+#'
+#' # Here's how to use the cell to build a stacked RNN:
+#'
+#' cells = [MinimalRNNCell(32), MinimalRNNCell(64)]
+#' x = keras.Input((NULL, 5))
+#' layer = RNN(cells)
+#' y = layer(x)
+#' ```
 #'
 #' @param cell
 #' A RNN cell instance or a list of RNN cell instances.
@@ -7774,6 +10518,21 @@ function(object, cell, return_sequences = FALSE, return_state = FALSE,
 #' it adds a bias vector to the output.
 #' It then optionally applies an activation function to produce the final
 #' output.
+#'
+#' Input shape:
+#'   3D tensor with shape:
+#'   `(batch_size, channels, steps)` if data_format='channels_first'
+#'   or 3D tensor with shape:
+#'   `(batch_size, steps, channels)` if data_format='channels_last'.
+#'
+#' Output shape:
+#'   3D tensor with shape:
+#'   `(batch_size, filters, new_steps)` if data_format='channels_first'
+#'   or 3D tensor with shape:
+#'   `(batch_size,  new_steps, filters)` if data_format='channels_last'.
+#'   `new_steps` value might have changed due to padding or strides.
+#'
+#'   A tensor of rank 3 representing
 #'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the number
@@ -7911,6 +10670,23 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
 #' Intuitively, separable convolutions can be understood as
 #' a way to factorize a convolution kernel into two smaller kernels,
 #' or as an extreme version of an Inception block.
+#'
+#' Input shape:
+#'   4D tensor with shape:
+#'   `(batch_size, channels, rows, cols)` if data_format='channels_first'
+#'   or 4D tensor with shape:
+#'   `(batch_size, rows, cols, channels)` if data_format='channels_last'.
+#'
+#' Output shape:
+#'   4D tensor with shape:
+#'   `(batch_size, filters, new_rows, new_cols)` if
+#'   data_format='channels_first'
+#'   or 4D tensor with shape:
+#'   `(batch_size, new_rows, new_cols, filters)` if
+#'   data_format='channels_last'.  `rows` and `cols` values might have changed
+#'   due to padding.
+#'
+#'   A tensor of rank 4 representing
 #'
 #' @param filters
 #' Integer, the dimensionality of the output space
@@ -8046,6 +10822,21 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
 #' It then optionally applies an activation function to produce the final
 #' output.
 #'
+#' Input shape:
+#'   3D tensor with shape:
+#'   `(batch_size, channels, steps)` if data_format='channels_first'
+#'   or 3D tensor with shape:
+#'   `(batch_size, steps, channels)` if data_format='channels_last'.
+#'
+#' Output shape:
+#'   3D tensor with shape:
+#'   `(batch_size, filters, new_steps)` if data_format='channels_first'
+#'   or 3D tensor with shape:
+#'   `(batch_size,  new_steps, filters)` if data_format='channels_last'.
+#'   `new_steps` value might have changed due to padding or strides.
+#'
+#'   A tensor of rank 3 representing
+#'
 #' @param filters
 #' Integer, the dimensionality of the output space (i.e. the number
 #' of filters in the convolution).
@@ -8182,6 +10973,23 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
 #' Intuitively, separable convolutions can be understood as
 #' a way to factorize a convolution kernel into two smaller kernels,
 #' or as an extreme version of an Inception block.
+#'
+#' Input shape:
+#'   4D tensor with shape:
+#'   `(batch_size, channels, rows, cols)` if data_format='channels_first'
+#'   or 4D tensor with shape:
+#'   `(batch_size, rows, cols, channels)` if data_format='channels_last'.
+#'
+#' Output shape:
+#'   4D tensor with shape:
+#'   `(batch_size, filters, new_rows, new_cols)` if
+#'   data_format='channels_first'
+#'   or 4D tensor with shape:
+#'   `(batch_size, new_rows, new_cols, filters)` if
+#'   data_format='channels_last'.  `rows` and `cols` values might have changed
+#'   due to padding.
+#'
+#'   A tensor of rank 4 representing
 #'
 #' @param filters
 #' Integer, the dimensionality of the output space
@@ -8313,6 +11121,33 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
 #' See [the Keras RNN API guide](https://www.tensorflow.org/guide/keras/rnn)
 #' for details about the usage of RNN API.
 #'
+#' Call arguments:
+#'   inputs: A 3D tensor, with shape `[batch, timesteps, feature]`.
+#'   mask: Binary tensor of shape `[batch, timesteps]` indicating whether
+#'     a given timestep should be masked. An individual `TRUE` entry indicates
+#'     that the corresponding timestep should be utilized, while a `FALSE`
+#'     entry indicates that the corresponding timestep should be ignored.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. This argument is passed to the cell
+#'     when calling it. This is only relevant if `dropout` or
+#'     `recurrent_dropout` is used.
+#'   initial_state: List of initial state tensors to be passed to the first
+#'     call of the cell.
+#'
+#' ```python
+#' inputs = np.random.random([32, 10, 8]).astype(np.float32)
+#' simple_rnn = tf.keras.layers.SimpleRNN(4)
+#'
+#' output = simple_rnn(inputs)  # The output has shape `[32, 4]`.
+#'
+#' simple_rnn = tf.keras.layers.SimpleRNN(
+#'     4, return_sequences=TRUE, return_state=TRUE)
+#'
+#' # whole_sequence_output has shape `[32, 10, 4]`.
+#' # final_state has shape `[32, 4]`.
+#' whole_sequence_output, final_state = simple_rnn(inputs)
+#' ```
+#'
 #' @param units
 #' Positive integer, dimensionality of the output space.
 #'
@@ -8433,6 +11268,31 @@ function(object, units, activation = "tanh", use_bias = TRUE,
 #' This class processes one step within the whole time sequence input, whereas
 #' `tf.keras.layer.SimpleRNN` processes the whole sequence.
 #'
+#' Call arguments:
+#'   inputs: A 2D tensor, with shape of `[batch, feature]`.
+#'   states: A 2D tensor with shape of `[batch, units]`, which is the state
+#'     from the previous time step. For timestep 0, the initial state provided
+#'     by user will be feed to cell.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. Only relevant when `dropout` or
+#'     `recurrent_dropout` is used.
+#'
+#' ```python
+#' inputs = np.random.random([32, 10, 8]).astype(np.float32)
+#' rnn = tf.keras.layers.RNN(tf.keras.layers.SimpleRNNCell(4))
+#'
+#' output = rnn(inputs)  # The output has shape `[32, 4]`.
+#'
+#' rnn = tf.keras.layers.RNN(
+#'     tf.keras.layers.SimpleRNNCell(4),
+#'     return_sequences=TRUE,
+#'     return_state=TRUE)
+#'
+#' # whole_sequence_output has shape `[32, 10, 4]`.
+#' # final_state has shape `[32, 4]`.
+#' whole_sequence_output, final_state = rnn(inputs)
+#' ```
+#'
 #' @param units
 #' Positive integer, dimensionality of the output space.
 #'
@@ -8534,6 +11394,13 @@ function(units, activation = "tanh", use_bias = TRUE, kernel_initializer = "glor
 #' Output shape:
 #'     Same shape as the input.
 #'
+#' Call arguments:
+#'     inputs: The inputs, or logits to the softmax layer.
+#'     mask: A boolean mask of the same shape as `inputs`. The mask
+#'         specifies 1 to keep and 0 to mask. Defaults to `NULL`.
+#'
+#'     Softmaxed output with the same shape as `inputs`.
+#'
 #' @param axis
 #' Integer, or list of Integers, axis along which the softmax
 #' normalization is applied.
@@ -8565,6 +11432,16 @@ function(object, axis = -1L, ...)
 #' decrease. In this case, SpatialDropout1D will help promote independence
 #' between feature maps and should be used instead.
 #'
+#' Call arguments:
+#'   inputs: A 3D tensor.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode (adding dropout) or in inference mode (doing nothing).
+#' Input shape:
+#'   3D tensor with shape: `(samples, timesteps, channels)`
+#' Output shape: Same as input.
+#' References: - [Efficient Object Localization Using Convolutional
+#'     Networks](https://arxiv.org/abs/1411.4280)
+#'
 #' @param rate
 #' Float between 0 and 1. Fraction of the input units to drop.
 #'
@@ -8594,6 +11471,19 @@ function(object, rate, ...)
 #' activations and will otherwise just result in an effective learning rate
 #' decrease. In this case, SpatialDropout2D will help promote independence
 #' between feature maps and should be used instead.
+#'
+#' Call arguments:
+#'   inputs: A 4D tensor.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode (adding dropout) or in inference mode (doing nothing).
+#' Input shape:
+#'   4D tensor with shape: `(samples, channels, rows, cols)` if
+#'     data_format='channels_first'
+#'   or 4D tensor with shape: `(samples, rows, cols, channels)` if
+#'     data_format='channels_last'.
+#' Output shape: Same as input.
+#' References: - [Efficient Object Localization Using Convolutional
+#'     Networks](https://arxiv.org/abs/1411.4280)
 #'
 #' @param rate
 #' Float between 0 and 1. Fraction of the input units to drop.
@@ -8633,6 +11523,19 @@ function(object, rate, data_format = NULL, ...)
 #' decrease. In this case, SpatialDropout3D will help promote independence
 #' between feature maps and should be used instead.
 #'
+#' Call arguments:
+#'   inputs: A 5D tensor.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode (adding dropout) or in inference mode (doing nothing).
+#' Input shape:
+#'   5D tensor with shape: `(samples, channels, dim1, dim2, dim3)` if
+#'     data_format='channels_first'
+#'   or 5D tensor with shape: `(samples, dim1, dim2, dim3, channels)` if
+#'     data_format='channels_last'.
+#' Output shape: Same as input.
+#' References: - [Efficient Object Localization Using Convolutional
+#'     Networks](https://arxiv.org/abs/1411.4280)
+#'
 #' @param rate
 #' Float between 0 and 1. Fraction of the input units to drop.
 #'
@@ -8666,6 +11569,28 @@ function(object, rate, data_format = NULL, ...)
 #' This wrapper controls the Lipschitz constant of the weights of a layer by
 #' constraining their spectral norm, which can stabilize the training of GANs.
 #'
+#' Wrap `keras.layers.Conv2D`:
+#' ```python
+#' >>> x = np.random.rand(1, 10, 10, 1)
+#' >>> conv2d = SpectralNormalization(tf.keras.layers.Conv2D(2, 2))
+#' >>> y = conv2d(x)
+#' >>> y.shape
+#' TensorShape([1, 9, 9, 2])
+#' ```
+#'
+#' Wrap `keras.layers.Dense`:
+#' ```python
+#' >>> x = np.random.rand(1, 10, 10, 1)
+#' >>> dense = SpectralNormalization(tf.keras.layers.Dense(10))
+#' >>> y = dense(x)
+#' >>> y.shape
+#' TensorShape([1, 10, 10, 10])
+#' ```
+#'
+#' Reference:
+#'
+#' - [Spectral Normalization for GAN](https://arxiv.org/abs/1802.05957).
+#'
 #' @param layer
 #' A `keras.layers.Layer` instance that
 #' has either a `kernel` (e.g. `Conv2D`, `Dense`...)
@@ -8693,7 +11618,22 @@ function(object, layer, power_iterations = 1L, ...)
 # <class 'keras.src.layers.rnn.stacked_rnn_cells.StackedRNNCells'>
 #' Wrapper allowing a stack of RNN cells to behave as a single cell
 #'
+#' @details
 #' Used to implement efficient stacked RNNs.
+#'
+#' ```python
+#' batch_size = 3
+#' sentence_max_length = 5
+#' n_features = 2
+#' new_shape = (batch_size, sentence_max_length, n_features)
+#' x = tf.constant(np.reshape(np.arange(30), new_shape), dtype = tf.float32)
+#'
+#' rnn_cells = [tf.keras.layers.LSTMCell(128) for _ in range(2)]
+#' stacked_lstm = tf.keras.layers.StackedRNNCells(rnn_cells)
+#' lstm_layer = tf.keras.layers.RNN(stacked_lstm)
+#'
+#' result = lstm_layer(x)
+#' ```
 #'
 #' @param cells
 #' List of RNN cell instances.
@@ -8746,6 +11686,204 @@ function(cells, ...)
 #'
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#'
+#' **Creating a lookup layer with a known vocabulary**
+#'
+#' This example creates a lookup layer with a pre-existing vocabulary.
+#'
+#' ```python
+#' >>> vocab = ["a", "b", "c", "d"]
+#' >>> data = tf.constant([["a", "c", "d"], ["d", "z", "b"]])
+#' >>> layer = tf.keras.layers.StringLookup(vocabulary=vocab)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+#' array([[1, 3, 4],
+#'        [4, 0, 2]])>
+#' ```
+#'
+#' **Creating a lookup layer with an adapted vocabulary**
+#'
+#' This example creates a lookup layer and generates the vocabulary by
+#' analyzing the dataset.
+#'
+#' ```python
+#' >>> data = tf.constant([["a", "c", "d"], ["d", "z", "b"]])
+#' >>> layer = tf.keras.layers.StringLookup()
+#' >>> layer.adapt(data)
+#' >>> layer.get_vocabulary()
+#' ['[UNK]', 'd', 'z', 'c', 'b', 'a']
+#' ```
+#'
+#' Note that the OOV token `"[UNK]"` has been added to the vocabulary.
+#' The remaining tokens are sorted by frequency
+#' (`"d"`, which has 2 occurrences, is first) then by inverse sort order.
+#'
+#' ```python
+#' >>> data = tf.constant([["a", "c", "d"], ["d", "z", "b"]])
+#' >>> layer = tf.keras.layers.StringLookup()
+#' >>> layer.adapt(data)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+#' array([[5, 3, 1],
+#'        [1, 2, 4]])>
+#' ```
+#'
+#' **Lookups with multiple OOV indices**
+#'
+#' This example demonstrates how to use a lookup layer with multiple OOV
+#' indices.  When a layer is created with more than one OOV index, any OOV
+#' values are hashed into the number of OOV buckets, distributing OOV values in
+#' a deterministic fashion across the set.
+#'
+#' ```python
+#' >>> vocab = ["a", "b", "c", "d"]
+#' >>> data = tf.constant([["a", "c", "d"], ["m", "z", "b"]])
+#' >>> layer = tf.keras.layers.StringLookup(vocabulary=vocab,
+#' ...                                      num_oov_indices=2)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+#' array([[2, 4, 5],
+#'        [0, 1, 3]])>
+#' ```
+#'
+#' Note that the output for OOV value 'm' is 0, while the output for OOV value
+#' 'z' is 1. The in-vocab terms have their output index increased by 1 from
+#' earlier examples (a maps to 2, etc) in order to make space for the extra OOV
+#' value.
+#'
+#' **One-hot output**
+#'
+#' Configure the layer with `output_mode='one_hot'`. Note that the first
+#' `num_oov_indices` dimensions in the one_hot encoding represent OOV values.
+#'
+#' ```python
+#' >>> vocab = ["a", "b", "c", "d"]
+#' >>> data = tf.constant(["a", "b", "c", "d", "z"])
+#' >>> layer = tf.keras.layers.StringLookup(
+#' ...     vocabulary=vocab, output_mode='one_hot')
+#' >>> layer(data)
+#' <tf.Tensor: shape=(5, 5), dtype=float32, numpy=
+#'   array([[0., 1., 0., 0., 0.],
+#'          [0., 0., 1., 0., 0.],
+#'          [0., 0., 0., 1., 0.],
+#'          [0., 0., 0., 0., 1.],
+#'          [1., 0., 0., 0., 0.]], dtype=float32)>
+#' ```
+#'
+#' **Multi-hot output**
+#'
+#' Configure the layer with `output_mode='multi_hot'`. Note that the first
+#' `num_oov_indices` dimensions in the multi_hot encoding represent OOV values.
+#'
+#' ```python
+#' >>> vocab = ["a", "b", "c", "d"]
+#' >>> data = tf.constant([["a", "c", "d", "d"], ["d", "z", "b", "z"]])
+#' >>> layer = tf.keras.layers.StringLookup(
+#' ...     vocabulary=vocab, output_mode='multi_hot')
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+#'   array([[0., 1., 0., 1., 1.],
+#'          [1., 0., 1., 0., 1.]], dtype=float32)>
+#' ```
+#'
+#' **Token count output**
+#'
+#' Configure the layer with `output_mode='count'`. As with multi_hot output,
+#' the first `num_oov_indices` dimensions in the output represent OOV values.
+#'
+#' ```python
+#' >>> vocab = ["a", "b", "c", "d"]
+#' >>> data = tf.constant([["a", "c", "d", "d"], ["d", "z", "b", "z"]])
+#' >>> layer = tf.keras.layers.StringLookup(
+#' ...     vocabulary=vocab, output_mode='count')
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+#'   array([[0., 1., 0., 1., 2.],
+#'          [2., 0., 1., 0., 1.]], dtype=float32)>
+#' ```
+#'
+#' **TF-IDF output**
+#'
+#' Configure the layer with `output_mode="tf_idf"`. As with multi_hot output,
+#' the first `num_oov_indices` dimensions in the output represent OOV values.
+#'
+#' Each token bin will output `token_count * idf_weight`, where the idf weights
+#' are the inverse document frequency weights per token. These should be
+#' provided along with the vocabulary. Note that the `idf_weight` for OOV
+#' values will default to the average of all idf weights passed in.
+#'
+#' ```python
+#' >>> vocab = ["a", "b", "c", "d"]
+#' >>> idf_weights = [0.25, 0.75, 0.6, 0.4]
+#' >>> data = tf.constant([["a", "c", "d", "d"], ["d", "z", "b", "z"]])
+#' >>> layer = tf.keras.layers.StringLookup(output_mode="tf_idf")
+#' >>> layer.set_vocabulary(vocab, idf_weights=idf_weights)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+#'   array([[0.  , 0.25, 0.  , 0.6 , 0.8 ],
+#'          [1.0 , 0.  , 0.75, 0.  , 0.4 ]], dtype=float32)>
+#' ```
+#'
+#' To specify the idf weights for oov values, you will need to pass the entire
+#' vocabularly including the leading oov token.
+#'
+#' ```python
+#' >>> vocab = ["[UNK]", "a", "b", "c", "d"]
+#' >>> idf_weights = [0.9, 0.25, 0.75, 0.6, 0.4]
+#' >>> data = tf.constant([["a", "c", "d", "d"], ["d", "z", "b", "z"]])
+#' >>> layer = tf.keras.layers.StringLookup(output_mode="tf_idf")
+#' >>> layer.set_vocabulary(vocab, idf_weights=idf_weights)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+#'   array([[0.  , 0.25, 0.  , 0.6 , 0.8 ],
+#'          [1.8 , 0.  , 0.75, 0.  , 0.4 ]], dtype=float32)>
+#' ```
+#'
+#' When adapting the layer in `"tf_idf"` mode, each input sample will be
+#' considered a document, and IDF weight per token will be calculated as
+#' `log(1 + num_documents / (1 + token_document_count))`.
+#'
+#' **Inverse lookup**
+#'
+#' This example demonstrates how to map indices to strings using this layer.
+#' (You can also use `adapt()` with `inverse=TRUE`, but for simplicity we'll
+#' pass the vocab in this example.)
+#'
+#' ```python
+#' >>> vocab = ["a", "b", "c", "d"]
+#' >>> data = tf.constant([[1, 3, 4], [4, 0, 2]])
+#' >>> layer = tf.keras.layers.StringLookup(vocabulary=vocab, invert=TRUE)
+#' >>> layer(data)
+#' <tf.Tensor: shape=(2, 3), dtype=string, numpy=
+#' array([[b'a', b'c', b'd'],
+#'        [b'd', b'[UNK]', b'b']], dtype=object)>
+#' ```
+#'
+#' Note that the first index correspond to the oov token by default.
+#'
+#' **Forward and inverse lookup pairs**
+#'
+#' This example demonstrates how to use the vocabulary of a standard lookup
+#' layer to create an inverse lookup layer.
+#'
+#' ```python
+#' >>> vocab = ["a", "b", "c", "d"]
+#' >>> data = tf.constant([["a", "c", "d"], ["d", "z", "b"]])
+#' >>> layer = tf.keras.layers.StringLookup(vocabulary=vocab)
+#' >>> i_layer = tf.keras.layers.StringLookup(vocabulary=vocab, invert=TRUE)
+#' >>> int_data = layer(data)
+#' >>> i_layer(int_data)
+#' <tf.Tensor: shape=(2, 3), dtype=string, numpy=
+#' array([[b'a', b'c', b'd'],
+#'        [b'd', b'[UNK]', b'b']], dtype=object)>
+#' ```
+#'
+#' In this example, the input value `"z"` resulted in an output of `"[UNK]"`,
+#' since 1000 was not in the vocabulary - it got represented as an OOV, and all
+#' OOV values are returned as `"[UNK]"` in the inverse layer. Also, note that
+#' for the inverse to work, you must have already set the forward layer
+#' vocabulary either directly or via `adapt()` before calling
+#' `get_vocabulary()`.
 #'
 #' @param max_tokens
 #' Maximum size of the vocabulary for this layer. This should
@@ -8856,6 +11994,20 @@ function(object, max_tokens = NULL, num_oov_indices = 1L, mask_token = NULL,
 #' It takes as input a list of tensors of size 2, both of the same shape, and
 #' returns a single tensor, (inputs[0] - inputs[1]), also of the same shape.
 #'
+#' ```python
+#'     import keras.src as keras
+#'
+#'     input1 = keras.layers.Input(shape=(16,))
+#'     x1 = keras.layers.Dense(8, activation='relu')(input1)
+#'     input2 = keras.layers.Input(shape=(32,))
+#'     x2 = keras.layers.Dense(8, activation='relu')(input2)
+#'     # Equivalent to subtracted = keras.layers.subtract([x1, x2])
+#'     subtracted = keras.layers.Subtract()([x1, x2])
+#'
+#'     out = keras.layers.Dense(4)(subtracted)
+#'     model = keras.models.Model(inputs=[input1, input2], outputs=out)
+#' ```
+#'
 #' @param ... standard layer arguments.
 #'
 #' @seealso
@@ -8931,6 +12083,75 @@ function(inputs, ...)
 #'
 #' For an overview and full list of preprocessing layers, see the preprocessing
 #' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#'
+#' Example:
+#'
+#' This example instantiates a `TextVectorization` layer that lowercases text,
+#' splits on whitespace, strips punctuation, and outputs integer vocab indices.
+#'
+#' ```python
+#' >>> text_dataset = tf.data.Dataset.from_tensor_slices(["foo", "bar", "baz"])
+#' >>> max_features = 5000  # Maximum vocab size.
+#' >>> max_len = 4  # Sequence length to pad the outputs to.
+#' >>>
+#' >>> # Create the layer.
+#' >>> vectorize_layer = tf.keras.layers.TextVectorization(
+#' ...  max_tokens=max_features,
+#' ...  output_mode='int',
+#' ...  output_sequence_length=max_len)
+#' >>>
+#' >>> # Now that the vocab layer has been created, call `adapt` on the
+#' >>> # text-only dataset to create the vocabulary. You don't have to batch,
+#' >>> # but for large datasets this means we're not keeping spare copies of
+#' >>> # the dataset.
+#' >>> vectorize_layer.adapt(text_dataset.batch(64))
+#' >>>
+#' >>> # Create the model that uses the vectorize text layer
+#' >>> model = tf.keras.models.Sequential()
+#' >>>
+#' >>> # Start by creating an explicit input layer. It needs to have a shape of
+#' >>> # (1,) (because we need to guarantee that there is exactly one string
+#' >>> # input per batch), and the dtype needs to be 'string'.
+#' >>> model.add(tf.keras.Input(shape=(1,), dtype=tf.string))
+#' >>>
+#' >>> # The first layer in our model is the vectorization layer. After this
+#' >>> # layer, we have a tensor of shape (batch_size, max_len) containing
+#' >>> # vocab indices.
+#' >>> model.add(vectorize_layer)
+#' >>>
+#' >>> # Now, the model can map strings to integers, and you can add an
+#' >>> # embedding layer to map these integers to learned embeddings.
+#' >>> input_data = [["foo qux bar"], ["qux baz"]]
+#' >>> model.predict(input_data)
+#' array([[2, 1, 4, 0],
+#'        [1, 3, 0, 0]])
+#' ```
+#'
+#' Example:
+#'
+#' This example instantiates a `TextVectorization` layer by passing a list
+#' of vocabulary terms to the layer's `__init__()` method.
+#'
+#' ```python
+#' >>> vocab_data = ["earth", "wind", "and", "fire"]
+#' >>> max_len = 4  # Sequence length to pad the outputs to.
+#' >>>
+#' >>> # Create the layer, passing the vocab directly. You can also pass the
+#' >>> # vocabulary arg a path to a file containing one vocabulary word per
+#' >>> # line.
+#' >>> vectorize_layer = tf.keras.layers.TextVectorization(
+#' ...  max_tokens=max_features,
+#' ...  output_mode='int',
+#' ...  output_sequence_length=max_len,
+#' ...  vocabulary=vocab_data)
+#' >>>
+#' >>> # Because we've passed the vocabulary directly, we don't need to adapt
+#' >>> # the layer - the vocabulary is already set. The vocabulary contains the
+#' >>> # padding token ('') and OOV token ('[UNK]') as well as the passed
+#' >>> # tokens.
+#' >>> vectorize_layer.get_vocabulary()
+#' ['', '[UNK]', 'earth', 'wind', 'and', 'fire']
+#' ```
 #'
 #' @param max_tokens
 #' Maximum size of the vocabulary for this layer. This should
@@ -9114,6 +12335,16 @@ function(object, theta = 1, ...)
 #' Because `TimeDistributed` applies the same instance of `Conv2D` to each of
 #' the timestamps, the same set of weights are used at each timestamp.
 #'
+#' Call arguments:
+#'   inputs: Input tensor of shape (batch, time, ...) or nested tensors,
+#'     and each of which has shape (batch, time, ...).
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. This argument is passed to the
+#'     wrapped layer (only if the layer supports this argument).
+#'   mask: Binary tensor of shape `(samples, timesteps)` indicating whether
+#'     a given timestep should be masked. This argument is passed to the
+#'     wrapped layer (only if the layer supports this argument).
+#'
 #' @param layer
 #' a `tf.keras.layers.Layer` instance.
 #'
@@ -9139,6 +12370,15 @@ function(object, layer, ...)
 #' Normalize a batch of inputs so that each input in the batch has a L2 norm
 #' equal to 1 (across the axes specified in `axis`).
 #'
+#' Example:
+#'
+#' ```python
+#' >>> data = tf.constant(np.arange(6).reshape(2, 3), dtype=tf.float32)
+#' >>> normalized_data = tf.keras.layers.UnitNormalization()(data)
+#' >>> print(tf.reduce_sum(normalized_data[0, :] ** 2).numpy())
+#' 1.0
+#' ```
+#'
 #' @param axis
 #' Integer or list. The axis or axes to normalize across.
 #' Typically, this is the features axis or axes. The left-out axes are
@@ -9163,7 +12403,35 @@ function(object, axis = -1L, ...)
 # <class 'keras.src.layers.reshaping.up_sampling1d.UpSampling1D'>
 #' Upsampling layer for 1D inputs
 #'
+#' @details
 #' Repeats each temporal step `size` times along the time axis.
+#'
+#' ```python
+#' >>> input_shape = (2, 2, 3)
+#' >>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+#' >>> print(x)
+#' [[[ 0  1  2]
+#'   [ 3  4  5]]
+#'  [[ 6  7  8]
+#'   [ 9 10 11]]]
+#' >>> y = tf.keras.layers.UpSampling1D(size=2)(x)
+#' >>> print(y)
+#' tf.Tensor(
+#'   [[[ 0  1  2]
+#'     [ 0  1  2]
+#'     [ 3  4  5]
+#'     [ 3  4  5]]
+#'    [[ 6  7  8]
+#'     [ 6  7  8]
+#'     [ 9 10 11]
+#'     [ 9 10 11]]], shape=(2, 4, 3), dtype=int64)
+#' ```
+#'
+#' Input shape:
+#'   3D tensor with shape: `(batch_size, steps, features)`.
+#'
+#' Output shape:
+#'   3D tensor with shape: `(batch_size, upsampled_steps, features)`.
 #'
 #' @param size
 #' Integer. Upsampling factor.
@@ -9189,6 +12457,41 @@ function(object, size = 2L, ...)
 #' @details
 #' Repeats the rows and columns of the data
 #' by `size[0]` and `size[1]` respectively.
+#'
+#' ```python
+#' >>> input_shape = (2, 2, 1, 3)
+#' >>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+#' >>> print(x)
+#' [[[[ 0  1  2]]
+#'   [[ 3  4  5]]]
+#'  [[[ 6  7  8]]
+#'   [[ 9 10 11]]]]
+#' >>> y = tf.keras.layers.UpSampling2D(size=(1, 2))(x)
+#' >>> print(y)
+#' tf.Tensor(
+#'   [[[[ 0  1  2]
+#'      [ 0  1  2]]
+#'     [[ 3  4  5]
+#'      [ 3  4  5]]]
+#'    [[[ 6  7  8]
+#'      [ 6  7  8]]
+#'     [[ 9 10 11]
+#'      [ 9 10 11]]]], shape=(2, 2, 2, 3), dtype=int64)
+#' ```
+#'
+#' Input shape:
+#'   4D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'       `(batch_size, rows, cols, channels)`
+#'   - If `data_format` is `"channels_first"`:
+#'       `(batch_size, channels, rows, cols)`
+#'
+#' Output shape:
+#'   4D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'       `(batch_size, upsampled_rows, upsampled_cols, channels)`
+#'   - If `data_format` is `"channels_first"`:
+#'       `(batch_size, channels, upsampled_rows, upsampled_cols)`
 #'
 #' @param size
 #' Int, or list of 2 integers.
@@ -9234,6 +12537,30 @@ function(object, size = list(2L, 2L), data_format = NULL, interpolation = "neare
 #' @details
 #' Repeats the 1st, 2nd and 3rd dimensions
 #' of the data by `size[0]`, `size[1]` and `size[2]` respectively.
+#'
+#' ```python
+#' >>> input_shape = (2, 1, 2, 1, 3)
+#' >>> x = tf.constant(1, shape=input_shape)
+#' >>> y = tf.keras.layers.UpSampling3D(size=2)(x)
+#' >>> print(y.shape)
+#' (2, 2, 4, 2, 3)
+#' ```
+#'
+#' Input shape:
+#'   5D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'       `(batch_size, dim1, dim2, dim3, channels)`
+#'   - If `data_format` is `"channels_first"`:
+#'       `(batch_size, channels, dim1, dim2, dim3)`
+#'
+#' Output shape:
+#'   5D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'       `(batch_size, upsampled_dim1, upsampled_dim2, upsampled_dim3,
+#'       channels)`
+#'   - If `data_format` is `"channels_first"`:
+#'       `(batch_size, channels, upsampled_dim1, upsampled_dim2,
+#'       upsampled_dim3)`
 #'
 #' @param size
 #' Int, or list of 3 integers.
@@ -9297,6 +12624,39 @@ function(object, layer, ...)
 # <class 'keras.src.layers.reshaping.zero_padding1d.ZeroPadding1D'>
 #' Zero-padding layer for 1D input (e.g. temporal sequence)
 #'
+#' @details
+#'
+#' ```python
+#' >>> input_shape = (2, 2, 3)
+#' >>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+#' >>> print(x)
+#' [[[ 0  1  2]
+#'   [ 3  4  5]]
+#'  [[ 6  7  8]
+#'   [ 9 10 11]]]
+#' >>> y = tf.keras.layers.ZeroPadding1D(padding=2)(x)
+#' >>> print(y)
+#' tf.Tensor(
+#'   [[[ 0  0  0]
+#'     [ 0  0  0]
+#'     [ 0  1  2]
+#'     [ 3  4  5]
+#'     [ 0  0  0]
+#'     [ 0  0  0]]
+#'    [[ 0  0  0]
+#'     [ 0  0  0]
+#'     [ 6  7  8]
+#'     [ 9 10 11]
+#'     [ 0  0  0]
+#'     [ 0  0  0]]], shape=(2, 6, 3), dtype=int64)
+#' ```
+#'
+#' Input shape:
+#'     3D tensor with shape `(batch_size, axis_to_pad, features)`
+#'
+#' Output shape:
+#'     3D tensor with shape `(batch_size, padded_axis, features)`
+#'
 #' @param padding
 #' Int, or list of int (length 2).
 #' - If int:
@@ -9327,6 +12687,43 @@ function(object, padding = 1L, ...)
 #' @details
 #' This layer can add rows and columns of zeros
 #' at the top, bottom, left and right side of an image tensor.
+#'
+#' ```python
+#' >>> input_shape = (1, 1, 2, 2)
+#' >>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+#' >>> print(x)
+#' [[[[0 1]
+#'    [2 3]]]]
+#' >>> y = tf.keras.layers.ZeroPadding2D(padding=1)(x)
+#' >>> print(y)
+#' tf.Tensor(
+#'   [[[[0 0]
+#'      [0 0]
+#'      [0 0]
+#'      [0 0]]
+#'     [[0 0]
+#'      [0 1]
+#'      [2 3]
+#'      [0 0]]
+#'     [[0 0]
+#'      [0 0]
+#'      [0 0]
+#'      [0 0]]]], shape=(1, 3, 4, 2), dtype=int64)
+#' ```
+#'
+#' Input shape:
+#'   4D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'       `(batch_size, rows, cols, channels)`
+#'   - If `data_format` is `"channels_first"`:
+#'       `(batch_size, channels, rows, cols)`
+#'
+#' Output shape:
+#'   4D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'       `(batch_size, padded_rows, padded_cols, channels)`
+#'   - If `data_format` is `"channels_first"`:
+#'       `(batch_size, channels, padded_rows, padded_cols)`
 #'
 #' @param padding
 #' Int, or list of 2 ints, or list of 2 lists of 2 ints.
@@ -9371,6 +12768,34 @@ function(object, padding = list(1L, 1L), data_format = NULL,
 
 # <class 'keras.src.layers.reshaping.zero_padding3d.ZeroPadding3D'>
 #' Zero-padding layer for 3D data (spatial or spatio-temporal)
+#'
+#' @details
+#'
+#' ```python
+#' >>> input_shape = (1, 1, 2, 2, 3)
+#' >>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+#' >>> y = tf.keras.layers.ZeroPadding3D(padding=2)(x)
+#' >>> print(y.shape)
+#' (1, 5, 6, 6, 3)
+#' ```
+#'
+#' Input shape:
+#'   5D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'       `(batch_size, first_axis_to_pad, second_axis_to_pad,
+#'       third_axis_to_pad, depth)`
+#'   - If `data_format` is `"channels_first"`:
+#'       `(batch_size, depth, first_axis_to_pad, second_axis_to_pad,
+#'       third_axis_to_pad)`
+#'
+#' Output shape:
+#'   5D tensor with shape:
+#'   - If `data_format` is `"channels_last"`:
+#'       `(batch_size, first_padded_axis, second_padded_axis,
+#'       third_axis_to_pad, depth)`
+#'   - If `data_format` is `"channels_first"`:
+#'       `(batch_size, depth, first_padded_axis, second_padded_axis,
+#'         third_axis_to_pad)`
 #'
 #' @param padding
 #' Int, or list of 3 ints, or list of 3 lists of 2 ints.
@@ -9449,6 +12874,17 @@ function(object, padding = list(1L, 1L, 1L), data_format = NULL,
 #' ...                                 activation='selu'))
 #' >>> model.add(tf.keras.layers.Dense(num_classes, activation='softmax'))
 #' ```
+#'
+#'     The scaled exponential unit activation: `scale * elu(x, alpha)`.
+#'
+#' Notes:
+#'     - To be used together with the
+#'         `tf.keras.initializers.LecunNormal` initializer.
+#'     - To be used together with the dropout variant
+#'         `tf.keras.layers.AlphaDropout` (not regular dropout).
+#'
+#' References:
+#'     - [Klambauer et al., 2017](https://arxiv.org/abs/1706.02515)
 #'
 #' @param x
 #' A tensor or variable to compute the activation function for.

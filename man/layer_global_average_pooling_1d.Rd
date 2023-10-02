@@ -27,6 +27,42 @@ The behavior is the same as for \code{tf.reduce_mean} or \code{np.mean}.}
 \description{
 Global average pooling operation for temporal data
 }
+\details{
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_shape = (2, 3, 4)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.GlobalAveragePooling1D()(x)
+>>> print(y.shape)
+(2, 4)
+}\if{html}{\out{</div>}}
+
+Call arguments:
+inputs: A 3D tensor.
+mask: Binary tensor of shape \verb{(batch_size, steps)} indicating whether
+a given step should be masked (excluded from the average).
+
+Input shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+3D tensor with shape:
+\verb{(batch_size, steps, features)}
+\item If \code{data_format='channels_first'}:
+3D tensor with shape:
+\verb{(batch_size, features, steps)}
+}
+
+Output shape:
+\itemize{
+\item If \code{keepdims}=FALSE:
+2D tensor with shape \verb{(batch_size, features)}.
+\item If \code{keepdims}=TRUE:
+\itemize{
+\item If \code{data_format='channels_last'}:
+3D tensor with shape \verb{(batch_size, 1, features)}
+\item If \code{data_format='channels_first'}:
+3D tensor with shape \verb{(batch_size, features, 1)}
+}
+}
+}
 \seealso{
 \itemize{
 \item \url{https://keras.io/api/layers}

@@ -78,6 +78,13 @@ Relation to Instance Normalization:
 If the number of groups is set to the input dimension (number of groups is
 equal to number of channels), then this operation becomes identical to
 Instance Normalization.
+
+Call arguments:
+inputs: Input tensor (of any rank).
+mask: The mask parameter is a tensor that indicates the weight for each
+position in the input tensor when computing the mean and variance.
+
+Reference: - \href{https://arxiv.org/abs/1803.08494}{Yuxin Wu & Kaiming He, 2018}
 }
 \seealso{
 \itemize{

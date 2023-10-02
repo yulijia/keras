@@ -14,6 +14,21 @@ layer_repeat_vector(object, n, ...)
 \description{
 Repeats the input n times
 }
+\details{
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{model = Sequential()
+model.add(Dense(32, input_dim=32))
+# now: model.output_shape == (NULL, 32)
+# note: `NULL` is the batch dimension
+
+model.add(RepeatVector(3))
+# now: model.output_shape == (NULL, 3, 32)
+}\if{html}{\out{</div>}}
+
+Input shape: 2D tensor of shape \verb{(num_samples, features)}.
+Output shape: 3D tensor of shape \verb{(num_samples, n, features)}.
+}
 \seealso{
 \itemize{
 \item \url{https://keras.io/api/layers}

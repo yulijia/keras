@@ -55,6 +55,38 @@ A \code{ValueError} will be raised if these requirements are not met.}
 \description{
 Bidirectional wrapper for RNNs
 }
+\details{
+Call arguments:
+The call arguments for this layer are the same as those of the wrapped RNN
+layer.
+Beware that when passing the \code{initial_state} argument during the call of
+this layer, the first half in the list of elements in the \code{initial_state}
+list will be passed to the forward RNN call and the last half in the list
+of elements will be passed to the backward RNN call.
+
+ValueError:
+1. If \code{layer} or \code{backward_layer} is not a \code{Layer} instance.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{model = Sequential()
+model.add(Bidirectional(LSTM(10, return_sequences=TRUE),
+                             input_shape=(5, 10)))
+model.add(Bidirectional(LSTM(10)))
+model.add(Dense(5))
+model.add(Activation('softmax'))
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
+
+# With custom backward layer
+model = Sequential()
+forward_layer = LSTM(10, return_sequences=TRUE)
+backward_layer = LSTM(10, activation='relu', return_sequences=TRUE,
+                      go_backwards=TRUE)
+model.add(Bidirectional(forward_layer, backward_layer=backward_layer,
+                        input_shape=(5, 10)))
+model.add(Dense(5))
+model.add(Activation('softmax'))
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
+}\if{html}{\out{</div>}}
+}
 \seealso{
 \itemize{
 \item \url{https://keras.io/api/layers}

@@ -30,6 +30,31 @@ Upsampling layer for 3D inputs
 \details{
 Repeats the 1st, 2nd and 3rd dimensions
 of the data by \code{size[0]}, \code{size[1]} and \code{size[2]} respectively.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_shape = (2, 1, 2, 1, 3)
+>>> x = tf.constant(1, shape=input_shape)
+>>> y = tf.keras.layers.UpSampling3D(size=2)(x)
+>>> print(y.shape)
+(2, 2, 4, 2, 3)
+}\if{html}{\out{</div>}}
+
+Input shape:
+5D tensor with shape:
+\itemize{
+\item If \code{data_format} is \code{"channels_last"}:
+\verb{(batch_size, dim1, dim2, dim3, channels)}
+\item If \code{data_format} is \code{"channels_first"}:
+\verb{(batch_size, channels, dim1, dim2, dim3)}
+}
+
+Output shape:
+5D tensor with shape:
+\itemize{
+\item If \code{data_format} is \code{"channels_last"}:
+\verb{(batch_size, upsampled_dim1, upsampled_dim2, upsampled_dim3, channels)}
+\item If \code{data_format} is \code{"channels_first"}:
+\verb{(batch_size, channels, upsampled_dim1, upsampled_dim2, upsampled_dim3)}
+}
 }
 \seealso{
 \itemize{

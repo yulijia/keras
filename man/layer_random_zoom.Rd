@@ -80,6 +80,23 @@ By default, the layer will output floats.
 
 For an overview and full list of preprocessing layers, see the preprocessing
 \href{https://www.tensorflow.org/guide/keras/preprocessing_layers}{guide}.
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_img = np.random.random((32, 224, 224, 3))
+>>> layer = tf.keras.layers.RandomZoom(.5, .2)
+>>> out_img = layer(input_img)
+>>> out_img.shape
+TensorShape([32, 224, 224, 3])
+}\if{html}{\out{</div>}}
+
+Input shape:
+3D (unbatched) or 4D (batched) tensor with shape:
+\verb{(..., height, width, channels)}, in \code{"channels_last"} format.
+
+Output shape:
+3D (unbatched) or 4D (batched) tensor with shape:
+\verb{(..., height, width, channels)}, in \code{"channels_last"} format.
 }
 \seealso{
 \itemize{

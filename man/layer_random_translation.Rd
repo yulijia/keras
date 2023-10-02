@@ -72,6 +72,14 @@ floats.
 
 For an overview and full list of preprocessing layers, see the preprocessing
 \href{https://www.tensorflow.org/guide/keras/preprocessing_layers}{guide}.
+
+Input shape:
+3D (unbatched) or 4D (batched) tensor with shape:
+\verb{(..., height, width, channels)},  in \code{"channels_last"} format.
+
+Output shape:
+3D (unbatched) or 4D (batched) tensor with shape:
+\verb{(..., height, width, channels)},  in \code{"channels_last"} format.
 }
 \seealso{
 \itemize{

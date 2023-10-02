@@ -64,6 +64,98 @@ example close to 0 and the activation standard deviation close to 1.
 
 Given a tensor \code{inputs}, moments are calculated and normalization
 is performed across the axes specified in \code{axis}.
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> data = tf.constant(np.arange(10).reshape(5, 2) * 10, dtype=tf.float32)
+>>> print(data)
+tf.Tensor(
+[[ 0. 10.]
+ [20. 30.]
+ [40. 50.]
+ [60. 70.]
+ [80. 90.]], shape=(5, 2), dtype=float32)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.LayerNormalization(axis=1)
+>>> output = layer(data)
+>>> print(output)
+tf.Tensor(
+[[-1. 1.]
+ [-1. 1.]
+ [-1. 1.]
+ [-1. 1.]
+ [-1. 1.]], shape=(5, 2), dtype=float32)
+}\if{html}{\out{</div>}}
+
+Notice that with Layer Normalization the normalization happens across the
+axes \emph{within} each example, rather than across different examples in the
+batch.
+
+If \code{scale} or \code{center} are enabled, the layer will scale the normalized
+outputs by broadcasting them with a trainable variable \code{gamma}, and center
+the outputs by broadcasting with a trainable variable \code{beta}. \code{gamma} will
+default to a ones tensor and \code{beta} will default to a zeros tensor, so that
+centering and scaling are no-ops before training has begun.
+
+So, with scaling and centering enabled the normalization equations
+are as follows:
+
+Let the intermediate activations for a mini-batch to be the \code{inputs}.
+
+For each sample \code{x_i} in \code{inputs} with \code{k} features, we compute the mean and
+variance of the sample:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{mean_i = sum(x_i[j] for j in range(k)) / k
+var_i = sum((x_i[j] - mean_i) ** 2 for j in range(k)) / k
+}\if{html}{\out{</div>}}
+
+and then compute a normalized \code{x_i_normalized}, including a small factor
+\code{epsilon} for numerical stability.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{x_i_normalized = (x_i - mean_i) / sqrt(var_i + epsilon)
+}\if{html}{\out{</div>}}
+
+And finally \code{x_i_normalized } is linearly transformed by \code{gamma} and \code{beta},
+which are learned parameters:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{output_i = x_i_normalized * gamma + beta
+}\if{html}{\out{</div>}}
+
+\code{gamma} and \code{beta} will span the axes of \code{inputs} specified in \code{axis}, and
+this part of the inputs' shape must be fully defined.
+
+For example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.LayerNormalization(axis=[1, 2, 3])
+>>> layer.build([5, 20, 30, 40])
+>>> print(layer.beta.shape)
+(20, 30, 40)
+>>> print(layer.gamma.shape)
+(20, 30, 40)
+}\if{html}{\out{</div>}}
+
+Note that other implementations of layer normalization may choose to define
+\code{gamma} and \code{beta} over a separate set of axes from the axes being
+normalized across. For example, Group Normalization
+(\href{https://arxiv.org/abs/1803.08494}{Wu et al. 2018}) with group size of 1
+corresponds to a Layer Normalization that normalizes across height, width,
+and channel and has \code{gamma} and \code{beta} span only the channel dimension.
+So, this Layer Normalization implementation will not match a Group
+Normalization layer with group size set to 1.
+
+Input shape:
+Arbitrary. Use the keyword argument \code{input_shape} (list of
+integers, does not include the samples axis) when using this layer as the
+first layer in a model.
+
+Output shape:
+Same shape as input.
+
+Reference:
+\itemize{
+\item \href{https://arxiv.org/abs/1607.06450}{Lei Ba et al., 2016}.
+}
 }
 \seealso{
 \itemize{

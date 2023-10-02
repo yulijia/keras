@@ -30,6 +30,35 @@ The behavior is the same as for \code{tf.reduce_mean} or \code{np.mean}.}
 \description{
 Global average pooling operation for spatial data
 }
+\details{
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_shape = (2, 4, 5, 3)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.GlobalAveragePooling2D()(x)
+>>> print(y.shape)
+(2, 3)
+}\if{html}{\out{</div>}}
+
+Input shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+4D tensor with shape \verb{(batch_size, rows, cols, channels)}.
+\item If \code{data_format='channels_first'}:
+4D tensor with shape \verb{(batch_size, channels, rows, cols)}.
+}
+
+Output shape:
+\itemize{
+\item If \code{keepdims}=FALSE:
+2D tensor with shape \verb{(batch_size, channels)}.
+\item If \code{keepdims}=TRUE:
+\itemize{
+\item If \code{data_format='channels_last'}:
+4D tensor with shape \verb{(batch_size, 1, 1, channels)}
+\item If \code{data_format='channels_first'}:
+4D tensor with shape \verb{(batch_size, channels, 1, 1)}
+}
+}
+}
 \seealso{
 \itemize{
 \item \url{https://keras.io/api/layers}

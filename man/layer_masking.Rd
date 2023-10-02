@@ -20,6 +20,33 @@ in all downstream layers (as long as they support masking).
 
 If any downstream layer does not support masking yet receives such
 an input mask, an exception will be raised.
+
+Example:
+
+Consider a Numpy data array \code{x} of shape \verb{(samples, timesteps, features)},
+to be fed to an LSTM layer. You want to mask timestep #3 and #5 because you
+lack data for these timesteps. You can:
+\itemize{
+\item Set \verb{x[:, 3, :] = 0.} and \verb{x[:, 5, :] = 0.}
+\item Insert a \code{Masking} layer with \code{mask_value=0.} before the LSTM layer:
+}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{samples, timesteps, features = 32, 10, 8
+inputs = np.random.random([samples, timesteps, features]).astype(np.float32)
+inputs[:, 3, :] = 0.
+inputs[:, 5, :] = 0.
+
+model = tf.keras.models.Sequential()
+model.add(tf.keras.layers.Masking(mask_value=0.,
+                                  input_shape=(timesteps, features)))
+model.add(tf.keras.layers.LSTM(32))
+
+output = model(inputs)
+# The time step 3 and 5 will be skipped from LSTM calculation.
+}\if{html}{\out{</div>}}
+
+See \href{https://www.tensorflow.org/guide/keras/masking_and_padding}{the masking and padding guide}
+for more details.
 }
 \seealso{
 \itemize{

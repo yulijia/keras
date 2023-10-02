@@ -107,6 +107,32 @@ Fully-connected RNN where the output is to be fed back to input
 \details{
 See \href{https://www.tensorflow.org/guide/keras/rnn}{the Keras RNN API guide}
 for details about the usage of RNN API.
+
+Call arguments:
+inputs: A 3D tensor, with shape \verb{[batch, timesteps, feature]}.
+mask: Binary tensor of shape \verb{[batch, timesteps]} indicating whether
+a given timestep should be masked. An individual \code{TRUE} entry indicates
+that the corresponding timestep should be utilized, while a \code{FALSE}
+entry indicates that the corresponding timestep should be ignored.
+training: Python boolean indicating whether the layer should behave in
+training mode or in inference mode. This argument is passed to the cell
+when calling it. This is only relevant if \code{dropout} or
+\code{recurrent_dropout} is used.
+initial_state: List of initial state tensors to be passed to the first
+call of the cell.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{inputs = np.random.random([32, 10, 8]).astype(np.float32)
+simple_rnn = tf.keras.layers.SimpleRNN(4)
+
+output = simple_rnn(inputs)  # The output has shape `[32, 4]`.
+
+simple_rnn = tf.keras.layers.SimpleRNN(
+    4, return_sequences=TRUE, return_state=TRUE)
+
+# whole_sequence_output has shape `[32, 10, 4]`.
+# final_state has shape `[32, 4]`.
+whole_sequence_output, final_state = simple_rnn(inputs)
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

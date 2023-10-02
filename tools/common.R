@@ -1,9 +1,16 @@
 
+`_COMMON_` <- NULL
 
 # ---- imports ----
 # reticulate::virtualenv_remove("r-tensorflow")
 envir:::set_library_default_pos(value = 3L)
+library(envir)
+library(magrittr, include.only = c("%>%", "%<>%"))
+library(purrr)
+library(dplyr, warn.conflicts = FALSE)
+library(stringr)
 library(reticulate)
+
 tryCatch(
   use_virtualenv("r-tensorflow"),
   error = function(e) {
@@ -21,19 +28,11 @@ tryCatch(
 
                    "scipy", "pandas")))
 
-    # py_install("git+https://github.com/rr-/docstring_parser.git",
-               # "r-tensorflow")
+    # py_install("git+https://github.com/rr-/docstring_parser.git", "r-tensorflow")
 
     use_virtualenv("r-tensorflow")
   }
 )
-
-# library(tidyverse)
-library(purrr)
-library(dplyr, warn.conflicts = FALSE)
-library(stringr)
-library(envir)
-library(magrittr, include.only = c("%>%", "%<>%"))
 
 inspect <- import("inspect")
 docstring_parser <- import("docstring_parser") # broken in py 3.10
@@ -41,12 +40,16 @@ docstring_parser <- import("docstring_parser") # broken in py 3.10
 keras <- import("tensorflow.keras")
 # keras <- import("keras_core")
 
-`__main__` <- reticulate::import_main()
-`__main__`$`_Layer` <- keras$layers$Layer
-`__main__`$`_ABCMeta` <- import("abc")$ABCMeta
+local({
+  `__main__` <- reticulate::import_main()
+  `__main__`$`_Layer` <- keras$layers$Layer
+  `__main__`$`_ABCMeta` <- import("abc")$ABCMeta
+})
 is_layer_class <- py_eval(
   "lambda x: isinstance(x, (type, _ABCMeta)) and issubclass(x, _Layer)")
 
+source_python("tools/common.py") # keras_class_type()
+rm(r)
 
 
 # ---- docstrings ----
@@ -56,30 +59,14 @@ print.docstring_parser.common.Docstring <- function(x) {
 
 get_doc <- function(py_obj, style = "GOOGLE") {
 
-  doc <- inspect$getdoc(py_obj)
+  docstring <- doc <- inspect$getdoc(py_obj)
 
   if(py_obj$`__name__` == "LSTM" &&
      py_id(py_obj) == py_id(keras$layers$LSTM)) {
 
-    doc <- doc %>%
-      sub("sample at index i", "  sample at index i", .)
-    # %>%
-      # strsplit("\n") %>% .[[1L]] %>%
-      # trimws("right") %>% {
-      #   .[-1] <- paste0("    ", .[-1])
-      #   .
-      # } %>%
-      # sub("^  ", "    ", .) %>%
-      # sub("^      ", "        ", .) %>%
-      # str_flatten("\n") %>%
-      # cat() %>%
-      # docstring_parser$parse(., style = docstring_parser$DocstringStyle[[style]])
-
-    # browser()
+    # fix parse error due to bad indentation from one arg
+    doc %<>% sub("sample at index i", "  sample at index i", .)
   }
-
-  # if(grepl("mple at index i in a batch will be used as initial state for the samp", doc))
-  #   browser()
 
   doc <- tryCatch({
     docstring_parser$parse(doc, style = docstring_parser$DocstringStyle[[style]])
@@ -87,6 +74,20 @@ get_doc <- function(py_obj, style = "GOOGLE") {
     message("Parsing of ", py_obj$`__name__`, " failed with ", style, " style.")
     docstring_parser$parse(doc, style = docstring_parser$DocstringStyle[["AUTO"]])
   })
+
+  prep_to_compare <- . %>% strsplit("\n") %>% unlist() %>% trimws()
+  doc0 <- prep_to_compare(docstring)
+  doc1 <- docstring_parser$compose(doc) %>% prep_to_compare()
+  if(!all(doc0 %in% doc1)) {
+    message("Parsing docstring for ", py_obj$`__name__`, " resulted in lost content:\n***")
+    doc00 <- strsplit(docstring, "\n")[[1]]
+    lost_content <- doc00[doc0 == "" | !doc0 %in% doc1]
+    writeLines(lost_content)
+    doc$extra_description <- lost_content
+    message("***")
+  } else
+    doc$extra_description <- ""
+
 
   doc$object <- py_obj
   doc
@@ -171,7 +172,9 @@ r_doc_from_py_fn <- function(py_fn, name = NULL) {
   # cat("@title ", title)
   cat(title)
 
-  desc <- cleanup_description(x$long_description)
+  desc <- cleanup_description(str_flatten(c(x$long_description,
+                                            "\n\n",
+                                            x$extra_description), "\n"))
   cat()
 
   # avoid splitting across @description and @details,
@@ -199,7 +202,11 @@ r_doc_from_py_fn <- function(py_fn, name = NULL) {
   # need to make a lookup table for these urls
   cat("  +  <https://keras.io/api/layers>")
 
-  cat("@export")
+
+    # browser()
+  # if(py_fn$`__name__` == "Layer")
+  if(!py_fn$`__name__` %in% c("Layer", "InputLayer"))
+    cat("@export")
 
   x <- textConnectionValue(con)
   x <- stringr::str_flatten(x, "\n")

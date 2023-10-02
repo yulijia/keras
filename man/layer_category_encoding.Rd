@@ -53,6 +53,49 @@ use \code{tf.keras.layers.IntegerLookup} instead.
 
 For an overview and full list of preprocessing layers, see the preprocessing
 \href{https://www.tensorflow.org/guide/keras/preprocessing_layers}{guide}.
+
+\strong{One-hot encoding data}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.CategoryEncoding(
+...           num_tokens=4, output_mode="one_hot")
+>>> layer([3, 2, 0, 1])
+<tf.Tensor: shape=(4, 4), dtype=float32, numpy=
+  array([[0., 0., 0., 1.],
+         [0., 0., 1., 0.],
+         [1., 0., 0., 0.],
+         [0., 1., 0., 0.]], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+\strong{Multi-hot encoding data}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.CategoryEncoding(
+...           num_tokens=4, output_mode="multi_hot")
+>>> layer([[0, 1], [0, 0], [1, 2], [3, 1]])
+<tf.Tensor: shape=(4, 4), dtype=float32, numpy=
+  array([[1., 1., 0., 0.],
+         [1., 0., 0., 0.],
+         [0., 1., 1., 0.],
+         [0., 1., 0., 1.]], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+\strong{Using weighted inputs in \code{"count"} mode}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.CategoryEncoding(
+...           num_tokens=4, output_mode="count")
+>>> count_weights = np.array([[.1, .2], [.1, .1], [.2, .3], [.4, .2]])
+>>> layer([[0, 1], [0, 0], [1, 2], [3, 1]], count_weights=count_weights)
+<tf.Tensor: shape=(4, 4), dtype=float64, numpy=
+  array([[0.1, 0.2, 0. , 0. ],
+         [0.2, 0. , 0. , 0. ],
+         [0. , 0.2, 0.3, 0. ],
+         [0. , 0.2, 0. , 0.4]], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+Call arguments:
+inputs: A 1D or 2D tensor of integer inputs.
+count_weights: A tensor in the same shape as \code{inputs} indicating the
+weight for each sample value when summing up in \code{count} mode. Not used
+in \code{"multi_hot"} or \code{"one_hot"} modes.
 }
 \seealso{
 \itemize{

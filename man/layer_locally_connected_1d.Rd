@@ -103,6 +103,24 @@ of the input.
 
 Note: layer attributes cannot be modified after the layer has been called
 once (except the \code{trainable} attribute).
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{    # apply a unshared weight convolution 1d of length 3 to a sequence with
+    # 10 timesteps, with 64 output filters
+    model = Sequential()
+    model.add(LocallyConnected1D(64, 3, input_shape=(10, 32)))
+    # now model.output_shape == (NULL, 8, 64)
+    # add a new conv1d on top
+    model.add(LocallyConnected1D(32, 3))
+    # now model.output_shape == (NULL, 6, 32)
+}\if{html}{\out{</div>}}
+
+Input shape:
+3D tensor with shape: \verb{(batch_size, steps, input_dim)}
+Output shape:
+3D tensor with shape: \verb{(batch_size, new_steps, filters)} \code{steps} value
+might have changed due to padding or strides.
 }
 \seealso{
 \itemize{

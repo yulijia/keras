@@ -120,6 +120,60 @@ with strategy.scope():
   model.add(tf.keras.layers.Dense(16))
   model.add(tf.keras.layers.BatchNormalization(synchronized=TRUE))
 }\if{html}{\out{</div>}}
+
+Call arguments:
+inputs: Input tensor (of any rank).
+training: Python boolean indicating whether the layer should behave in
+training mode or in inference mode.
+- \code{training=TRUE}: The layer will normalize its inputs using the mean
+and variance of the current batch of inputs.
+- \code{training=FALSE}: The layer will normalize its inputs using the mean
+and variance of its moving statistics, learned during training.
+
+Input shape:
+Arbitrary. Use the keyword argument \code{input_shape} (list of
+integers, does not include the samples axis) when using this layer as the
+first layer in a model.
+
+Output shape:
+Same shape as input.
+
+Reference:
+\itemize{
+\item \href{https://arxiv.org/abs/1502.03167}{Ioffe and Szegedy, 2015}.
+}
+
+\strong{About setting \code{layer.trainable = FALSE} on a \code{BatchNormalization} layer:}
+
+The meaning of setting \code{layer.trainable = FALSE} is to freeze the layer,
+i.e. its internal state will not change during training:
+its trainable weights will not be updated
+during \code{fit()} or \code{train_on_batch()}, and its state updates will not be run.
+
+Usually, this does not necessarily mean that the layer is run in inference
+mode (which is normally controlled by the \code{training} argument that can
+be passed when calling a layer). "Frozen state" and "inference mode"
+are two separate concepts.
+
+However, in the case of the \code{BatchNormalization} layer, \strong{setting
+\code{trainable = FALSE} on the layer means that the layer will be
+subsequently run in inference mode} (meaning that it will use
+the moving mean and the moving variance to normalize the current batch,
+rather than using the mean and variance of the current batch).
+
+This behavior has been introduced in TensorFlow 2.0, in order
+to enable \code{layer.trainable = FALSE} to produce the most commonly
+expected behavior in the convnet fine-tuning use case.
+
+Note that:
+\itemize{
+\item Setting \code{trainable} on an model containing other layers will
+recursively set the \code{trainable} value of all inner layers.
+\item If the value of the \code{trainable}
+attribute is changed after calling \code{compile()} on a model,
+the new value doesn't take effect for this model
+until \code{compile()} is called again.
+}
 }
 \seealso{
 \itemize{

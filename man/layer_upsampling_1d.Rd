@@ -12,7 +12,36 @@ layer_upsampling_1d(object, size = 2L, ...)
 \item{...}{standard layer arguments.}
 }
 \description{
+Upsampling layer for 1D inputs
+}
+\details{
 Repeats each temporal step \code{size} times along the time axis.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_shape = (2, 2, 3)
+>>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+>>> print(x)
+[[[ 0  1  2]
+  [ 3  4  5]]
+ [[ 6  7  8]
+  [ 9 10 11]]]
+>>> y = tf.keras.layers.UpSampling1D(size=2)(x)
+>>> print(y)
+tf.Tensor(
+  [[[ 0  1  2]
+    [ 0  1  2]
+    [ 3  4  5]
+    [ 3  4  5]]
+   [[ 6  7  8]
+    [ 6  7  8]
+    [ 9 10 11]
+    [ 9 10 11]]], shape=(2, 4, 3), dtype=int64)
+}\if{html}{\out{</div>}}
+
+Input shape:
+3D tensor with shape: \verb{(batch_size, steps, features)}.
+
+Output shape:
+3D tensor with shape: \verb{(batch_size, upsampled_steps, features)}.
 }
 \seealso{
 \itemize{

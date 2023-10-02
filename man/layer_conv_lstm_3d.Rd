@@ -128,6 +128,43 @@ for the linear transformation of the recurrent state.}
 \details{
 Similar to an LSTM layer, but the input transformations
 and recurrent transformations are both convolutional.
+
+Call arguments:
+inputs: A 6D tensor.
+mask: Binary tensor of shape \verb{(samples, timesteps)} indicating whether a
+given timestep should be masked.
+training: Python boolean indicating whether the layer should behave in
+training mode or in inference mode. This argument is passed to the cell
+when calling it. This is only relevant if \code{dropout} or
+\code{recurrent_dropout} are set.
+initial_state: List of initial state tensors to be passed to the first
+call of the cell.
+Input shape: - If data_format='channels_first'
+6D tensor with shape: \verb{(samples, time, channels, rows, cols, depth)} -
+If data_format='channels_last'
+5D tensor with shape: \verb{(samples, time, rows, cols, depth, channels)}
+Output shape:
+\itemize{
+\item If \code{return_state}: a list of tensors. The first tensor is the output.
+The remaining tensors are the last states,
+each 5D tensor with shape: \verb{(samples, filters, new_rows, new_cols, new_depth)} if data_format='channels_first'
+or shape: \verb{(samples, new_rows, new_cols, new_depth, filters)} if
+data_format='channels_last'. \code{rows}, \code{cols}, and \code{depth} values might
+have changed due to padding.
+\item If \code{return_sequences}: 6D tensor with shape: \verb{(samples, timesteps, filters, new_rows, new_cols, new_depth)} if data_format='channels_first'
+or shape: \verb{(samples, timesteps, new_rows, new_cols, new_depth, filters)}
+if data_format='channels_last'.
+\item Else, 5D tensor with shape: \verb{(samples, filters, new_rows, new_cols, new_depth)} if data_format='channels_first'
+or shape: \verb{(samples, new_rows, new_cols, new_depth, filters)} if
+data_format='channels_last'.
+}
+
+References:
+\itemize{
+\item \href{http://arxiv.org/abs/1506.04214v1}{Shi et al., 2015}
+(the current implementation does not include the feedback loop on the
+cells output).
+}
 }
 \seealso{
 \itemize{

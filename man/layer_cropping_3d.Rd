@@ -49,6 +49,24 @@ Examples:
 >>> print(y.shape)
 (2, 24, 20, 6, 3)
 }\if{html}{\out{</div>}}
+
+Input shape:
+5D tensor with shape:
+\itemize{
+\item If \code{data_format} is \code{"channels_last"}:
+\verb{(batch_size, first_axis_to_crop, second_axis_to_crop, third_axis_to_crop, depth)}
+\item If \code{data_format} is \code{"channels_first"}:
+\verb{(batch_size, depth, first_axis_to_crop, second_axis_to_crop, third_axis_to_crop)}
+}
+
+Output shape:
+5D tensor with shape:
+\itemize{
+\item If \code{data_format} is \code{"channels_last"}:
+\verb{(batch_size, first_cropped_axis, second_cropped_axis, third_cropped_axis, depth)}
+\item If \code{data_format} is \code{"channels_first"}:
+\verb{(batch_size, depth, first_cropped_axis, second_cropped_axis, third_cropped_axis)}
+}
 }
 \seealso{
 \itemize{

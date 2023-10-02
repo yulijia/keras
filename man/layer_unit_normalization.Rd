@@ -20,6 +20,14 @@ Unit normalization layer
 \details{
 Normalize a batch of inputs so that each input in the batch has a L2 norm
 equal to 1 (across the axes specified in \code{axis}).
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> data = tf.constant(np.arange(6).reshape(2, 3), dtype=tf.float32)
+>>> normalized_data = tf.keras.layers.UnitNormalization()(data)
+>>> print(tf.reduce_sum(normalized_data[0, :] ** 2).numpy())
+1.0
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

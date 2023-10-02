@@ -15,6 +15,27 @@ built-in activation function, such as "relu".}
 \description{
 Applies an activation function to an output
 }
+\details{
+Usage:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = tf.keras.layers.Activation('relu')
+>>> output = layer([-3.0, -1.0, 0.0, 2.0])
+>>> list(output.numpy())
+[0.0, 0.0, 0.0, 2.0]
+>>> layer = tf.keras.layers.Activation(tf.nn.relu)
+>>> output = layer([-3.0, -1.0, 0.0, 2.0])
+>>> list(output.numpy())
+[0.0, 0.0, 0.0, 2.0]
+}\if{html}{\out{</div>}}
+
+Input shape:
+Arbitrary. Use the keyword argument \code{input_shape}
+(list of integers, does not include the batch axis)
+when using this layer as the first layer in a model.
+
+Output shape:
+Same shape as input.
+}
 \seealso{
 \itemize{
 \item \url{https://keras.io/api/layers}

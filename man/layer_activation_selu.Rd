@@ -47,6 +47,18 @@ Example Usage:
 ...                                 activation='selu'))
 >>> model.add(tf.keras.layers.Dense(num_classes, activation='softmax'))
 }\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{The scaled exponential unit activation: `scale * elu(x, alpha)`.
+}\if{html}{\out{</div>}}
+
+Notes:
+- To be used together with the
+\code{tf.keras.initializers.LecunNormal} initializer.
+- To be used together with the dropout variant
+\code{tf.keras.layers.AlphaDropout} (not regular dropout).
+
+References:
+- \href{https://arxiv.org/abs/1706.02515}{Klambauer et al., 2017}
 }
 \seealso{
 \itemize{

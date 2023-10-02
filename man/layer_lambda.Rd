@@ -56,6 +56,58 @@ non-portable. They should only be loaded in the same environment where
 they were saved. Subclassed layers can be saved in a more portable way
 by overriding their \code{get_config()} method. Models that rely on
 subclassed Layers are also often easier to visualize and reason about.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{# add a x -> x^2 layer
+model.add(Lambda(lambda x: x ** 2))
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{# add a layer that returns the concatenation
+# of the positive part of the input and
+# the opposite of the negative part
+
+def antirectifier(x):
+    x -= K.mean(x, axis=1, keepdims=TRUE)
+    x = K.l2_normalize(x, axis=1)
+    pos = K.relu(x)
+    neg = K.relu(-x)
+    return K.concatenate([pos, neg], axis=1)
+
+model.add(Lambda(antirectifier))
+}\if{html}{\out{</div>}}
+
+\strong{Note on Variables:}
+
+While it is possible to use Variables with Lambda layers,
+this practice is discouraged as it can easily lead to bugs.
+For instance, consider the following layer:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{scale = tf.Variable(1.)
+scale_layer = tf.keras.layers.Lambda(lambda x: x * scale)
+}\if{html}{\out{</div>}}
+
+Because \code{scale_layer} does not directly track the \code{scale} variable, it will
+not appear in \code{scale_layer.trainable_weights} and will therefore not be
+trained if \code{scale_layer} is used in a Model.
+
+A better pattern is to write a subclassed Layer:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{class ScaleLayer(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.scale = tf.Variable(1.)
+
+    def call(self, inputs):
+        return inputs * self.scale
+}\if{html}{\out{</div>}}
+
+In general, \code{Lambda} layers can be convenient for simple stateless
+computation, but anything more complex should use a subclass Layer instead.
+
+Input shape: Arbitrary. Use the keyword argument input_shape (list of
+integers, does not include the samples axis) when using this layer as the
+first layer in a model.
+
+Output shape: Specified by \code{output_shape} argument
 }
 \seealso{
 \itemize{

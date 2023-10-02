@@ -42,6 +42,32 @@ Defaults to 'channels_last'.}
 \description{
 Zero-padding layer for 3D data (spatial or spatio-temporal)
 }
+\details{
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_shape = (1, 1, 2, 2, 3)
+>>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+>>> y = tf.keras.layers.ZeroPadding3D(padding=2)(x)
+>>> print(y.shape)
+(1, 5, 6, 6, 3)
+}\if{html}{\out{</div>}}
+
+Input shape:
+5D tensor with shape:
+\itemize{
+\item If \code{data_format} is \code{"channels_last"}:
+\verb{(batch_size, first_axis_to_pad, second_axis_to_pad, third_axis_to_pad, depth)}
+\item If \code{data_format} is \code{"channels_first"}:
+\verb{(batch_size, depth, first_axis_to_pad, second_axis_to_pad, third_axis_to_pad)}
+}
+
+Output shape:
+5D tensor with shape:
+\itemize{
+\item If \code{data_format} is \code{"channels_last"}:
+\verb{(batch_size, first_padded_axis, second_padded_axis, third_axis_to_pad, depth)}
+\item If \code{data_format} is \code{"channels_first"}:
+\verb{(batch_size, depth, first_padded_axis, second_padded_axis, third_axis_to_pad)}
+}
+}
 \seealso{
 \itemize{
 \item \url{https://keras.io/api/layers}

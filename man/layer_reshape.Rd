@@ -21,6 +21,28 @@ layer in a model.
 
 Output shape:
 \verb{(batch_size,) + target_shape}
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # as first layer in a Sequential model
+>>> model = tf.keras.Sequential()
+>>> model.add(tf.keras.layers.Reshape((3, 4), input_shape=(12,)))
+>>> # model.output_shape == (NULL, 3, 4), `NULL` is the batch size.
+>>> model.output_shape
+(NULL, 3, 4)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # as intermediate layer in a Sequential model
+>>> model.add(tf.keras.layers.Reshape((6, 2)))
+>>> model.output_shape
+(NULL, 6, 2)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # also supports shape inference using `-1` as dimension
+>>> model.add(tf.keras.layers.Reshape((-1, 2, 2)))
+>>> model.output_shape
+(NULL, 3, 2, 2)
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

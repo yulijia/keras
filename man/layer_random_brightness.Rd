@@ -47,6 +47,34 @@ will be apply to each the images in the batch.
 
 For an overview and full list of preprocessing layers, see the preprocessing
 \href{https://www.tensorflow.org/guide/keras/preprocessing_layers}{guide}.
+
+Inputs: 3D (HWC) or 4D (NHWC) tensor, with float or int dtype. Input pixel
+values can be of any range (e.g. \verb{[0., 1.)} or \verb{[0, 255]})
+
+Output: 3D (HWC) or 4D (NHWC) tensor with brightness adjusted based on the
+\code{factor}. By default, the layer will output floats.
+The output value will be clipped to the range \verb{[0, 255]},
+the valid range of RGB colors, and
+rescaled based on the \code{value_range} if needed.
+
+Sample usage:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{random_bright = tf.keras.layers.RandomBrightness(factor=0.2)
+
+# An image with shape [2, 2, 3]
+image = [[[1, 2, 3], [4 ,5 ,6]], [[7, 8, 9], [10, 11, 12]]]
+
+# Assume we randomly select the factor to be 0.1, then it will apply
+# 0.1 * 255 to all the channel
+output = random_bright(image, training=TRUE)
+
+# output will be int64 with 25.5 added to each channel and round down.
+tf.Tensor([[[26.5, 27.5, 28.5]
+            [29.5, 30.5, 31.5]]
+           [[32.5, 33.5, 34.5]
+            [35.5, 36.5, 37.5]]],
+          shape=(2, 2, 3), dtype=int64)
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

@@ -133,6 +133,36 @@ provide an \code{input_shape} argument
 \verb{(10, 128)} for sequences of 10 vectors of 128-dimensional vectors,
 or \verb{(NULL, 128)} for variable-length sequences of 128-dimensional vectors.
 
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # The inputs are 128-length vectors with 10 timesteps, and the
+>>> # batch size is 4.
+>>> input_shape = (4, 10, 128)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv1D(
+... 32, 3, activation='relu',input_shape=input_shape[1:])(x)
+>>> print(y.shape)
+(4, 8, 32)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # With extended batch shape [4, 7] (e.g. weather data where batch
+>>> # dimensions correspond to spatial location and the third dimension
+>>> # corresponds to time.)
+>>> input_shape = (4, 7, 10, 128)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv1D(
+... 32, 3, activation='relu', input_shape=input_shape[2:])(x)
+>>> print(y.shape)
+(4, 7, 8, 32)
+}\if{html}{\out{</div>}}
+
+Input shape:
+3+D tensor with shape: \verb{batch_shape + (steps, input_dim)}
+
+Output shape:
+3+D tensor with shape: \verb{batch_shape + (new_steps, filters)}
+\code{steps} value might have changed due to padding or strides.
+
+A tensor of rank 3 representing
+
 This layer creates a convolution kernel that is convolved
 with the layer input over a single spatial (or temporal) dimension
 to produce a tensor of outputs.
@@ -145,6 +175,36 @@ provide an \code{input_shape} argument
 (list of integers or \code{NULL}, e.g.
 \verb{(10, 128)} for sequences of 10 vectors of 128-dimensional vectors,
 or \verb{(NULL, 128)} for variable-length sequences of 128-dimensional vectors.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # The inputs are 128-length vectors with 10 timesteps, and the
+>>> # batch size is 4.
+>>> input_shape = (4, 10, 128)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv1D(
+... 32, 3, activation='relu',input_shape=input_shape[1:])(x)
+>>> print(y.shape)
+(4, 8, 32)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # With extended batch shape [4, 7] (e.g. weather data where batch
+>>> # dimensions correspond to spatial location and the third dimension
+>>> # corresponds to time.)
+>>> input_shape = (4, 7, 10, 128)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv1D(
+... 32, 3, activation='relu', input_shape=input_shape[2:])(x)
+>>> print(y.shape)
+(4, 7, 8, 32)
+}\if{html}{\out{</div>}}
+
+Input shape:
+3+D tensor with shape: \verb{batch_shape + (steps, input_dim)}
+
+Output shape:
+3+D tensor with shape: \verb{batch_shape + (new_steps, filters)}
+\code{steps} value might have changed due to padding or strides.
+
+A tensor of rank 3 representing
 }
 \seealso{
 \itemize{

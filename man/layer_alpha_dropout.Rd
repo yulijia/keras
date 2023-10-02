@@ -24,6 +24,19 @@ to their original values, in order to ensure the self-normalizing property
 even after this dropout.
 Alpha Dropout fits well to Scaled Exponential Linear Units
 by randomly setting activations to the negative saturation value.
+
+Call arguments:
+inputs: Input tensor (of any rank).
+training: Python boolean indicating whether the layer should behave in
+training mode (adding dropout) or in inference mode (doing nothing).
+
+Input shape:
+Arbitrary. Use the keyword argument \code{input_shape}
+(list of integers, does not include the samples axis)
+when using this layer as the first layer in a model.
+
+Output shape:
+Same shape as input.
 }
 \seealso{
 \itemize{

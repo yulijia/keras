@@ -15,7 +15,27 @@ of the input.}
 \item{...}{standard layer arguments.}
 }
 \description{
+Permutes the dimensions of the input according to a given pattern
+}
+\details{
 Useful e.g. connecting RNNs and convnets.
+
+Example:
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{model = Sequential()
+model.add(Permute((2, 1), input_shape=(10, 64)))
+# now: model.output_shape == (NULL, 64, 10)
+# note: `NULL` is the batch dimension
+}\if{html}{\out{</div>}}
+
+Input shape:
+Arbitrary. Use the keyword argument \code{input_shape}
+(list of integers, does not include the samples axis)
+when using this layer as the first layer in a model.
+
+Output shape:
+Same as the input shape, but with the dimensions re-ordered according
+to the specified pattern.
 }
 \seealso{
 \itemize{

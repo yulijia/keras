@@ -133,6 +133,197 @@ begin with OOV indices and instances of the mask token will be dropped.
 
 For an overview and full list of preprocessing layers, see the preprocessing
 \href{https://www.tensorflow.org/guide/keras/preprocessing_layers}{guide}.
+
+\strong{Creating a lookup layer with a known vocabulary}
+
+This example creates a lookup layer with a pre-existing vocabulary.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> vocab = [12, 36, 1138, 42]
+>>> data = tf.constant([[12, 1138, 42], [42, 1000, 36]])  # Note OOV tokens
+>>> layer = tf.keras.layers.IntegerLookup(vocabulary=vocab)
+>>> layer(data)
+<tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+array([[1, 3, 4],
+       [4, 0, 2]])>
+}\if{html}{\out{</div>}}
+
+\strong{Creating a lookup layer with an adapted vocabulary}
+
+This example creates a lookup layer and generates the vocabulary by
+analyzing the dataset.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> data = tf.constant([[12, 1138, 42], [42, 1000, 36]])
+>>> layer = tf.keras.layers.IntegerLookup()
+>>> layer.adapt(data)
+>>> layer.get_vocabulary()
+[-1, 42, 1138, 1000, 36, 12]
+}\if{html}{\out{</div>}}
+
+Note that the OOV token -1 have been added to the vocabulary. The remaining
+tokens are sorted by frequency (42, which has 2 occurrences, is first) then
+by inverse sort order.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> data = tf.constant([[12, 1138, 42], [42, 1000, 36]])
+>>> layer = tf.keras.layers.IntegerLookup()
+>>> layer.adapt(data)
+>>> layer(data)
+<tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+array([[5, 2, 1],
+       [1, 3, 4]])>
+}\if{html}{\out{</div>}}
+
+\strong{Lookups with multiple OOV indices}
+
+This example demonstrates how to use a lookup layer with multiple OOV
+indices.  When a layer is created with more than one OOV index, any OOV
+tokens are hashed into the number of OOV buckets, distributing OOV tokens in
+a deterministic fashion across the set.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> vocab = [12, 36, 1138, 42]
+>>> data = tf.constant([[12, 1138, 42], [37, 1000, 36]])
+>>> layer = tf.keras.layers.IntegerLookup(
+...     vocabulary=vocab, num_oov_indices=2)
+>>> layer(data)
+<tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+array([[2, 4, 5],
+       [1, 0, 3]])>
+}\if{html}{\out{</div>}}
+
+Note that the output for OOV token 37 is 1, while the output for OOV token
+1000 is 0. The in-vocab terms have their output index increased by 1 from
+earlier examples (12 maps to 2, etc) in order to make space for the extra
+OOV token.
+
+\strong{One-hot output}
+
+Configure the layer with \code{output_mode='one_hot'}. Note that the first
+\code{num_oov_indices} dimensions in the one_hot encoding represent OOV values.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> vocab = [12, 36, 1138, 42]
+>>> data = tf.constant([12, 36, 1138, 42, 7]) # Note OOV tokens
+>>> layer = tf.keras.layers.IntegerLookup(
+...     vocabulary=vocab, output_mode='one_hot')
+>>> layer(data)
+<tf.Tensor: shape=(5, 5), dtype=float32, numpy=
+  array([[0., 1., 0., 0., 0.],
+         [0., 0., 1., 0., 0.],
+         [0., 0., 0., 1., 0.],
+         [0., 0., 0., 0., 1.],
+         [1., 0., 0., 0., 0.]], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+\strong{Multi-hot output}
+
+Configure the layer with \code{output_mode='multi_hot'}. Note that the first
+\code{num_oov_indices} dimensions in the multi_hot encoding represent OOV tokens
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> vocab = [12, 36, 1138, 42]
+>>> data = tf.constant([[12, 1138, 42, 42],
+...                     [42, 7, 36, 7]]) # Note OOV tokens
+>>> layer = tf.keras.layers.IntegerLookup(
+...     vocabulary=vocab, output_mode='multi_hot')
+>>> layer(data)
+<tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+  array([[0., 1., 0., 1., 1.],
+         [1., 0., 1., 0., 1.]], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+\strong{Token count output}
+
+Configure the layer with \code{output_mode='count'}. As with multi_hot output,
+the first \code{num_oov_indices} dimensions in the output represent OOV tokens.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> vocab = [12, 36, 1138, 42]
+>>> data = tf.constant([[12, 1138, 42, 42],
+...                     [42, 7, 36, 7]]) # Note OOV tokens
+>>> layer = tf.keras.layers.IntegerLookup(
+...     vocabulary=vocab, output_mode='count')
+>>> layer(data)
+<tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+  array([[0., 1., 0., 1., 2.],
+         [2., 0., 1., 0., 1.]], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+\strong{TF-IDF output}
+
+Configure the layer with \code{output_mode='tf_idf'}. As with multi_hot output,
+the first \code{num_oov_indices} dimensions in the output represent OOV tokens.
+
+Each token bin will output \code{token_count * idf_weight}, where the idf weights
+are the inverse document frequency weights per token. These should be
+provided along with the vocabulary. Note that the \code{idf_weight} for OOV
+tokens will default to the average of all idf weights passed in.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> vocab = [12, 36, 1138, 42]
+>>> idf_weights = [0.25, 0.75, 0.6, 0.4]
+>>> data = tf.constant([[12, 1138, 42, 42],
+...                     [42, 7, 36, 7]]) # Note OOV tokens
+>>> layer = tf.keras.layers.IntegerLookup(
+...     output_mode='tf_idf', vocabulary=vocab, idf_weights=idf_weights)
+>>> layer(data)
+<tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+  array([[0.  , 0.25, 0.  , 0.6 , 0.8 ],
+         [1.0 , 0.  , 0.75, 0.  , 0.4 ]], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+To specify the idf weights for oov tokens, you will need to pass the entire
+vocabularly including the leading oov token.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> vocab = [-1, 12, 36, 1138, 42]
+>>> idf_weights = [0.9, 0.25, 0.75, 0.6, 0.4]
+>>> data = tf.constant([[12, 1138, 42, 42],
+...                     [42, 7, 36, 7]]) # Note OOV tokens
+>>> layer = tf.keras.layers.IntegerLookup(
+...     output_mode='tf_idf', vocabulary=vocab, idf_weights=idf_weights)
+>>> layer(data)
+<tf.Tensor: shape=(2, 5), dtype=float32, numpy=
+  array([[0.  , 0.25, 0.  , 0.6 , 0.8 ],
+         [1.8 , 0.  , 0.75, 0.  , 0.4 ]], dtype=float32)>
+}\if{html}{\out{</div>}}
+
+When adapting the layer in tf_idf mode, each input sample will be considered
+a document, and idf weight per token will be calculated as
+\code{log(1 + num_documents / (1 + token_document_count))}.
+
+\strong{Inverse lookup}
+
+This example demonstrates how to map indices to tokens using this layer.
+(You can also use \code{adapt()} with \code{inverse=TRUE}, but for simplicity we'll
+pass the vocab in this example.)
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> vocab = [12, 36, 1138, 42]
+>>> data = tf.constant([[1, 3, 4], [4, 0, 2]])
+>>> layer = tf.keras.layers.IntegerLookup(vocabulary=vocab, invert=TRUE)
+>>> layer(data)
+<tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+array([[  12, 1138,   42],
+       [  42,   -1,   36]])>
+}\if{html}{\out{</div>}}
+
+Note that the first index correspond to the oov token by default.
+
+\strong{Forward and inverse lookup pairs}
+
+This example demonstrates how to use the vocabulary of a standard lookup
+layer to create an inverse lookup layer.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> vocab = [12, 36, 1138, 42]
+>>> data = tf.constant([[12, 1138, 42], [42, 1000, 36]])
+>>> layer = tf.keras.layers.IntegerLookup(vocabulary=vocab)
+>>> i_layer = tf.keras.layers.IntegerLookup(
+...     vocabulary=layer.get_vocabulary(), invert=TRUE)
+>>> int_data = layer(data)
+>>> i_layer(int_data)
+<tf.Tensor: shape=(2, 3), dtype=int64, numpy=
+array([[  12, 1138,   42],
+       [  42,   -1,   36]])>
+}\if{html}{\out{</div>}}
+
+In this example, the input token 1000 resulted in an output of -1, since
+1000 was not in the vocabulary - it got represented as an OOV, and all OOV
+tokens are returned as -1 in the inverse layer. Also, note that for the
+inverse to work, you must have already set the forward layer vocabulary
+either directly or via \code{adapt()} before calling \code{get_vocabulary()}.
 }
 \seealso{
 \itemize{

@@ -15,7 +15,32 @@ If a single int is provided, the same value will be used for both.}
 \item{...}{standard layer arguments.}
 }
 \description{
+Cropping layer for 1D input (e.g. temporal sequence)
+}
+\details{
 It crops along the time dimension (axis 1).
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> input_shape = (2, 3, 2)
+>>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+>>> print(x)
+[[[ 0  1]
+  [ 2  3]
+  [ 4  5]]
+ [[ 6  7]
+  [ 8  9]
+  [10 11]]]
+>>> y = tf.keras.layers.Cropping1D(cropping=1)(x)
+>>> print(y)
+tf.Tensor(
+  [[[2 3]]
+   [[8 9]]], shape=(2, 1, 2), dtype=int64)
+}\if{html}{\out{</div>}}
+
+Input shape:
+3D tensor with shape \verb{(batch_size, axis_to_crop, features)}
+
+Output shape:
+3D tensor with shape \verb{(batch_size, cropped_axis, features)}
 }
 \seealso{
 \itemize{

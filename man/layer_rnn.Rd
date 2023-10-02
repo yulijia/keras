@@ -99,6 +99,126 @@ Base class for recurrent layers
 \details{
 See \href{https://www.tensorflow.org/guide/keras/rnn}{the Keras RNN API guide}
 for details about the usage of RNN API.
+
+Call arguments:
+inputs: Input tensor.
+mask: Binary tensor of shape \verb{[batch_size, timesteps]} indicating whether
+a given timestep should be masked. An individual \code{TRUE} entry indicates
+that the corresponding timestep should be utilized, while a \code{FALSE}
+entry indicates that the corresponding timestep should be ignored.
+training: Python boolean indicating whether the layer should behave in
+training mode or in inference mode. This argument is passed to the cell
+when calling it. This is for use with cells that use dropout.
+initial_state: List of initial state tensors to be passed to the first
+call of the cell.
+constants: List of constant tensors to be passed to the cell at each
+timestep.
+
+Input shape:
+N-D tensor with shape \verb{[batch_size, timesteps, ...]} or
+\verb{[timesteps, batch_size, ...]} when time_major is TRUE.
+
+Output shape:
+\itemize{
+\item If \code{return_state}: a list of tensors. The first tensor is
+the output. The remaining tensors are the last states,
+each with shape \verb{[batch_size, state_size]}, where \code{state_size} could
+be a high dimension tensor shape.
+\item If \code{return_sequences}: N-D tensor with shape
+\verb{[batch_size, timesteps, output_size]}, where \code{output_size} could
+be a high dimension tensor shape, or
+\verb{[timesteps, batch_size, output_size]} when \code{time_major} is TRUE.
+\item Else, N-D tensor with shape \verb{[batch_size, output_size]}, where
+\code{output_size} could be a high dimension tensor shape.
+}
+
+Masking:
+This layer supports masking for input data with a variable number
+of timesteps. To introduce masks to your data,
+use an \link{tf.keras.layers.Embedding} layer with the \code{mask_zero} parameter
+set to \code{TRUE}.
+
+Note on using statefulness in RNNs:
+You can set RNN layers to be 'stateful', which means that the states
+computed for the samples in one batch will be reused as initial states
+for the samples in the next batch. This assumes a one-to-one mapping
+between samples in different successive batches.
+
+To enable statefulness:
+- Specify \code{stateful=TRUE} in the layer constructor.
+- Specify a fixed batch size for your model, by passing
+If sequential model:
+\code{batch_input_shape=(...)} to the first layer in your model.
+Else for functional model with 1 or more Input layers:
+\code{batch_shape=(...)} to all the first layers in your model.
+This is the expected shape of your inputs
+\emph{including the batch size}.
+It should be a list of integers, e.g. \verb{(32, 10, 100)}.
+- Specify \code{shuffle=FALSE} when calling \code{fit()}.
+
+To reset the states of your model, call \code{.reset_states()} on either
+a specific layer, or on your entire model.
+
+Note on specifying the initial state of RNNs:
+You can specify the initial state of RNN layers symbolically by
+calling them with the keyword argument \code{initial_state}. The value of
+\code{initial_state} should be a tensor or list of tensors representing
+the initial state of the RNN layer.
+
+You can specify the initial state of RNN layers numerically by
+calling \code{reset_states} with the keyword argument \code{states}. The value of
+\code{states} should be a numpy array or list of numpy arrays representing
+the initial state of the RNN layer.
+
+Note on passing external constants to RNNs:
+You can pass "external" constants to the cell using the \code{constants}
+keyword argument of \code{RNN.__call__} (as well as \code{RNN.call}) method. This
+requires that the \code{cell.call} method accepts the same keyword argument
+\code{constants}. Such constants can be used to condition the cell
+transformation on additional static inputs (not changing over time),
+a.k.a. an attention mechanism.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{from keras.src.layers import RNN
+from keras.src import backend
+
+# First, let's define a RNN Cell, as a layer subclass.
+class MinimalRNNCell(keras.layers.Layer):
+
+    def __init__(self, units, **kwargs):
+        self.units = units
+        self.state_size = units
+        super(MinimalRNNCell, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        self.kernel = self.add_weight(shape=(input_shape[-1], self.units),
+                                      initializer='uniform',
+                                      name='kernel')
+        self.recurrent_kernel = self.add_weight(
+            shape=(self.units, self.units),
+            initializer='uniform',
+            name='recurrent_kernel')
+        self.built = TRUE
+
+    def call(self, inputs, states):
+        prev_output = states[0]
+        h = backend.dot(inputs, self.kernel)
+        output = h + backend.dot(prev_output, self.recurrent_kernel)
+        return output, [output]
+
+# Let's use this cell in a RNN layer:
+
+cell = MinimalRNNCell(32)
+x = keras.Input((NULL, 5))
+layer = RNN(cell)
+y = layer(x)
+
+# Here's how to use the cell to build a stacked RNN:
+
+cells = [MinimalRNNCell(32), MinimalRNNCell(64)]
+x = keras.Input((NULL, 5))
+layer = RNN(cells)
+y = layer(x)
+}\if{html}{\out{</div>}}
 }
 \seealso{
 \itemize{

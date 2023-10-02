@@ -153,6 +153,23 @@ Intuitively, separable convolutions can be understood as
 a way to factorize a convolution kernel into two smaller kernels,
 or as an extreme version of an Inception block.
 
+Input shape:
+4D tensor with shape:
+\verb{(batch_size, channels, rows, cols)} if data_format='channels_first'
+or 4D tensor with shape:
+\verb{(batch_size, rows, cols, channels)} if data_format='channels_last'.
+
+Output shape:
+4D tensor with shape:
+\verb{(batch_size, filters, new_rows, new_cols)} if
+data_format='channels_first'
+or 4D tensor with shape:
+\verb{(batch_size, new_rows, new_cols, filters)} if
+data_format='channels_last'.  \code{rows} and \code{cols} values might have changed
+due to padding.
+
+A tensor of rank 4 representing
+
 Separable convolutions consist of first performing
 a depthwise spatial convolution
 (which acts on each input channel separately)
@@ -163,6 +180,23 @@ output channels are generated per input channel in the depthwise step.
 Intuitively, separable convolutions can be understood as
 a way to factorize a convolution kernel into two smaller kernels,
 or as an extreme version of an Inception block.
+
+Input shape:
+4D tensor with shape:
+\verb{(batch_size, channels, rows, cols)} if data_format='channels_first'
+or 4D tensor with shape:
+\verb{(batch_size, rows, cols, channels)} if data_format='channels_last'.
+
+Output shape:
+4D tensor with shape:
+\verb{(batch_size, filters, new_rows, new_cols)} if
+data_format='channels_first'
+or 4D tensor with shape:
+\verb{(batch_size, new_rows, new_cols, filters)} if
+data_format='channels_last'.  \code{rows} and \code{cols} values might have changed
+due to padding.
+
+A tensor of rank 4 representing
 }
 \seealso{
 \itemize{

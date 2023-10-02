@@ -133,6 +133,38 @@ e.g. \verb{input_shape=(128, 128, 128, 1)} for 128x128x128 volumes
 with a single channel,
 in \code{data_format="channels_last"}.
 
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # The inputs are 28x28x28 volumes with a single channel, and the
+>>> # batch size is 4
+>>> input_shape =(4, 28, 28, 28, 1)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv3D(
+... 2, 3, activation='relu', input_shape=input_shape[1:])(x)
+>>> print(y.shape)
+(4, 26, 26, 26, 2)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # With extended batch shape [4, 7], e.g. a batch of 4 videos of
+>>> # 3D frames, with 7 frames per video.
+>>> input_shape = (4, 7, 28, 28, 28, 1)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv3D(
+... 2, 3, activation='relu', input_shape=input_shape[2:])(x)
+>>> print(y.shape)
+(4, 7, 26, 26, 26, 2)
+}\if{html}{\out{</div>}}
+
+Input shape:
+5+D tensor with shape: \verb{batch_shape + (channels, conv_dim1, conv_dim2, conv_dim3)} if data_format='channels_first'
+or 5+D tensor with shape: \verb{batch_shape + (conv_dim1, conv_dim2, conv_dim3, channels)} if data_format='channels_last'.
+
+Output shape:
+5+D tensor with shape: \verb{batch_shape + (filters, new_conv_dim1, new_conv_dim2, new_conv_dim3)} if data_format='channels_first'
+or 5+D tensor with shape: \verb{batch_shape + (new_conv_dim1, new_conv_dim2, new_conv_dim3, filters)} if data_format='channels_last'.
+\code{new_conv_dim1}, \code{new_conv_dim2} and \code{new_conv_dim3} values might have
+changed due to padding.
+
+A tensor of rank 5+ representing
+
 This layer creates a convolution kernel that is convolved
 with the layer input to produce a tensor of
 outputs. If \code{use_bias} is TRUE,
@@ -145,6 +177,38 @@ provide the keyword argument \code{input_shape}
 e.g. \verb{input_shape=(128, 128, 128, 1)} for 128x128x128 volumes
 with a single channel,
 in \code{data_format="channels_last"}.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # The inputs are 28x28x28 volumes with a single channel, and the
+>>> # batch size is 4
+>>> input_shape =(4, 28, 28, 28, 1)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv3D(
+... 2, 3, activation='relu', input_shape=input_shape[1:])(x)
+>>> print(y.shape)
+(4, 26, 26, 26, 2)
+}\if{html}{\out{</div>}}
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> # With extended batch shape [4, 7], e.g. a batch of 4 videos of
+>>> # 3D frames, with 7 frames per video.
+>>> input_shape = (4, 7, 28, 28, 28, 1)
+>>> x = tf.random.normal(input_shape)
+>>> y = tf.keras.layers.Conv3D(
+... 2, 3, activation='relu', input_shape=input_shape[2:])(x)
+>>> print(y.shape)
+(4, 7, 26, 26, 26, 2)
+}\if{html}{\out{</div>}}
+
+Input shape:
+5+D tensor with shape: \verb{batch_shape + (channels, conv_dim1, conv_dim2, conv_dim3)} if data_format='channels_first'
+or 5+D tensor with shape: \verb{batch_shape + (conv_dim1, conv_dim2, conv_dim3, channels)} if data_format='channels_last'.
+
+Output shape:
+5+D tensor with shape: \verb{batch_shape + (filters, new_conv_dim1, new_conv_dim2, new_conv_dim3)} if data_format='channels_first'
+or 5+D tensor with shape: \verb{batch_shape + (new_conv_dim1, new_conv_dim2, new_conv_dim3, filters)} if data_format='channels_last'.
+\code{new_conv_dim1}, \code{new_conv_dim2} and \code{new_conv_dim3} values might have
+changed due to padding.
+
+A tensor of rank 5+ representing
 }
 \seealso{
 \itemize{

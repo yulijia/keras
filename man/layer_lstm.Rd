@@ -154,6 +154,21 @@ For example:
 >>> print(final_carry_state.shape)
 (32, 4)
 }\if{html}{\out{</div>}}
+
+Call arguments:
+inputs: A 3D tensor with shape \verb{[batch, timesteps, feature]}.
+mask: Binary tensor of shape \verb{[batch, timesteps]} indicating whether
+a given timestep should be masked (optional).
+An individual \code{TRUE} entry indicates that the corresponding timestep
+should be utilized, while a \code{FALSE} entry indicates that the
+corresponding timestep should be ignored. Defaults to \code{NULL}.
+training: Python boolean indicating whether the layer should behave in
+training mode or in inference mode. This argument is passed to the cell
+when calling it. This is only relevant if \code{dropout} or
+\code{recurrent_dropout} is used (optional). Defaults to \code{NULL}.
+initial_state: List of initial state tensors to be passed to the first
+call of the cell (optional, \code{NULL} causes creation
+of zero-filled initial state tensors). Defaults to \code{NULL}.
 }
 \seealso{
 \itemize{

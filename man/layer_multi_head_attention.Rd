@@ -85,6 +85,52 @@ When using \code{MultiHeadAttention} inside a custom layer, the custom layer mus
 implement its own \code{build()} method and call \code{MultiHeadAttention}'s
 \verb{_build_from_signature()} there.
 This enables weights to be restored correctly when the model is loaded.
+
+Performs 1D cross-attention over two sequence inputs with an attention mask.
+Returns the additional attention weights over heads.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = MultiHeadAttention(num_heads=2, key_dim=2)
+>>> target = tf.keras.Input(shape=[8, 16])
+>>> source = tf.keras.Input(shape=[4, 16])
+>>> output_tensor, weights = layer(target, source,
+...                                return_attention_scores=TRUE)
+>>> print(output_tensor.shape)
+(NULL, 8, 16)
+>>> print(weights.shape)
+(NULL, 2, 8, 4)
+}\if{html}{\out{</div>}}
+
+Performs 2D self-attention over a 5D input tensor on axes 2 and 3.
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{>>> layer = MultiHeadAttention(
+...     num_heads=2, key_dim=2, attention_axes=(2, 3))
+>>> input_tensor = tf.keras.Input(shape=[5, 3, 4, 16])
+>>> output_tensor = layer(input_tensor, input_tensor)
+>>> print(output_tensor.shape)
+(NULL, 5, 3, 4, 16)
+}\if{html}{\out{</div>}}
+
+Call arguments:
+query: Query \code{Tensor} of shape \verb{(B, T, dim)}.
+value: Value \code{Tensor} of shape \verb{(B, S, dim)}.
+key: Optional key \code{Tensor} of shape \verb{(B, S, dim)}. If not given, will
+use \code{value} for both \code{key} and \code{value}, which is the most common
+case.
+attention_mask: a boolean mask of shape \verb{(B, T, S)}, that prevents
+attention to certain positions. The boolean mask specifies which
+query elements can attend to which key elements, 1 indicates
+attention and 0 indicates no attention. Broadcasting can happen for
+the missing batch dimensions and the head dimension.
+return_attention_scores: A boolean to indicate whether the output should
+be \verb{(attention_output, attention_scores)} if \code{TRUE}, or
+\code{attention_output} if \code{FALSE}. Defaults to \code{FALSE}.
+training: Python boolean indicating whether the layer should behave in
+training mode (adding dropout) or in inference mode (no dropout).
+Will go with either using the training mode of the parent
+layer/model, or FALSE (inference) if there is no parent layer.
+use_causal_mask: A boolean to indicate whether to apply a causal mask to
+prevent tokens from attending to future tokens (e.g., used in a
+decoder Transformer).
 }
 \seealso{
 \itemize{

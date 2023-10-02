@@ -104,6 +104,32 @@ different patch of the input.
 
 Note: layer attributes cannot be modified after the layer has been called
 once (except the \code{trainable} attribute).
+
+\if{html}{\out{<div class="sourceCode python">}}\preformatted{    # apply a 3x3 unshared weights convolution with 64 output filters on a
+    32x32 image
+    # with `data_format="channels_last"`:
+    model = Sequential()
+    model.add(LocallyConnected2D(64, (3, 3), input_shape=(32, 32, 3)))
+    # now model.output_shape == (NULL, 30, 30, 64)
+    # notice that this layer will consume (30*30)*(3*3*3*64) + (30*30)*64
+    parameters
+
+    # add a 3x3 unshared weights convolution on top, with 32 output filters:
+    model.add(LocallyConnected2D(32, (3, 3)))
+    # now model.output_shape == (NULL, 28, 28, 32)
+}\if{html}{\out{</div>}}
+
+Input shape:
+4D tensor with shape: \verb{(samples, channels, rows, cols)} if
+data_format='channels_first'
+or 4D tensor with shape: \verb{(samples, rows, cols, channels)} if
+data_format='channels_last'.
+Output shape:
+4D tensor with shape: \verb{(samples, filters, new_rows, new_cols)} if
+data_format='channels_first'
+or 4D tensor with shape: \verb{(samples, new_rows, new_cols, filters)} if
+data_format='channels_last'. \code{rows} and \code{cols} values might have
+changed due to padding.
 }
 \seealso{
 \itemize{

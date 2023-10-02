@@ -120,6 +120,22 @@ array([[[1.5],
         [5.]]], dtype=float32)>
 }\if{html}{\out{</div>}}
 
+Input shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+3D tensor with shape \verb{(batch_size, steps, features)}.
+\item If \code{data_format='channels_first'}:
+3D tensor with shape \verb{(batch_size, features, steps)}.
+}
+
+Output shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+3D tensor with shape \verb{(batch_size, downsampled_steps, features)}.
+\item If \code{data_format='channels_first'}:
+3D tensor with shape \verb{(batch_size, features, downsampled_steps)}.
+}
+
 Downsamples the input representation by taking the average value over the
 window defined by \code{pool_size}. The window is shifted by \code{strides}.  The
 resulting output when using "valid" padding option has a shape of:
@@ -189,6 +205,22 @@ array([[[1.5],
         [4.5],
         [5.]]], dtype=float32)>
 }\if{html}{\out{</div>}}
+
+Input shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+3D tensor with shape \verb{(batch_size, steps, features)}.
+\item If \code{data_format='channels_first'}:
+3D tensor with shape \verb{(batch_size, features, steps)}.
+}
+
+Output shape:
+\itemize{
+\item If \code{data_format='channels_last'}:
+3D tensor with shape \verb{(batch_size, downsampled_steps, features)}.
+\item If \code{data_format='channels_first'}:
+3D tensor with shape \verb{(batch_size, features, downsampled_steps)}.
+}
 }
 \seealso{
 \itemize{
