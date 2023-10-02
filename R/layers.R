@@ -6814,9 +6814,10 @@ function(object, axis = -1L, mean = NULL, variance = NULL, invert = FALSE,
 layer_permute <-
 function(object, dims, ...)
 {
-    args <- capture_args(match.call(), list(dims = function(x) tuple(as.list(as.integer(x))),
-        input_shape = normalize_shape, batch_size = as_nullable_integer,
-        batch_input_shape = normalize_shape), ignore = "object")
+    args <- capture_args(match.call(), list(dims = function(x)
+    tuple(as.list(as.integer(x))), input_shape = normalize_shape,
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape),
+        ignore = "object")
     create_layer(keras$layers$Permute, object, args)
 }
 
@@ -9041,8 +9042,8 @@ function(object, max_tokens = NULL, standardize = "lower_and_strip_punctuation",
     encoding = "utf-8", ...)
 {
     args <- capture_args(match.call(), list(max_tokens = as_nullable_integer,
-        output_sequence_length = as_nullable_integer, ngrams = function(x) if (length(x) >
-            1)
+        output_sequence_length = as_nullable_integer, ngrams = function(x)
+        if (length(x) > 1)
             as_integer_or_integer_tuple(x)
         else as_nullable_integer(x), input_shape = normalize_shape,
         batch_size = as_nullable_integer, batch_input_shape = normalize_shape),
