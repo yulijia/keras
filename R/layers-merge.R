@@ -18,7 +18,7 @@
 #' +  <https://keras.io/api/layers/merging_layers/add>
 #'
 #' @export
-layer_add <- function(inputs, ...) {
+old_layer_add <- function(inputs, ...) {
   if (missing(inputs))
     return(keras$layers$Add(...))
   if (!is.list(inputs))
@@ -53,7 +53,7 @@ layer_add <- function(inputs, ...) {
 #' +  <https://keras.io/api/layers/merging_layers/subtract>
 #'
 #' @export
-layer_subtract <- function(inputs, ...) {
+old_layer_subtract <- function(inputs, ...) {
   if (missing(inputs))
     return(keras$layers$Subtract(...))
   if (!is.list(inputs))
@@ -83,7 +83,7 @@ layer_subtract <- function(inputs, ...) {
 #' +  <https://keras.io/api/layers/merging_layers/multiply>
 #'
 #' @export
-layer_multiply <- function(inputs, ...) {
+old_layer_multiply <- function(inputs, ...) {
   if (missing(inputs))
     return(keras$layers$Multiply(...))
   if (!is.list(inputs))
@@ -114,7 +114,7 @@ layer_multiply <- function(inputs, ...) {
 #' +  <https://keras.io/api/layers/merging_layers/average>
 #'
 #' @export
-layer_average <- function(inputs, ...) {
+old_layer_average <- function(inputs, ...) {
   if (missing(inputs))
     return(keras$layers$Average(...))
   if (!is.list(inputs))
@@ -144,7 +144,7 @@ layer_average <- function(inputs, ...) {
 #' +  <https://keras.io/api/layers/merging_layers/maximum>
 #'
 #' @export
-layer_maximum <- function(inputs, ...) {
+old_layer_maximum <- function(inputs, ...) {
   if (missing(inputs))
     return(keras$layers$Maximum(...))
   if (!is.list(inputs))
@@ -174,7 +174,7 @@ layer_maximum <- function(inputs, ...) {
 #' +  <https://keras.io/api/layers/merging_layers/minimum>
 #'
 #' @export
-layer_minimum <- function(inputs, ...) {
+old_layer_minimum <- function(inputs, ...) {
   if (missing(inputs))
     return(keras$layers$Minimum(...))
   if (!is.list(inputs))
@@ -206,7 +206,7 @@ layer_minimum <- function(inputs, ...) {
 #' +  <https://keras.io/api/layers/merging_layers/concatenate>
 #'
 #' @export
-layer_concatenate <- function(inputs, ..., axis = -1) {
+old_layer_concatenate <- function(inputs, ..., axis = -1) {
   if (missing(inputs)) {
     args <- capture_args(match.call(), list(axis = as.integer))
     return(do.call(keras$layers$Concatenate, args))
@@ -257,7 +257,7 @@ layer_concatenate <- function(inputs, ..., axis = -1) {
 #'
 #' @export
 #' @importFrom rlang names2
-layer_dot <- function(inputs, ..., axes, normalize = FALSE) {
+old_layer_dot <- function(inputs, ..., axes, normalize = FALSE) {
   if (missing(inputs)) {
     args <- capture_args(match.call(), list(axes = as.integer))
     return(do.call(keras$layers$Dot, args))

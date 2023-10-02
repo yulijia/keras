@@ -51,7 +51,7 @@
 #'
 #'
 #' @export
-layer_simple_rnn <-
+old_layer_simple_rnn <-
 function(object,
          units,
          activation = "tanh",
@@ -126,7 +126,7 @@ function(object,
 #'   Networks](https://arxiv.org/abs/1512.05287)
 #'
 #' @export
-layer_gru <-
+old_layer_gru <-
 function(object,
          units,
          activation = "tanh",
@@ -186,7 +186,7 @@ function(object,
 #'
 #' @keywords internal
 #' @export
-layer_cudnn_gru <- function(object, units,
+old_layer_cudnn_gru <- function(object, units,
                             kernel_initializer = "glorot_uniform", recurrent_initializer = "orthogonal", bias_initializer = "zeros",
                             kernel_regularizer = NULL, recurrent_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL,
                             kernel_constraint = NULL, recurrent_constraint = NULL, bias_constraint = NULL,
@@ -246,7 +246,7 @@ layer_cudnn_gru <- function(object, units,
 #' @family recurrent layers
 #'
 #' @export
-layer_lstm <-
+old_layer_lstm <-
 function(object,
          units,
          activation = "tanh",
@@ -299,7 +299,7 @@ function(object,
 #'
 #' @keywords internal
 #' @export
-layer_cudnn_lstm <- function(object, units,
+old_layer_cudnn_lstm <- function(object, units,
                              kernel_initializer = "glorot_uniform",  recurrent_initializer = "orthogonal",
                              bias_initializer = "zeros",  unit_forget_bias = TRUE,
                              kernel_regularizer = NULL, recurrent_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL,

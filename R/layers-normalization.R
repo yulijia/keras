@@ -101,7 +101,7 @@
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/BatchNormalization>
 #'   +  <https://keras.io/api/layers>
 #' @export
-layer_batch_normalization <-
+old_layer_batch_normalization <-
   function(object,
            axis = -1L,
            momentum = 0.99,
@@ -165,7 +165,7 @@ layer_batch_normalization <-
 #'   Defaults to True.
 #'
 #' @export
-layer_layer_normalization <- function(
+old_layer_layer_normalization <- function(
   object,
   axis=-1,
   epsilon=0.001,
@@ -227,7 +227,7 @@ layer_layer_normalization <- function(
 #'
 #' @export
 #'
-layer_unit_normalization <-
+old_layer_unit_normalization <-
 function(object, axis = -1L, ...)
 {
   args <- capture_args(match.call(), list(axis = as_axis),

@@ -11,7 +11,7 @@
 #' @family activation layers
 #'
 #' @export
-layer_activation <- function(object, activation, input_shape = NULL,
+old_layer_activation <- function(object, activation, input_shape = NULL,
                              batch_input_shape = NULL, batch_size = NULL, dtype = NULL,
                              name = NULL, trainable = NULL, weights = NULL) {
 
@@ -42,7 +42,7 @@ layer_activation <- function(object, activation, input_shape = NULL,
 #' @family activation layers
 #'
 #' @export
-layer_activation_leaky_relu <- function(object, alpha = 0.3, input_shape = NULL,
+old_layer_activation_leaky_relu <- function(object, alpha = 0.3, input_shape = NULL,
                                         batch_input_shape = NULL, batch_size = NULL,
                                         dtype = NULL, name = NULL, trainable = NULL,
                                         weights = NULL) {
@@ -81,7 +81,7 @@ layer_activation_leaky_relu <- function(object, alpha = 0.3, input_shape = NULL,
 #' @family activation layers
 #'
 #' @export
-layer_activation_parametric_relu <- function(object, alpha_initializer = "zeros", alpha_regularizer = NULL,
+old_layer_activation_parametric_relu <- function(object, alpha_initializer = "zeros", alpha_regularizer = NULL,
                                              alpha_constraint = NULL, shared_axes = NULL,
                                              input_shape = NULL,
                                              batch_input_shape = NULL, batch_size = NULL,
@@ -121,7 +121,7 @@ layer_activation_parametric_relu <- function(object, alpha_initializer = "zeros"
 #' @family activation layers
 #'
 #' @export
-layer_activation_thresholded_relu <- function(object, theta = 1.0, input_shape = NULL,
+old_layer_activation_thresholded_relu <- function(object, theta = 1.0, input_shape = NULL,
                                               batch_input_shape = NULL, batch_size = NULL,
                                               dtype = NULL, name = NULL, trainable = NULL,
                                               weights = NULL) {
@@ -153,7 +153,7 @@ layer_activation_thresholded_relu <- function(object, theta = 1.0, input_shape =
 #' @family activation layers
 #'
 #' @export
-layer_activation_elu <- function(object, alpha = 1.0, input_shape = NULL,
+old_layer_activation_elu <- function(object, alpha = 1.0, input_shape = NULL,
                                  batch_input_shape = NULL, batch_size = NULL, dtype = NULL,
                                  name = NULL, trainable = NULL, weights = NULL) {
 
@@ -192,7 +192,7 @@ layer_activation_elu <- function(object, alpha = 1.0, input_shape = NULL,
 #' @family activation layers
 #'
 #' @export
-layer_activation_selu <- function(object, input_shape = NULL,
+old_layer_activation_selu <- function(object, input_shape = NULL,
                                  batch_input_shape = NULL, batch_size = NULL, dtype = NULL,
                                  name = NULL, trainable = NULL, weights = NULL) {
 
@@ -219,7 +219,7 @@ layer_activation_selu <- function(object, input_shape = NULL,
 #' @family activation layers
 #'
 #' @export
-layer_activation_softmax <- function(object, axis = -1, input_shape = NULL,
+old_layer_activation_softmax <- function(object, axis = -1, input_shape = NULL,
                                      batch_input_shape = NULL, batch_size = NULL, dtype = NULL,
                                      name = NULL, trainable = NULL, weights = NULL) {
 
@@ -247,7 +247,7 @@ layer_activation_softmax <- function(object, axis = -1, input_shape = NULL,
 #' @family activation layers
 #'
 #' @export
-layer_activation_relu <- function(object, max_value = NULL, negative_slope = 0, threshold = 0,
+old_layer_activation_relu <- function(object, max_value = NULL, negative_slope = 0, threshold = 0,
                                   input_shape = NULL, batch_input_shape = NULL, batch_size = NULL,
                                   dtype = NULL, name = NULL, trainable = NULL,
                                   weights = NULL) {

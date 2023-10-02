@@ -33,7 +33,7 @@
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/Resizing>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/image_preprocessing/resizing>
 #' @export
-layer_resizing <-
+old_layer_resizing <-
 function(object, height, width, interpolation = "bilinear",
          crop_to_aspect_ratio = FALSE, ...)
 {
@@ -79,7 +79,7 @@ function(object, height, width, interpolation = "bilinear",
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/Rescaling>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/image_preprocessing/rescaling>
 #' @export
-layer_rescaling <-
+old_layer_rescaling <-
 function(object, scale, offset = 0, ...)
 {
   require_tf_version("2.6", "layer_rescaling()")
@@ -120,7 +120,7 @@ function(object, scale, offset = 0, ...)
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/CenterCrop>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/image_preprocessing/center_crop>
 #' @export
-layer_center_crop <-
+old_layer_center_crop <-
 function(object, height, width, ...)
 {
   require_tf_version("2.6", "layer_center_crop()")
@@ -168,7 +168,7 @@ function(object, height, width, ...)
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/RandomCrop>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/image_augmentation/random_crop>
 #' @export
-layer_random_crop <-
+old_layer_random_crop <-
 function(object, height, width, seed = NULL, ...)
 {
   require_tf_version("2.6", "layer_random_crop()")
@@ -214,7 +214,7 @@ function(object, height, width, seed = NULL, ...)
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/RandomFlip>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/image_augmentation/random_flip>
 #' @export
-layer_random_flip <-
+old_layer_random_flip <-
 function(object, mode = "horizontal_and_vertical", seed = NULL, ...)
 {
   require_tf_version("2.6", "layer_random_flip()")
@@ -277,7 +277,7 @@ function(object, mode = "horizontal_and_vertical", seed = NULL, ...)
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/RandomTranslation>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/>
 #' @export
-layer_random_translation <-
+old_layer_random_translation <-
 function(object, height_factor, width_factor, fill_mode = "reflect",
          interpolation = "bilinear", seed = NULL, fill_value = 0, ...)
 {
@@ -346,7 +346,7 @@ function(object, height_factor, width_factor, fill_mode = "reflect",
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/RandomRotation>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/>
 #' @export
-layer_random_rotation <-
+old_layer_random_rotation <-
 function(object, factor, fill_mode = "reflect", interpolation = "bilinear",
          seed = NULL, fill_value = 0, ...)
 {
@@ -412,7 +412,7 @@ function(object, factor, fill_mode = "reflect", interpolation = "bilinear",
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/RandomZoom>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/>
 #' @export
-layer_random_zoom <-
+old_layer_random_zoom <-
 function(object, height_factor, width_factor = NULL, fill_mode = "reflect",
          interpolation = "bilinear", seed = NULL, fill_value = 0, ...)
 {
@@ -462,7 +462,7 @@ function(object, height_factor, width_factor = NULL, fill_mode = "reflect",
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/RandomContrast>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/>
 #' @export
-layer_random_contrast <-
+old_layer_random_contrast <-
 function(object, factor, seed = NULL, ...)
 {
   require_tf_version("2.6", "layer_random_contrast()")
@@ -507,7 +507,7 @@ function(object, factor, seed = NULL, ...)
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/RandomHeight>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/>
 #' @export
-layer_random_height <-
+old_layer_random_height <-
 function(object, factor, interpolation = "bilinear", seed = NULL, ...)
 {
   require_tf_version("2.6", "layer_random_height()")
@@ -554,7 +554,7 @@ function(object, factor, interpolation = "bilinear", seed = NULL, ...)
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/RandomWidth>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/>
 #' @export
-layer_random_width <-
+old_layer_random_width <-
 function(object, factor, interpolation = "bilinear", seed = NULL, ...)
 {
   require_tf_version("2.6", "layer_random_width()")
@@ -605,7 +605,7 @@ function(object, factor, interpolation = "bilinear", seed = NULL, ...)
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/RandomBrightness>
 #'   +  <https://keras.io/api/layers>
 #' @export
-layer_random_brightness <-
+old_layer_random_brightness <-
 function(object, factor, value_range = c(0, 255), seed = NULL,  ...)
 {
   require_tf_version("2.9", "layer_random_brightness()")
@@ -683,7 +683,7 @@ function(object, factor, value_range = c(0, 255), seed = NULL,  ...)
 #'   - <https://keras.io/api/layers/preprocessing_layers/categorical/category_encoding/>
 #'
 #' @export
-layer_category_encoding <-
+old_layer_category_encoding <-
 function(object, num_tokens=NULL, output_mode = "multi_hot", sparse = FALSE, ...)
 {
   require_tf_version("2.6", "layer_category_encoding()")
@@ -812,7 +812,7 @@ function(object, num_tokens=NULL, output_mode = "multi_hot", sparse = FALSE, ...
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/Hashing>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/categorical/hashing/>
 #' @export
-layer_hashing <-
+old_layer_hashing <-
 function(object, num_bins, mask_value = NULL, salt = NULL,
          output_mode = "int", sparse = FALSE, ...)
 {
@@ -946,7 +946,7 @@ function(object, num_bins, mask_value = NULL, salt = NULL,
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/IntegerLookup>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/categorical/integer_lookup>
 #' @export
-layer_integer_lookup <-
+old_layer_integer_lookup <-
 function(object,
          max_tokens = NULL,
          num_oov_indices = 1L,
@@ -1092,7 +1092,7 @@ function(object,
 #'   -  <https://keras.io/api/layers/preprocessing_layers/categorical/string_lookup>
 #'
 #' @export
-layer_string_lookup <-
+old_layer_string_lookup <-
 function(object,
          max_tokens = NULL,
          num_oov_indices = 1L,
@@ -1169,7 +1169,7 @@ function(object,
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/Normalization>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/numerical/normalization>
 #' @export
-layer_normalization <-
+old_layer_normalization <-
 function(object, axis = -1L,
          mean = NULL, variance = NULL,
          invert = FALSE, ...)
@@ -1244,7 +1244,7 @@ function(object, axis = -1L,
 #'   -  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/Discretization>
 #'   -  <https://keras.io/api/layers/preprocessing_layers/numerical/discretization>
 #' @export
-layer_discretization <-
+old_layer_discretization <-
 function(object, bin_boundaries=NULL, num_bins = NULL, epsilon = 0.01,
          output_mode = "int", sparse = FALSE,...)
 {
@@ -1380,7 +1380,7 @@ function(object, bin_boundaries=NULL, num_bins = NULL, epsilon = 0.01,
 #'   - <https://www.tensorflow.org/api_docs/python/tf/keras/layers/TextVectorization>
 #'   - <https://keras.io/api/layers/preprocessing_layers/text/text_vectorization>
 #' @export
-layer_text_vectorization <-
+old_layer_text_vectorization <-
 function(object,
          max_tokens = NULL,
          standardize = 'lower_and_strip_punctuation',

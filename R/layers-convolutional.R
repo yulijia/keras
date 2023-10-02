@@ -61,7 +61,7 @@
 #' @family convolutional layers
 #'
 #' @export
-layer_conv_1d <- function(object, filters, kernel_size, strides = 1L, padding = "valid",
+old_layer_conv_1d <- function(object, filters, kernel_size, strides = 1L, padding = "valid",
                           data_format = "channels_last",
                           dilation_rate = 1L, groups = 1L, activation = NULL, use_bias = TRUE,
                           kernel_initializer = "glorot_uniform", bias_initializer = "zeros",
@@ -158,7 +158,7 @@ layer_conv_1d <- function(object, filters, kernel_size, strides = 1L, padding = 
 #' @family convolutional layers
 #'
 #' @export
-layer_conv_2d <- function(object, filters, kernel_size, strides = c(1L, 1L), padding = "valid", data_format = NULL,
+old_layer_conv_2d <- function(object, filters, kernel_size, strides = c(1L, 1L), padding = "valid", data_format = NULL,
                           dilation_rate = c(1L, 1L), groups = 1L, activation = NULL, use_bias = TRUE,
                           kernel_initializer = "glorot_uniform", bias_initializer = "zeros",
                           kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL,
@@ -254,7 +254,7 @@ layer_conv_2d <- function(object, filters, kernel_size, strides = c(1L, 1L), pad
 #' @family convolutional layers
 #'
 #' @export
-layer_conv_3d <- function(object, filters, kernel_size, strides = c(1L, 1L, 1L), padding = "valid",
+old_layer_conv_3d <- function(object, filters, kernel_size, strides = c(1L, 1L, 1L), padding = "valid",
                           data_format = NULL, dilation_rate = c(1L, 1L, 1L), groups = 1L,
                           activation = NULL, use_bias = TRUE,
                           kernel_initializer = "glorot_uniform", bias_initializer = "zeros",
@@ -328,7 +328,7 @@ layer_conv_3d <- function(object, filters, kernel_size, strides = c(1L, 1L, 1L),
 #' @family convolutional layers
 #'
 #' @export
-layer_conv_1d_transpose <- function(object, filters, kernel_size, strides = 1, padding = "valid", output_padding = NULL,
+old_layer_conv_1d_transpose <- function(object, filters, kernel_size, strides = 1, padding = "valid", output_padding = NULL,
                                     data_format = NULL, dilation_rate = 1, activation = NULL, use_bias = TRUE,
                                     kernel_initializer = "glorot_uniform", bias_initializer = "zeros",
                                     kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL,
@@ -410,7 +410,7 @@ layer_conv_1d_transpose <- function(object, filters, kernel_size, strides = 1, p
 #' @family convolutional layers
 #'
 #' @export
-layer_conv_2d_transpose <- function(object, filters, kernel_size, strides = c(1, 1), padding = "valid", output_padding = NULL,
+old_layer_conv_2d_transpose <- function(object, filters, kernel_size, strides = c(1, 1), padding = "valid", output_padding = NULL,
                                     data_format = NULL, dilation_rate = c(1, 1), activation = NULL, use_bias = TRUE,
                                     kernel_initializer = "glorot_uniform", bias_initializer = "zeros",
                                     kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL,
@@ -512,7 +512,7 @@ layer_conv_2d_transpose <- function(object, filters, kernel_size, strides = c(1,
 #' @family convolutional layers
 #'
 #' @export
-layer_conv_3d_transpose <- function(object, filters, kernel_size, strides = c(1, 1, 1),
+old_layer_conv_3d_transpose <- function(object, filters, kernel_size, strides = c(1, 1, 1),
                                     padding = "valid", output_padding = NULL,
                                     data_format = NULL, dilation_rate = c(1L, 1L, 1L),
                                     activation = NULL, use_bias = TRUE,
@@ -607,7 +607,7 @@ layer_conv_3d_transpose <- function(object, filters, kernel_size, strides = c(1,
 #' @family convolutional layers
 #'
 #' @export
-layer_separable_conv_2d <- function(object, filters, kernel_size, strides = c(1, 1), padding = "valid", data_format = NULL,
+old_layer_separable_conv_2d <- function(object, filters, kernel_size, strides = c(1, 1), padding = "valid", data_format = NULL,
                                     dilation_rate = 1, depth_multiplier = 1, activation = NULL, use_bias = TRUE,
                                     depthwise_initializer = "glorot_uniform", pointwise_initializer = "glorot_uniform", bias_initializer = "zeros",
                                     depthwise_regularizer = NULL, pointwise_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL,
@@ -739,7 +739,7 @@ layer_separable_conv_2d <- function(object, filters, kernel_size, strides = c(1,
 #' @seealso
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/DepthwiseConv1D>
 #' @export
-layer_depthwise_conv_1d <-
+old_layer_depthwise_conv_1d <-
 function(object,
          kernel_size,
          strides = 1L,
@@ -779,7 +779,7 @@ function(object,
 #' @family convolutional layers
 #'
 #' @export
-layer_depthwise_conv_2d <- function(object, kernel_size, strides = c(1, 1), padding = "valid", depth_multiplier = 1,
+old_layer_depthwise_conv_2d <- function(object, kernel_size, strides = c(1, 1), padding = "valid", depth_multiplier = 1,
                                     data_format = NULL, dilation_rate = c(1, 1), activation = NULL, use_bias = TRUE,
                                     depthwise_initializer = "glorot_uniform", bias_initializer = "zeros",
                                     depthwise_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL,
@@ -866,7 +866,7 @@ layer_depthwise_conv_2d <- function(object, kernel_size, strides = c(1, 1), padd
 #' @family convolutional layers
 #'
 #' @export
-layer_separable_conv_1d <- function(object, filters, kernel_size, strides = 1, padding = "valid", data_format = "channels_last",
+old_layer_separable_conv_1d <- function(object, filters, kernel_size, strides = 1, padding = "valid", data_format = "channels_last",
                                     dilation_rate = 1, depth_multiplier = 1, activation = NULL, use_bias = TRUE,
                                     depthwise_initializer = "glorot_uniform", pointwise_initializer = "glorot_uniform", bias_initializer = "zeros",
                                     depthwise_regularizer = NULL, pointwise_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL,
@@ -926,7 +926,7 @@ layer_separable_conv_1d <- function(object, filters, kernel_size, strides = 1, p
 #' @family convolutional layers
 #'
 #' @export
-layer_upsampling_1d <- function(object, size = 2L,
+old_layer_upsampling_1d <- function(object, size = 2L,
                                 batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
   create_layer(keras$layers$UpSampling1D, object, list(
@@ -966,7 +966,7 @@ layer_upsampling_1d <- function(object, size = 2L,
 #' @family convolutional layers
 #'
 #' @export
-layer_upsampling_2d <- function(object, size = c(2L, 2L), data_format = NULL, interpolation = "nearest",
+old_layer_upsampling_2d <- function(object, size = c(2L, 2L), data_format = NULL, interpolation = "nearest",
                                 batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
   args <- list(
@@ -1017,7 +1017,7 @@ layer_upsampling_2d <- function(object, size = c(2L, 2L), data_format = NULL, in
 #' @family convolutional layers
 #'
 #' @export
-layer_upsampling_3d <- function(object, size= c(2L, 2L, 2L), data_format = NULL,
+old_layer_upsampling_3d <- function(object, size= c(2L, 2L, 2L), data_format = NULL,
                                 batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
   create_layer(keras$layers$UpSampling3D, object, list(
@@ -1048,7 +1048,7 @@ layer_upsampling_3d <- function(object, size= c(2L, 2L, 2L), data_format = NULL,
 #' @family convolutional layers
 #'
 #' @export
-layer_zero_padding_1d <- function(object, padding = 1L,
+old_layer_zero_padding_1d <- function(object, padding = 1L,
                                   batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
   create_layer(keras$layers$ZeroPadding1D, object, list(
     padding = as.integer(padding),
@@ -1086,7 +1086,7 @@ layer_zero_padding_1d <- function(object, padding = 1L,
 #' @family convolutional layers
 #'
 #' @export
-layer_zero_padding_2d <- function(object, padding = c(1L, 1L), data_format = NULL,
+old_layer_zero_padding_2d <- function(object, padding = c(1L, 1L), data_format = NULL,
                                   batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
   create_layer(keras$layers$ZeroPadding2D, object, list(
@@ -1133,7 +1133,7 @@ layer_zero_padding_2d <- function(object, padding = c(1L, 1L), data_format = NUL
 #' @family convolutional layers
 #'
 #' @export
-layer_zero_padding_3d <- function(object,  padding = c(1L, 1L, 1L), data_format = NULL,
+old_layer_zero_padding_3d <- function(object,  padding = c(1L, 1L, 1L), data_format = NULL,
                                   batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
   create_layer(keras$layers$ZeroPadding3D, object, list(
@@ -1165,7 +1165,7 @@ layer_zero_padding_3d <- function(object,  padding = c(1L, 1L, 1L), data_format 
 #' @family convolutional layers
 #'
 #' @export
-layer_cropping_1d <- function(object, cropping = c(1L, 1L),
+old_layer_cropping_1d <- function(object, cropping = c(1L, 1L),
                               batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
   create_layer(keras$layers$Cropping1D, object, list(
     cropping = as.integer(cropping),
@@ -1202,7 +1202,7 @@ layer_cropping_1d <- function(object, cropping = c(1L, 1L),
 #' @family convolutional layers
 #'
 #' @export
-layer_cropping_2d <- function(object, cropping = list(c(0L, 0L), c(0L, 0L)), data_format = NULL,
+old_layer_cropping_2d <- function(object, cropping = list(c(0L, 0L), c(0L, 0L)), data_format = NULL,
                               batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
   create_layer(keras$layers$Cropping2D, object, list(
@@ -1256,7 +1256,7 @@ layer_cropping_2d <- function(object, cropping = list(c(0L, 0L), c(0L, 0L)), dat
 #' @family convolutional layers
 #'
 #' @export
-layer_cropping_3d <- function(object, cropping = list(c(1L, 1L), c(1L, 1L), c(1L, 1L)), data_format = NULL,
+old_layer_cropping_3d <- function(object, cropping = list(c(1L, 1L), c(1L, 1L), c(1L, 1L)), data_format = NULL,
                               batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
   create_layer(keras$layers$Cropping3D, object, list(
     cropping = normalize_cropping(cropping, 3L),
@@ -1348,7 +1348,7 @@ layer_cropping_3d <- function(object, cropping = list(c(1L, 1L), c(1L, 1L), c(1L
 #' @family convolutional layers
 #'
 #' @export
-layer_conv_lstm_2d <- function(object, filters, kernel_size, strides = c(1L, 1L), padding = "valid", data_format = NULL,
+old_layer_conv_lstm_2d <- function(object, filters, kernel_size, strides = c(1L, 1L), padding = "valid", data_format = NULL,
                                dilation_rate = c(1L, 1L), activation = "tanh", recurrent_activation = "hard_sigmoid", use_bias = TRUE,
                                kernel_initializer = "glorot_uniform", recurrent_initializer = "orthogonal", bias_initializer = "zeros",
                                unit_forget_bias = TRUE, kernel_regularizer = NULL, recurrent_regularizer = NULL, bias_regularizer = NULL,
@@ -1494,7 +1494,7 @@ layer_conv_lstm_2d <- function(object, filters, kernel_size, strides = c(1L, 1L)
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/ConvLSTM1D>
 #'
 #' @export
-layer_conv_lstm_1d <-
+old_layer_conv_lstm_1d <-
 function(object,
          filters,
          kernel_size,
@@ -1639,7 +1639,7 @@ function(object,
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/ConvLSTM3D>
 #'
 #' @export
-layer_conv_lstm_3d <-
+old_layer_conv_lstm_3d <-
 function(object,
          filters,
          kernel_size,

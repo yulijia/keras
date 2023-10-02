@@ -8,6 +8,7 @@ test_activation <- function(name, required_version = NULL, required_tf_version=t
     skip_if_not_tensorflow_version(required_tf_version)
     activation_fn <- eval(parse(text = name))
     test_call_succeeds(name, {
+      # browser()
       keras_model_sequential() %>%
         layer_dense(32, input_shape = 784) %>%
         layer_activation(activation = activation_fn)

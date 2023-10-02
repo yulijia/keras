@@ -24,7 +24,7 @@
 #' @family pooling layers
 #'
 #' @export
-layer_max_pooling_1d <- function(object, pool_size = 2L, strides = NULL, padding = "valid",
+old_layer_max_pooling_1d <- function(object, pool_size = 2L, strides = NULL, padding = "valid",
                                  data_format='channels_last',
                                  batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
@@ -66,7 +66,7 @@ layer_max_pooling_1d <- function(object, pool_size = 2L, strides = NULL, padding
 #' @family pooling layers
 #'
 #' @export
-layer_max_pooling_2d <- function(object, pool_size = c(2L, 2L), strides = NULL, padding = "valid", data_format = NULL,
+old_layer_max_pooling_2d <- function(object, pool_size = c(2L, 2L), strides = NULL, padding = "valid", data_format = NULL,
                                  batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
   create_layer(keras$layers$MaxPooling2D, object, list(
@@ -112,7 +112,7 @@ layer_max_pooling_2d <- function(object, pool_size = c(2L, 2L), strides = NULL, 
 #' @family pooling layers
 #'
 #' @export
-layer_max_pooling_3d <- function(object, pool_size = c(2L, 2L, 2L), strides = NULL, padding = "valid", data_format = NULL,
+old_layer_max_pooling_3d <- function(object, pool_size = c(2L, 2L, 2L), strides = NULL, padding = "valid", data_format = NULL,
                                  batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
   create_layer(keras$layers$MaxPooling3D, object, list(
@@ -148,7 +148,7 @@ layer_max_pooling_3d <- function(object, pool_size = c(2L, 2L, 2L), strides = NU
 #' @family pooling layers
 #'
 #' @export
-layer_average_pooling_1d <- function(object, pool_size = 2L, strides = NULL, padding = "valid",
+old_layer_average_pooling_1d <- function(object, pool_size = 2L, strides = NULL, padding = "valid",
                                      data_format = "channels_last",
                                      batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
@@ -193,7 +193,7 @@ layer_average_pooling_1d <- function(object, pool_size = 2L, strides = NULL, pad
 #' @family pooling layers
 #'
 #' @export
-layer_average_pooling_2d <- function(object, pool_size = c(2L, 2L), strides = NULL, padding = "valid", data_format = NULL,
+old_layer_average_pooling_2d <- function(object, pool_size = c(2L, 2L), strides = NULL, padding = "valid", data_format = NULL,
                                      batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
   create_layer(keras$layers$AveragePooling2D, object, list(
@@ -238,7 +238,7 @@ layer_average_pooling_2d <- function(object, pool_size = c(2L, 2L), strides = NU
 #' @family pooling layers
 #'
 #' @export
-layer_average_pooling_3d <- function(object, pool_size = c(2L, 2L, 2L), strides = NULL, padding = "valid", data_format = NULL,
+old_layer_average_pooling_3d <- function(object, pool_size = c(2L, 2L, 2L), strides = NULL, padding = "valid", data_format = NULL,
                                      batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
   create_layer(keras$layers$AveragePooling3D, object, list(
     pool_size = as.integer(pool_size),
@@ -276,7 +276,7 @@ layer_average_pooling_3d <- function(object, pool_size = c(2L, 2L, 2L), strides 
 #' @family pooling layers
 #'
 #' @export
-layer_global_max_pooling_1d <-
+old_layer_global_max_pooling_1d <-
 function(object, data_format = "channels_last", keepdims = FALSE, ...)
 {
   args <- capture_args(match.call(),
@@ -299,7 +299,7 @@ function(object, data_format = "channels_last", keepdims = FALSE, ...)
 #' @family pooling layers
 #'
 #' @export
-layer_global_average_pooling_1d <-
+old_layer_global_average_pooling_1d <-
 function(object, data_format = "channels_last", keepdims = FALSE, ...)
 {
   args <- capture_args(match.call(),
@@ -323,7 +323,7 @@ function(object, data_format = "channels_last", keepdims = FALSE, ...)
 #' @family pooling layers
 #'
 #' @export
-layer_global_max_pooling_2d <-
+old_layer_global_max_pooling_2d <-
 function(object, data_format = NULL, keepdims = FALSE, ...)
 {
   args <- capture_args(match.call(),
@@ -347,7 +347,7 @@ function(object, data_format = NULL, keepdims = FALSE, ...)
 #' @family pooling layers
 #'
 #' @export
-layer_global_average_pooling_2d <-
+old_layer_global_average_pooling_2d <-
 function(object, data_format = NULL, keepdims = FALSE, ...)
 {
   args <- capture_args(match.call(),
@@ -383,7 +383,7 @@ function(object, data_format = NULL, keepdims = FALSE, ...)
 #' @family pooling layers
 #'
 #' @export
-layer_global_max_pooling_3d <-
+old_layer_global_max_pooling_3d <-
 function(object, data_format = NULL, keepdims = FALSE, ...)
 {
   args <- capture_args(match.call(),
@@ -415,7 +415,7 @@ function(object, data_format = NULL, keepdims = FALSE, ...)
 #' @family pooling layers
 #'
 #' @export
-layer_global_average_pooling_3d <-
+old_layer_global_average_pooling_3d <-
 function(object, data_format = NULL, keepdims = FALSE, ...)
 {
   args <- capture_args(match.call(),

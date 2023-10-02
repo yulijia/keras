@@ -24,7 +24,7 @@
 #' @family noise layers
 #'
 #' @export
-layer_gaussian_noise <-
+old_layer_gaussian_noise <-
 function(object, stddev, seed = NULL, ...)
 {
   args <- capture_args(match.call(),
@@ -62,7 +62,7 @@ function(object, stddev, seed = NULL, ...)
 #' @family noise layers
 #'
 #' @export
-layer_gaussian_dropout <-
+old_layer_gaussian_dropout <-
 function(object, rate, seed = NULL, ...)
 {
   args <- capture_args(match.call(),
@@ -106,7 +106,7 @@ function(object, rate, seed = NULL, ...)
 #' @family noise layers
 #'
 #' @export
-layer_alpha_dropout <-
+old_layer_alpha_dropout <-
 function(object, rate, noise_shape = NULL, seed = NULL, ...) {
   args <- capture_args(match.call(),
     modifiers = list(

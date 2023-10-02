@@ -13,7 +13,7 @@
 #' @family core layers
 #'
 #' @export
-layer_dense_features <- function(object, feature_columns, name = NULL,
+old_layer_dense_features <- function(object, feature_columns, name = NULL,
                                  trainable = NULL, input_shape = NULL,
                                  batch_input_shape = NULL, batch_size = NULL, dtype = NULL,
                                  weights = NULL) {

@@ -1,0 +1,40 @@
+
+
+ALL_ARGS:
+  axis: as_axis
+
+
+Hashing:
+  num_bins: as.integer
+  salt: as_nullable_integer
+
+# "*":
+#   input_shape: normalize_shape
+#   batch_size: as_nullable_integer
+#   batch_input_shape: normalize_shape
+
+# "*":
+#   axis: as_axis
+
+AlphaDropout:
+  seed: as_nullable_integer
+
+"Conv*":
+  filters: as.integer
+  kernel_size:   as_integer_or_integer_tuple
+  dilation_rate: as_integer_or_integer_tuple
+  strides:       as_integer_or_integer_tuple
+
+"*Pooling?D":
+  pool_size: as.integer
+  strides: as_nullable_integer
+
+
+
+TextVectorization:
+   max_tokens:             as_nullable_integer
+   output_sequence_length: as_nullable_integer
+   ngrams: function(x) if(length(x) > 1) as_integer_or_integer_tuple(x) else as_nullable_integer(x)
+
+
+GaussianDropout:

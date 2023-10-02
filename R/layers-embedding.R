@@ -58,7 +58,7 @@
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/Embedding>
 #'   +  <https://keras.io/api/layers>
 #' @export
-layer_embedding <-
+old_layer_embedding <-
   function(object, input_dim, output_dim, embeddings_initializer = "uniform",
            embeddings_regularizer = NULL, activity_regularizer = NULL,
            embeddings_constraint = NULL, mask_zero = FALSE, input_length = NULL,

@@ -28,7 +28,7 @@
 #' @family core layers
 #'
 #' @export
-layer_input <-
+old_layer_input <-
 function(shape = NULL, batch_shape = NULL, name = NULL,
          dtype = NULL, sparse = FALSE, tensor = NULL,
          ragged = FALSE) {
@@ -95,7 +95,7 @@ function(shape = NULL, batch_shape = NULL, name = NULL,
 #' @family core layers
 #'
 #' @export
-layer_dense <- function(object, units, activation = NULL, use_bias = TRUE,
+old_layer_dense <- function(object, units, activation = NULL, use_bias = TRUE,
                         kernel_initializer = 'glorot_uniform', bias_initializer = 'zeros',
                         kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL,
                         kernel_constraint = NULL, bias_constraint = NULL, input_shape = NULL,
@@ -142,7 +142,7 @@ layer_dense <- function(object, units, activation = NULL, use_bias = TRUE,
 #' @family core layers
 #'
 #' @export
-layer_reshape <- function(object, target_shape, input_shape = NULL,
+old_layer_reshape <- function(object, target_shape, input_shape = NULL,
                           batch_input_shape = NULL, batch_size = NULL, dtype = NULL,
                           name = NULL, trainable = NULL, weights = NULL) {
 
@@ -180,7 +180,7 @@ layer_reshape <- function(object, target_shape, input_shape = NULL,
 #' @family core layers
 #'
 #' @export
-layer_permute <- function(object, dims, input_shape = NULL,
+old_layer_permute <- function(object, dims, input_shape = NULL,
                           batch_input_shape = NULL, batch_size = NULL, dtype = NULL,
                           name = NULL, trainable = NULL, weights = NULL) {
 
@@ -210,7 +210,7 @@ layer_permute <- function(object, dims, input_shape = NULL,
 #' @family core layers
 #'
 #' @export
-layer_repeat_vector <- function(object, n,
+old_layer_repeat_vector <- function(object, n,
                                 batch_size = NULL, name = NULL, trainable = NULL, weights = NULL) {
 
   create_layer(keras$layers$RepeatVector, object, list(
@@ -244,7 +244,7 @@ layer_repeat_vector <- function(object, n,
 #' @family core layers
 #'
 #' @export
-layer_lambda <- function(object, f, output_shape = NULL, mask = NULL, arguments = NULL,
+old_layer_lambda <- function(object, f, output_shape = NULL, mask = NULL, arguments = NULL,
                          input_shape = NULL, batch_input_shape = NULL, batch_size = NULL, dtype = NULL,
                          name = NULL, trainable = NULL, weights = NULL) {
 
@@ -288,7 +288,7 @@ layer_lambda <- function(object, f, output_shape = NULL, mask = NULL, arguments 
 #' @family core layers
 #'
 #' @export
-layer_activity_regularization <- function(object, l1 = 0.0, l2 = 0.0, input_shape = NULL,
+old_layer_activity_regularization <- function(object, l1 = 0.0, l2 = 0.0, input_shape = NULL,
                                           batch_input_shape = NULL, batch_size = NULL,
                                           dtype = NULL, name = NULL, trainable = NULL,
                                           weights = NULL) {
@@ -322,7 +322,7 @@ layer_activity_regularization <- function(object, l1 = 0.0, l2 = 0.0, input_shap
 #' @family core layers
 #'
 #' @export
-layer_masking <- function(object, mask_value = 0.0, input_shape = NULL,
+old_layer_masking <- function(object, mask_value = 0.0, input_shape = NULL,
                           batch_input_shape = NULL, batch_size = NULL, dtype = NULL,
                           name = NULL, trainable = NULL, weights = NULL) {
 
@@ -359,7 +359,7 @@ layer_masking <- function(object, mask_value = 0.0, input_shape = NULL,
 #' @family core layers
 #'
 #' @export
-layer_flatten <- function(object, data_format = NULL, input_shape = NULL, dtype = NULL,
+old_layer_flatten <- function(object, data_format = NULL, input_shape = NULL, dtype = NULL,
                           name = NULL, trainable = NULL, weights = NULL) {
 
   args <- list(
@@ -401,6 +401,15 @@ as_integer_tuple <- function(x, force_tuple = FALSE) {
   else
     as.integer(x)
 }
+
+as_integer_or_integer_tuple <- function(x) {
+  x <- as.integer(x)
+  if(length(x) > 1)
+    tuple(as.list(x))
+  else
+    x
+}
+
 
 as_nullable_integer <- function(x) {
   if (is.null(x))

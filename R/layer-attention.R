@@ -46,7 +46,7 @@
 #' @seealso
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/Attention>
 #' @export
-layer_attention <-
+old_layer_attention <-
   function(inputs, use_scale = FALSE, score_mode = "dot", ..., dropout = NULL)
   {
     args <- capture_args(match.call(), ignore = "inputs")
@@ -113,7 +113,7 @@ layer_attention <-
 #' - attention_scores: (Optional) multi-head attention coeffients over attention axes.
 #'
 #' @export
-layer_multi_head_attention <-
+old_layer_multi_head_attention <-
 function(inputs,
          num_heads,
          key_dim,
@@ -186,7 +186,7 @@ function(inputs,
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/AdditiveAttention>
 #'   +  <https://keras.io/api/layers/attention_layers/additive_attention/>
 #' @export
-layer_additive_attention <-
+old_layer_additive_attention <-
 function(object, use_scale = TRUE, ..., causal = FALSE, dropout = 0)
 {
     args <- capture_args(match.call(), NULL, ignore = "object")

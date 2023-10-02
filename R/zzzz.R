@@ -1,0 +1,8977 @@
+#' Abstract object representing an RNN cell 
+#' 
+#' @details 
+#' See [the Keras RNN API guide](https://www.tensorflow.org/guide/keras/rnn)
+#' for details about the usage of RNN API.
+#' 
+#' This is the base class for implementing RNN cells with custom behavior.
+#' 
+#' Every `RNNCell` must have the properties below and implement `call` with
+#' the signature `(output, next_state) = call(input, state)`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_abstract_rnn_cell <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$AbstractRNNCell, object, args)
+}
+
+
+#' Applies an activation function to an output 
+#' 
+#'  
+#' 
+#' @param activation 
+#' Activation function, such as `tf.nn.relu`, or string name of
+#' built-in activation function, such as "relu". 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_activation <- 
+function(object, activation, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Activation, object, args)
+}
+
+
+#' Layer that applies an update to the cost function based input activity 
+#' 
+#'  
+#' 
+#' @param l1 
+#' L1 regularization factor (positive float). 
+#' 
+#' @param l2 
+#' L2 regularization factor (positive float). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_activity_regularization <- 
+function(object, l1 = 0, l2 = 0, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$ActivityRegularization, object, 
+        args)
+}
+
+
+#' Layer that adds a list of inputs 
+#' 
+#' @details 
+#' It takes as input a list of tensors,
+#' all of the same shape, and returns
+#' a single tensor (also of the same shape). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_add <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Add, object, args)
+}
+
+
+#' Additive attention layer, a.k.a. Bahdanau-style attention 
+#' 
+#' @details 
+#' Inputs are `query` tensor of shape `[batch_size, Tq, dim]`, `value` tensor
+#' of shape `[batch_size, Tv, dim]` and `key` tensor of shape
+#' `[batch_size, Tv, dim]`. The calculation follows the steps:
+#' 
+#' 1. Reshape `query` and `key` into shapes `[batch_size, Tq, 1, dim]`
+#'     and `[batch_size, 1, Tv, dim]` respectively.
+#' 2. Calculate scores with shape `[batch_size, Tq, Tv]` as a non-linear
+#'     sum: `scores = tf.reduce_sum(tf.tanh(query + key), axis=-1)`
+#' 3. Use scores to calculate a distribution with shape
+#'     `[batch_size, Tq, Tv]`: `distribution = tf.nn.softmax(scores)`.
+#' 4. Use `distribution` to create a linear combination of `value` with
+#'     shape `[batch_size, Tq, dim]`:
+#'    `return tf.matmul(distribution, value)`. 
+#' 
+#' @param use_scale 
+#' If `TRUE`, will create a variable to scale the attention
+#' scores. 
+#' 
+#' @param dropout 
+#' Float between 0 and 1. Fraction of the units to drop for the
+#' attention scores. Defaults to `0.0`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_additive_attention <- 
+function(object, use_scale = TRUE, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$AdditiveAttention, object, args)
+}
+
+
+#' Applies Alpha Dropout to the input 
+#' 
+#' @details 
+#' Alpha Dropout is a `Dropout` that keeps mean and variance of inputs
+#' to their original values, in order to ensure the self-normalizing property
+#' even after this dropout.
+#' Alpha Dropout fits well to Scaled Exponential Linear Units
+#' by randomly setting activations to the negative saturation value. 
+#' 
+#' @param rate 
+#' float, drop probability (as with `Dropout`).
+#' The multiplicative noise will have
+#' standard deviation `sqrt(rate / (1 - rate))`. 
+#' 
+#' @param seed 
+#' Integer, optional random seed to enable deterministic behavior. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_alpha_dropout <- 
+function(object, rate, noise_shape = NULL, seed = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(seed = as_nullable_integer), 
+        ignore = "object")
+    create_layer(keras$layers$AlphaDropout, object, args)
+}
+
+
+#' Dot-product attention layer, a.k.a. Luong-style attention 
+#' 
+#' @details 
+#' Inputs are `query` tensor of shape `[batch_size, Tq, dim]`, `value` tensor
+#' of shape `[batch_size, Tv, dim]` and `key` tensor of shape
+#' `[batch_size, Tv, dim]`. The calculation follows the steps:
+#' 
+#' 1. Calculate scores with shape `[batch_size, Tq, Tv]` as a `query`-`key` dot
+#'     product: `scores = tf.matmul(query, key, transpose_b=TRUE)`.
+#' 2. Use scores to calculate a distribution with shape
+#'     `[batch_size, Tq, Tv]`: `distribution = tf.nn.softmax(scores)`.
+#' 3. Use `distribution` to create a linear combination of `value` with
+#'      shape `[batch_size, Tq, dim]`:
+#'      `return tf.matmul(distribution, value)`. 
+#' 
+#' @param use_scale 
+#' If `TRUE`, will create a scalar variable to scale the
+#' attention scores. 
+#' 
+#' @param dropout 
+#' Float between 0 and 1. Fraction of the units to drop for the
+#' attention scores. Defaults to 0.0. 
+#' 
+#' @param score_mode 
+#' Function to use to compute attention scores, one of
+#' `{"dot", "concat"}`. `"dot"` refers to the dot product between the
+#' query and key vectors. `"concat"` refers to the hyperbolic tangent
+#' of the concatenation of the query and key vectors. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_attention <- 
+function(object, use_scale = FALSE, score_mode = "dot", ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Attention, object, args)
+}
+
+
+#' Layer that averages a list of inputs element-wise 
+#' 
+#' @details 
+#' It takes as input a list of tensors, all of the same shape, and returns
+#' a single tensor (also of the same shape). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_average <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Average, object, args)
+}
+
+
+#' Average pooling for temporal data 
+#' 
+#' @details 
+#' Downsamples the input representation by taking the average value over the
+#' window defined by `pool_size`. The window is shifted by `strides`.  The
+#' resulting output when using "valid" padding option has a shape of:
+#' `output_shape = (input_shape - pool_size + 1) / strides)`
+#' 
+#' The resulting output shape when using the "same" padding option is:
+#' `output_shape = input_shape / strides`
+#' 
+#' For example, for strides=1 and padding="valid":
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> x
+#' <tf.Tensor: shape=(1, 5, 1), dtype=float32, numpy=
+#'   array([[[1.],
+#'           [2.],
+#'           [3.],
+#'           [4.],
+#'           [5.]], dtype=float32)>
+#' >>> avg_pool_1d = tf.keras.layers.AveragePooling1D(pool_size=2,
+#' ...    strides=1, padding='valid')
+#' >>> avg_pool_1d(x)
+#' <tf.Tensor: shape=(1, 4, 1), dtype=float32, numpy=
+#' array([[[1.5],
+#'         [2.5],
+#'         [3.5],
+#'         [4.5]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for strides=2 and padding="valid":
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> x
+#' <tf.Tensor: shape=(1, 5, 1), dtype=float32, numpy=
+#'   array([[[1.],
+#'           [2.],
+#'           [3.],
+#'           [4.],
+#'           [5.]], dtype=float32)>
+#' >>> avg_pool_1d = tf.keras.layers.AveragePooling1D(pool_size=2,
+#' ...    strides=2, padding='valid')
+#' >>> avg_pool_1d(x)
+#' <tf.Tensor: shape=(1, 2, 1), dtype=float32, numpy=
+#' array([[[1.5],
+#'         [3.5]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for strides=1 and padding="same":
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> x
+#' <tf.Tensor: shape=(1, 5, 1), dtype=float32, numpy=
+#'   array([[[1.],
+#'           [2.],
+#'           [3.],
+#'           [4.],
+#'           [5.]], dtype=float32)>
+#' >>> avg_pool_1d = tf.keras.layers.AveragePooling1D(pool_size=2,
+#' ...    strides=1, padding='same')
+#' >>> avg_pool_1d(x)
+#' <tf.Tensor: shape=(1, 5, 1), dtype=float32, numpy=
+#' array([[[1.5],
+#'         [2.5],
+#'         [3.5],
+#'         [4.5],
+#'         [5.]]], dtype=float32)>
+#' ```
+#'  
+#' 
+#' @param pool_size 
+#' Integer, size of the average pooling windows. 
+#' 
+#' @param strides 
+#' Integer, or NULL. Factor by which to downscale.
+#' E.g. 2 will halve the input.
+#' If NULL, it will default to `pool_size`. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, steps, features)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, features, steps)`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_average_pooling_1d <- 
+function(object, pool_size = 2L, strides = NULL, padding = "valid", 
+    data_format = "channels_last", ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$AveragePooling1D, object, args)
+}
+
+
+#' Average pooling operation for spatial data 
+#' 
+#' @details 
+#' Downsamples the input along its spatial dimensions (height and width)
+#' by taking the average value over an input window
+#' (of size defined by `pool_size`) for each channel of the input.
+#' The window is shifted by `strides` along each dimension.
+#' 
+#' The resulting output when using `"valid"` padding option has a shape
+#' (number of rows or columns) of:
+#' `output_shape = math.floor((input_shape - pool_size) / strides) + 1`
+#' (when `input_shape >= pool_size`)
+#' 
+#' The resulting output shape when using the `"same"` padding option is:
+#' `output_shape = math.floor((input_shape - 1) / strides) + 1`
+#' 
+#' For example, for `strides=(1, 1)` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3.],
+#' ...                  [4., 5., 6.],
+#' ...                  [7., 8., 9.]])
+#' >>> x = tf.reshape(x, [1, 3, 3, 1])
+#' >>> avg_pool_2d = tf.keras.layers.AveragePooling2D(pool_size=(2, 2),
+#' ...    strides=(1, 1), padding='valid')
+#' >>> avg_pool_2d(x)
+#' <tf.Tensor: shape=(1, 2, 2, 1), dtype=float32, numpy=
+#'   array([[[[3.],
+#'            [4.]],
+#'           [[6.],
+#'            [7.]]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for `stride=(2, 2)` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3., 4.],
+#' ...                  [5., 6., 7., 8.],
+#' ...                  [9., 10., 11., 12.]])
+#' >>> x = tf.reshape(x, [1, 3, 4, 1])
+#' >>> avg_pool_2d = tf.keras.layers.AveragePooling2D(pool_size=(2, 2),
+#' ...    strides=(2, 2), padding='valid')
+#' >>> avg_pool_2d(x)
+#' <tf.Tensor: shape=(1, 1, 2, 1), dtype=float32, numpy=
+#'   array([[[[3.5],
+#'            [5.5]]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for `strides=(1, 1)` and `padding="same"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3.],
+#' ...                  [4., 5., 6.],
+#' ...                  [7., 8., 9.]])
+#' >>> x = tf.reshape(x, [1, 3, 3, 1])
+#' >>> avg_pool_2d = tf.keras.layers.AveragePooling2D(pool_size=(2, 2),
+#' ...    strides=(1, 1), padding='same')
+#' >>> avg_pool_2d(x)
+#' <tf.Tensor: shape=(1, 3, 3, 1), dtype=float32, numpy=
+#'   array([[[[3.],
+#'            [4.],
+#'            [4.5]],
+#'           [[6.],
+#'            [7.],
+#'            [7.5]],
+#'           [[7.5],
+#'            [8.5],
+#'            [9.]]]], dtype=float32)>
+#' ```
+#'  
+#' 
+#' @param pool_size 
+#' integer or list of 2 integers,
+#' factors by which to downscale (vertical, horizontal).
+#' `(2, 2)` will halve the input in both spatial dimension.
+#' If only one integer is specified, the same window length
+#' will be used for both dimensions. 
+#' 
+#' @param strides 
+#' Integer, list of 2 integers, or NULL.
+#' Strides values.
+#' If NULL, it will default to `pool_size`. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, channels, height, width)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_average_pooling_2d <- 
+function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid", 
+    data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$AveragePooling2D, object, args)
+}
+
+
+#' Average pooling operation for 3D data (spatial or spatio-temporal) 
+#' 
+#' @details 
+#' Downsamples the input along its spatial dimensions (depth, height, and
+#' width) by taking the average value over an input window
+#' (of size defined by `pool_size`) for each channel of the input.
+#' The window is shifted by `strides` along each dimension. 
+#' 
+#' @param pool_size 
+#' list of 3 integers,
+#' factors by which to downscale (dim1, dim2, dim3).
+#' `(2, 2, 2)` will halve the size of the 3D input in each dimension. 
+#' 
+#' @param strides 
+#' list of 3 integers, or NULL. Strides values. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#' while `channels_first` corresponds to inputs with shape
+#' `(batch, channels, spatial_dim1, spatial_dim2, spatial_dim3)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_average_pooling_3d <- 
+function(object, pool_size = list(2L, 2L, 2L), strides = NULL, 
+    padding = "valid", data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$AveragePooling3D, object, args)
+}
+
+
+#' Average pooling for temporal data 
+#' 
+#' @details 
+#' Downsamples the input representation by taking the average value over the
+#' window defined by `pool_size`. The window is shifted by `strides`.  The
+#' resulting output when using "valid" padding option has a shape of:
+#' `output_shape = (input_shape - pool_size + 1) / strides)`
+#' 
+#' The resulting output shape when using the "same" padding option is:
+#' `output_shape = input_shape / strides`
+#' 
+#' For example, for strides=1 and padding="valid":
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> x
+#' <tf.Tensor: shape=(1, 5, 1), dtype=float32, numpy=
+#'   array([[[1.],
+#'           [2.],
+#'           [3.],
+#'           [4.],
+#'           [5.]], dtype=float32)>
+#' >>> avg_pool_1d = tf.keras.layers.AveragePooling1D(pool_size=2,
+#' ...    strides=1, padding='valid')
+#' >>> avg_pool_1d(x)
+#' <tf.Tensor: shape=(1, 4, 1), dtype=float32, numpy=
+#' array([[[1.5],
+#'         [2.5],
+#'         [3.5],
+#'         [4.5]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for strides=2 and padding="valid":
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> x
+#' <tf.Tensor: shape=(1, 5, 1), dtype=float32, numpy=
+#'   array([[[1.],
+#'           [2.],
+#'           [3.],
+#'           [4.],
+#'           [5.]], dtype=float32)>
+#' >>> avg_pool_1d = tf.keras.layers.AveragePooling1D(pool_size=2,
+#' ...    strides=2, padding='valid')
+#' >>> avg_pool_1d(x)
+#' <tf.Tensor: shape=(1, 2, 1), dtype=float32, numpy=
+#' array([[[1.5],
+#'         [3.5]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for strides=1 and padding="same":
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> x
+#' <tf.Tensor: shape=(1, 5, 1), dtype=float32, numpy=
+#'   array([[[1.],
+#'           [2.],
+#'           [3.],
+#'           [4.],
+#'           [5.]], dtype=float32)>
+#' >>> avg_pool_1d = tf.keras.layers.AveragePooling1D(pool_size=2,
+#' ...    strides=1, padding='same')
+#' >>> avg_pool_1d(x)
+#' <tf.Tensor: shape=(1, 5, 1), dtype=float32, numpy=
+#' array([[[1.5],
+#'         [2.5],
+#'         [3.5],
+#'         [4.5],
+#'         [5.]]], dtype=float32)>
+#' ```
+#'  
+#' 
+#' @param pool_size 
+#' Integer, size of the average pooling windows. 
+#' 
+#' @param strides 
+#' Integer, or NULL. Factor by which to downscale.
+#' E.g. 2 will halve the input.
+#' If NULL, it will default to `pool_size`. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, steps, features)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, features, steps)`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_average_pooling_1d <- 
+function(object, pool_size = 2L, strides = NULL, padding = "valid", 
+    data_format = "channels_last", ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$AveragePooling1D, object, args)
+}
+
+
+#' Average pooling operation for spatial data 
+#' 
+#' @details 
+#' Downsamples the input along its spatial dimensions (height and width)
+#' by taking the average value over an input window
+#' (of size defined by `pool_size`) for each channel of the input.
+#' The window is shifted by `strides` along each dimension.
+#' 
+#' The resulting output when using `"valid"` padding option has a shape
+#' (number of rows or columns) of:
+#' `output_shape = math.floor((input_shape - pool_size) / strides) + 1`
+#' (when `input_shape >= pool_size`)
+#' 
+#' The resulting output shape when using the `"same"` padding option is:
+#' `output_shape = math.floor((input_shape - 1) / strides) + 1`
+#' 
+#' For example, for `strides=(1, 1)` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3.],
+#' ...                  [4., 5., 6.],
+#' ...                  [7., 8., 9.]])
+#' >>> x = tf.reshape(x, [1, 3, 3, 1])
+#' >>> avg_pool_2d = tf.keras.layers.AveragePooling2D(pool_size=(2, 2),
+#' ...    strides=(1, 1), padding='valid')
+#' >>> avg_pool_2d(x)
+#' <tf.Tensor: shape=(1, 2, 2, 1), dtype=float32, numpy=
+#'   array([[[[3.],
+#'            [4.]],
+#'           [[6.],
+#'            [7.]]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for `stride=(2, 2)` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3., 4.],
+#' ...                  [5., 6., 7., 8.],
+#' ...                  [9., 10., 11., 12.]])
+#' >>> x = tf.reshape(x, [1, 3, 4, 1])
+#' >>> avg_pool_2d = tf.keras.layers.AveragePooling2D(pool_size=(2, 2),
+#' ...    strides=(2, 2), padding='valid')
+#' >>> avg_pool_2d(x)
+#' <tf.Tensor: shape=(1, 1, 2, 1), dtype=float32, numpy=
+#'   array([[[[3.5],
+#'            [5.5]]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for `strides=(1, 1)` and `padding="same"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3.],
+#' ...                  [4., 5., 6.],
+#' ...                  [7., 8., 9.]])
+#' >>> x = tf.reshape(x, [1, 3, 3, 1])
+#' >>> avg_pool_2d = tf.keras.layers.AveragePooling2D(pool_size=(2, 2),
+#' ...    strides=(1, 1), padding='same')
+#' >>> avg_pool_2d(x)
+#' <tf.Tensor: shape=(1, 3, 3, 1), dtype=float32, numpy=
+#'   array([[[[3.],
+#'            [4.],
+#'            [4.5]],
+#'           [[6.],
+#'            [7.],
+#'            [7.5]],
+#'           [[7.5],
+#'            [8.5],
+#'            [9.]]]], dtype=float32)>
+#' ```
+#'  
+#' 
+#' @param pool_size 
+#' integer or list of 2 integers,
+#' factors by which to downscale (vertical, horizontal).
+#' `(2, 2)` will halve the input in both spatial dimension.
+#' If only one integer is specified, the same window length
+#' will be used for both dimensions. 
+#' 
+#' @param strides 
+#' Integer, list of 2 integers, or NULL.
+#' Strides values.
+#' If NULL, it will default to `pool_size`. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, channels, height, width)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_average_pooling_2d <- 
+function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid", 
+    data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$AveragePooling2D, object, args)
+}
+
+
+#' Average pooling operation for 3D data (spatial or spatio-temporal) 
+#' 
+#' @details 
+#' Downsamples the input along its spatial dimensions (depth, height, and
+#' width) by taking the average value over an input window
+#' (of size defined by `pool_size`) for each channel of the input.
+#' The window is shifted by `strides` along each dimension. 
+#' 
+#' @param pool_size 
+#' list of 3 integers,
+#' factors by which to downscale (dim1, dim2, dim3).
+#' `(2, 2, 2)` will halve the size of the 3D input in each dimension. 
+#' 
+#' @param strides 
+#' list of 3 integers, or NULL. Strides values. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#' while `channels_first` corresponds to inputs with shape
+#' `(batch, channels, spatial_dim1, spatial_dim2, spatial_dim3)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_average_pooling_3d <- 
+function(object, pool_size = list(2L, 2L, 2L), strides = NULL, 
+    padding = "valid", data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$AveragePooling3D, object, args)
+}
+
+
+#' Layer that normalizes its inputs 
+#' 
+#' @details 
+#' Batch normalization applies a transformation that maintains the mean output
+#' close to 0 and the output standard deviation close to 1.
+#' 
+#' Importantly, batch normalization works differently during training and
+#' during inference.
+#' 
+#' **During training** (i.e. when using `fit()` or when calling the layer/model
+#' with the argument `training=TRUE`), the layer normalizes its output using
+#' the mean and standard deviation of the current batch of inputs. That is to
+#' say, for each channel being normalized, the layer returns
+#' `gamma * (batch - mean(batch)) / sqrt(var(batch) + epsilon) + beta`, where:
+#' 
+#' - `epsilon` is small constant (configurable as part of the constructor
+#' arguments)
+#' - `gamma` is a learned scaling factor (initialized as 1), which
+#' can be disabled by passing `scale=FALSE` to the constructor.
+#' - `beta` is a learned offset factor (initialized as 0), which
+#' can be disabled by passing `center=FALSE` to the constructor.
+#' 
+#' **During inference** (i.e. when using `evaluate()` or `predict()` or when
+#' calling the layer/model with the argument `training=FALSE` (which is the
+#' default), the layer normalizes its output using a moving average of the
+#' mean and standard deviation of the batches it has seen during training. That
+#' is to say, it returns
+#' `gamma * (batch - self.moving_mean) / sqrt(self.moving_var+epsilon) + beta`.
+#' 
+#' `self.moving_mean` and `self.moving_var` are non-trainable variables that
+#' are updated each time the layer in called in training mode, as such:
+#' 
+#' - `moving_mean = moving_mean * momentum + mean(batch) * (1 - momentum)`
+#' - `moving_var = moving_var * momentum + var(batch) * (1 - momentum)`
+#' 
+#' As such, the layer will only normalize its inputs during inference
+#' *after having been trained on data that has similar statistics as the
+#' inference data*.
+#' 
+#' When `synchronized=TRUE` is set and if this layer is used within a
+#' `tf.distribute` strategy, there will be an `allreduce` call
+#' to aggregate batch statistics across all replicas at every
+#' training step. Setting `synchronized` has no impact when the model is
+#' trained without specifying any distribution strategy.
+#' 
+#' Example usage:
+#' 
+#' ```python
+#' strategy = tf.distribute.MirroredStrategy()
+#' 
+#' with strategy.scope():
+#'   model = tf.keras.Sequential()
+#'   model.add(tf.keras.layers.Dense(16))
+#'   model.add(tf.keras.layers.BatchNormalization(synchronized=TRUE))
+#' ``` 
+#' 
+#' @param axis 
+#' Integer, the axis that should be normalized (typically the features
+#' axis). For instance, after a `Conv2D` layer with
+#' `data_format="channels_first"`, set `axis=1` in `BatchNormalization`. 
+#' 
+#' @param momentum 
+#' Momentum for the moving average. 
+#' 
+#' @param epsilon 
+#' Small float added to variance to avoid dividing by zero. 
+#' 
+#' @param center 
+#' If TRUE, add offset of `beta` to normalized tensor. If FALSE,
+#' `beta` is ignored. 
+#' 
+#' @param scale 
+#' If TRUE, multiply by `gamma`. If FALSE, `gamma` is not used. When
+#' the next layer is linear (also e.g. `nn.relu`), this can be disabled
+#' since the scaling will be done by the next layer. 
+#' 
+#' @param beta_initializer 
+#' Initializer for the beta weight. 
+#' 
+#' @param gamma_initializer 
+#' Initializer for the gamma weight. 
+#' 
+#' @param moving_mean_initializer 
+#' Initializer for the moving mean. 
+#' 
+#' @param moving_variance_initializer 
+#' Initializer for the moving variance. 
+#' 
+#' @param beta_regularizer 
+#' Optional regularizer for the beta weight. 
+#' 
+#' @param gamma_regularizer 
+#' Optional regularizer for the gamma weight. 
+#' 
+#' @param beta_constraint 
+#' Optional constraint for the beta weight. 
+#' 
+#' @param gamma_constraint 
+#' Optional constraint for the gamma weight. 
+#' 
+#' @param synchronized 
+#' If TRUE, synchronizes the global batch statistics (mean and
+#' variance) for the layer across all devices at each training step in a
+#' distributed training strategy. If FALSE, each replica uses its own
+#' local batch statistics. Only relevant when used inside a
+#' `tf.distribute` strategy. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_batch_normalization <- 
+function(object, axis = -1L, momentum = 0.99, epsilon = 0.001, 
+    center = TRUE, scale = TRUE, beta_initializer = "zeros", 
+    gamma_initializer = "ones", moving_mean_initializer = "zeros", 
+    moving_variance_initializer = "ones", beta_regularizer = NULL, 
+    gamma_regularizer = NULL, beta_constraint = NULL, gamma_constraint = NULL, 
+    synchronized = FALSE, ...) 
+{
+    args <- capture_args(match.call(), list(axis = as_axis), 
+        ignore = "object")
+    create_layer(keras$layers$BatchNormalization, object, args)
+}
+
+
+#' Bidirectional wrapper for RNNs 
+#' 
+#'  
+#' 
+#' @param layer 
+#' `keras.layers.RNN` instance, such as `keras.layers.LSTM` or
+#' `keras.layers.GRU`. It could also be a `keras.layers.Layer` instance
+#' that meets the following criteria:
+#' 1. Be a sequence-processing layer (accepts 3D+ inputs).
+#' 2. Have a `go_backwards`, `return_sequences` and `return_state`
+#'   attribute (with the same semantics as for the `RNN` class).
+#' 3. Have an `input_spec` attribute.
+#' 4. Implement serialization via `get_config()` and `from_config()`.
+#' Note that the recommended way to create new RNN layers is to write a
+#' custom RNN cell and use it with `keras.layers.RNN`, instead of
+#' subclassing `keras.layers.Layer` directly.
+#' - When the `returns_sequences` is true, the output of the masked
+#' timestep will be zero regardless of the layer's original
+#' `zero_output_for_mask` value. 
+#' 
+#' @param merge_mode 
+#' Mode by which outputs of the forward and backward RNNs will be
+#' combined. One of {'sum', 'mul', 'concat', 'ave', NULL}. If NULL, the
+#' outputs will not be combined, they will be returned as a list. Default
+#' value is 'concat'. 
+#' 
+#' @param backward_layer 
+#' Optional `keras.layers.RNN`, or `keras.layers.Layer`
+#' instance to be used to handle backwards input processing.
+#' If `backward_layer` is not provided, the layer instance passed as the
+#' `layer` argument will be used to generate the backward layer
+#' automatically.
+#' Note that the provided `backward_layer` layer should have properties
+#' matching those of the `layer` argument, in particular it should have the
+#' same values for `stateful`, `return_states`, `return_sequences`, etc.
+#' In addition, `backward_layer` and `layer` should have different
+#' `go_backwards` argument values.
+#' A `ValueError` will be raised if these requirements are not met. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_bidirectional <- 
+function(object, layer, merge_mode = "concat", weights = NULL, 
+    backward_layer = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Bidirectional, object, args)
+}
+
+
+#' A preprocessing layer which encodes integer features 
+#' 
+#' @details 
+#' This layer provides options for condensing data into a categorical encoding
+#' when the total number of tokens are known in advance. It accepts integer
+#' values as inputs, and it outputs a dense or sparse representation of those
+#' inputs. For integer inputs where the total number of tokens is not known,
+#' use `tf.keras.layers.IntegerLookup` instead.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param num_tokens 
+#' The total number of tokens the layer should support. All
+#' inputs to the layer must integers in the range `0 <= value <
+#' num_tokens`, or an error will be thrown. 
+#' 
+#' @param output_mode 
+#' Specification for the output of the layer.
+#' Values can be `"one_hot"`, `"multi_hot"` or
+#' `"count"`, configuring the layer as follows:
+#'   - `"one_hot"`: Encodes each individual element in the input into an
+#'     array of `num_tokens` size, containing a 1 at the element index. If
+#'     the last dimension is size 1, will encode on that dimension. If the
+#'     last dimension is not size 1, will append a new dimension for the
+#'     encoded output.
+#'   - `"multi_hot"`: Encodes each sample in the input into a single array
+#'     of `num_tokens` size, containing a 1 for each vocabulary term
+#'     present in the sample. Treats the last dimension as the sample
+#'     dimension, if input shape is `(..., sample_length)`, output shape
+#'     will be `(..., num_tokens)`.
+#'   - `"count"`: Like `"multi_hot"`, but the int array contains a count of
+#'     the number of times the token at that index appeared in the sample.
+#' For all output modes, currently only output up to rank 2 is supported.
+#' Defaults to `"multi_hot"`. 
+#' 
+#' @param sparse 
+#' Boolean. If true, returns a `SparseTensor` instead of a dense
+#' `Tensor`. Defaults to `FALSE`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_category_encoding <- 
+function(object, num_tokens = NULL, output_mode = "multi_hot", 
+    sparse = FALSE, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$CategoryEncoding, object, args)
+}
+
+
+#' A preprocessing layer which crops images 
+#' 
+#' @details 
+#' This layers crops the central portion of the images to a target size. If an
+#' image is smaller than the target size, it will be resized and cropped
+#' so as to return the largest possible window in the image that matches
+#' the target aspect ratio.
+#' 
+#' Input pixel values can be of any range (e.g. `[0., 1.)` or `[0, 255]`) and
+#' of integer or floating point dtype.
+#' By default, the layer will output floats.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#' 
+#' Input shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format.
+#' 
+#' Output shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., target_height, target_width, channels)`.
+#' 
+#' If the input height/width is even and the target height/width is odd (or
+#' inversely), the input image is left-padded by 1 pixel. 
+#' 
+#' @param height 
+#' Integer, the height of the output shape. 
+#' 
+#' @param width 
+#' Integer, the width of the output shape. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_center_crop <- 
+function(object, height, width, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$CenterCrop, object, args)
+}
+
+
+#' Layer that concatenates a list of inputs 
+#' 
+#' @details 
+#' It takes as input a list of tensors, all of the same shape except
+#' for the concatenation axis, and returns a single tensor that is the
+#' concatenation of all inputs.
+#' 
+#' ```python
+#' >>> x = np.arange(20).reshape(2, 2, 5)
+#' >>> print(x)
+#' [[[ 0  1  2  3  4]
+#'   [ 5  6  7  8  9]]
+#'  [[10 11 12 13 14]
+#'   [15 16 17 18 19]]]
+#' >>> y = np.arange(20, 30).reshape(2, 1, 5)
+#' >>> print(y)
+#' [[[20 21 22 23 24]]
+#'  [[25 26 27 28 29]]]
+#' >>> tf.keras.layers.Concatenate(axis=1)([x, y])
+#' <tf.Tensor: shape=(2, 3, 5), dtype=int64, numpy=
+#' array([[[ 0,  1,  2,  3,  4],
+#'         [ 5,  6,  7,  8,  9],
+#'         [20, 21, 22, 23, 24]],
+#'        [[10, 11, 12, 13, 14],
+#'         [15, 16, 17, 18, 19],
+#'         [25, 26, 27, 28, 29]]])>
+#' ```
+#' 
+#' ```python
+#' >>> x1 = tf.keras.layers.Dense(8)(np.arange(10).reshape(5, 2))
+#' >>> x2 = tf.keras.layers.Dense(8)(np.arange(10, 20).reshape(5, 2))
+#' >>> concatted = tf.keras.layers.Concatenate()([x1, x2])
+#' >>> concatted.shape
+#' TensorShape([5, 16])
+#' ```
+#'  
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_concatenate <- 
+function(object, axis = -1L, ...) 
+{
+    args <- capture_args(match.call(), list(axis = as_axis), 
+        ignore = "object")
+    create_layer(keras$layers$Concatenate, object, args)
+}
+
+
+#' 1D convolution layer (e.g. temporal convolution) 
+#' 
+#' @details 
+#' This layer creates a convolution kernel that is convolved
+#' with the layer input over a single spatial (or temporal) dimension
+#' to produce a tensor of outputs.
+#' If `use_bias` is TRUE, a bias vector is created and added to the outputs.
+#' Finally, if `activation` is not `NULL`,
+#' it is applied to the outputs as well.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide an `input_shape` argument
+#' (list of integers or `NULL`, e.g.
+#' `(10, 128)` for sequences of 10 vectors of 128-dimensional vectors,
+#' or `(NULL, 128)` for variable-length sequences of 128-dimensional vectors. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space
+#' (i.e. the number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of a single integer,
+#' specifying the length of the 1D convolution window. 
+#' 
+#' @param strides 
+#' An integer or list of a single integer,
+#' specifying the stride length of the convolution.
+#' Specifying any stride value != 1 is incompatible with specifying
+#' any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' One of `"valid"`, `"same"` or `"causal"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input.
+#' `"causal"` results in causal (dilated) convolutions, e.g. `output[t]`
+#' does not depend on `input[t+1:]`. Useful when modeling temporal data
+#' where the model should not violate the temporal order.
+#' See [WaveNet: A Generative Model for Raw Audio, section
+#'   2.1](https://arxiv.org/abs/1609.03499). 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`. The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch_size, width,
+#' channels)` while `channels_first` corresponds to inputs with shape
+#' `(batch_size, channels, width)`. Note that the `channels_first` format
+#' is currently not supported by TensorFlow on CPU. 
+#' 
+#' @param dilation_rate 
+#' an integer or list of a single integer, specifying
+#' the dilation rate to use for dilated convolution.
+#' Currently, specifying any `dilation_rate` value != 1 is
+#' incompatible with specifying any `strides` value != 1. 
+#' 
+#' @param groups 
+#' A positive integer specifying the number of groups in which the
+#' input is split along the channel axis. Each group is convolved
+#' separately with `filters / groups` filters. The output is the
+#' concatenation of all the `groups` results along the channel axis.
+#' Input channels and `filters` must both be divisible by `groups`. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix
+#' (see `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector
+#' (see `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to
+#' the `kernel` weights matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation")
+#' (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector
+#' (see `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_1d <- 
+function(object, filters, kernel_size, strides = 1L, padding = "valid", 
+    data_format = "channels_last", dilation_rate = 1L, groups = 1L, 
+    activation = NULL, use_bias = TRUE, kernel_initializer = "glorot_uniform", 
+    bias_initializer = "zeros", kernel_regularizer = NULL, bias_regularizer = NULL, 
+    activity_regularizer = NULL, kernel_constraint = NULL, bias_constraint = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), list(strides = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, groups = as.integer, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple), 
+        ignore = "object")
+    create_layer(keras$layers$Conv1D, object, args)
+}
+
+
+#' Transposed convolution layer (sometimes called Deconvolution) 
+#' 
+#' @details 
+#' The need for transposed convolutions generally arises
+#' from the desire to use a transformation going in the opposite direction
+#' of a normal convolution, i.e., from something that has the shape of the
+#' output of some convolution to something that has the shape of its input
+#' while maintaining a connectivity pattern that is compatible with
+#' said convolution.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide the keyword argument `input_shape`
+#' (list of integers or `NULL`, does not include the sample axis),
+#' e.g. `input_shape=(128, 3)` for data with 128 time steps and 3 channels. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space
+#' (i.e. the number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer length of the 1D convolution window. 
+#' 
+#' @param strides 
+#' An integer specifying the stride of the convolution along the
+#' time dimension. Specifying a stride value != 1 is incompatible with
+#' specifying a `dilation_rate` value != 1. Defaults to `1`. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. 
+#' 
+#' @param output_padding 
+#' An integer specifying the amount of padding along
+#' the time dimension of the output tensor.
+#' The amount of output padding must be lower than the stride.
+#' If set to `NULL` (default), the output shape is inferred. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, length, channels)` while `channels_first` corresponds to
+#' inputs with shape `(batch_size, channels, length)`. 
+#' 
+#' @param dilation_rate 
+#' an integer, specifying
+#' the dilation rate to use for dilated convolution.
+#' Currently, specifying a `dilation_rate` value != 1 is
+#' incompatible with specifying a stride value != 1.
+#' Also dilation rate larger than 1 is not currently supported. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix
+#' (see `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector
+#' (see `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to
+#' the `kernel` weights matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation") (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector
+#' (see `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_1d_transpose <- 
+function(object, filters, kernel_size, strides = 1L, padding = "valid", 
+    output_padding = NULL, data_format = NULL, dilation_rate = 1L, 
+    activation = NULL, use_bias = TRUE, kernel_initializer = "glorot_uniform", 
+    bias_initializer = "zeros", kernel_regularizer = NULL, bias_regularizer = NULL, 
+    activity_regularizer = NULL, kernel_constraint = NULL, bias_constraint = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), list(strides = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple), ignore = "object")
+    create_layer(keras$layers$Conv1DTranspose, object, args)
+}
+
+
+#' 2D convolution layer (e.g. spatial convolution over images) 
+#' 
+#' @details 
+#' This layer creates a convolution kernel that is convolved
+#' with the layer input to produce a tensor of
+#' outputs. If `use_bias` is TRUE,
+#' a bias vector is created and added to the outputs. Finally, if
+#' `activation` is not `NULL`, it is applied to the outputs as well.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide the keyword argument `input_shape`
+#' (list of integers or `NULL`, does not include the sample axis),
+#' e.g. `input_shape=(128, 128, 3)` for 128x128 RGB pictures
+#' in `data_format="channels_last"`. You can use `NULL` when
+#' a dimension has variable size. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the number
+#' of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 2 integers, specifying the height
+#' and width of the 2D convolution window. Can be a single integer to
+#' specify the same value for all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 2 integers, specifying the strides of
+#' the convolution along the height and width. Can be a single integer to
+#' specify the same value for all spatial dimensions. Specifying any stride
+#' value != 1 is incompatible with specifying any `dilation_rate` value !=
+#' 1. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input. When `padding="same"`
+#' and `strides=1`, the output has the same size as the input. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch_size, height,
+#' width, channels)` while `channels_first` corresponds to inputs with
+#' shape `(batch_size, channels, height, width)`. If left unspecified, it
+#' uses the `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Note that the `channels_first` format is currently not
+#' supported by TensorFlow on CPU. Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' an integer or list of 2 integers, specifying the
+#' dilation rate to use for dilated convolution. Can be a single integer to
+#' specify the same value for all spatial dimensions. Currently, specifying
+#' any `dilation_rate` value != 1 is incompatible with specifying any
+#' stride value != 1. 
+#' 
+#' @param groups 
+#' A positive integer specifying the number of groups in which the
+#' input is split along the channel axis. Each group is convolved
+#' separately with `filters / groups` filters. The output is the
+#' concatenation of all the `groups` results along the channel axis. Input
+#' channels and `filters` must both be divisible by `groups`. 
+#' 
+#' @param activation 
+#' Activation function to use. If you don't specify anything, no
+#' activation is applied (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix (see
+#' `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector (see
+#' `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector (see
+#' `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its "activation") (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix (see
+#' `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector (see
+#' `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_2d <- 
+function(object, filters, kernel_size, strides = list(1L, 1L), 
+    padding = "valid", data_format = NULL, dilation_rate = list(
+        1L, 1L), groups = 1L, activation = NULL, use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(groups = as.integer, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
+        ignore = "object")
+    create_layer(keras$layers$Conv2D, object, args)
+}
+
+
+#' Transposed convolution layer (sometimes called Deconvolution) 
+#' 
+#' @details 
+#' The need for transposed convolutions generally arises
+#' from the desire to use a transformation going in the opposite direction
+#' of a normal convolution, i.e., from something that has the shape of the
+#' output of some convolution to something that has the shape of its input
+#' while maintaining a connectivity pattern that is compatible with
+#' said convolution.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide the keyword argument `input_shape`
+#' (list of integers or `NULL`, does not include the sample axis),
+#' e.g. `input_shape=(128, 128, 3)` for 128x128 RGB pictures
+#' in `data_format="channels_last"`. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space
+#' (i.e. the number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 2 integers, specifying the
+#' height and width of the 2D convolution window.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 2 integers,
+#' specifying the strides of the convolution along the height and width.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions.
+#' Specifying any stride value != 1 is incompatible with specifying
+#' any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. 
+#' 
+#' @param output_padding 
+#' An integer or list of 2 integers,
+#' specifying the amount of padding along the height and width
+#' of the output tensor.
+#' Can be a single integer to specify the same value for all
+#' spatial dimensions.
+#' The amount of output padding along a given dimension must be
+#' lower than the stride along that same dimension.
+#' If set to `NULL` (default), the output shape is inferred. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch_size, channels, height, width)`.
+#' When unspecified, uses `image_data_format` value found in your Keras
+#' config file at `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to "channels_last". 
+#' 
+#' @param dilation_rate 
+#' an integer, specifying the dilation rate for all spatial
+#' dimensions for dilated convolution. Specifying different dilation rates
+#' for different dimensions is not supported.
+#' Currently, specifying any `dilation_rate` value != 1 is
+#' incompatible with specifying any stride value != 1. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix
+#' (see `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector
+#' (see `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to
+#' the `kernel` weights matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation") (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector
+#' (see `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_2d_transpose <- 
+function(object, filters, kernel_size, strides = list(1L, 1L), 
+    padding = "valid", output_padding = NULL, data_format = NULL, 
+    dilation_rate = list(1L, 1L), activation = NULL, use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
+        strides = as_integer_or_integer_tuple), ignore = "object")
+    create_layer(keras$layers$Conv2DTranspose, object, args)
+}
+
+
+#' 3D convolution layer (e.g. spatial convolution over volumes) 
+#' 
+#' @details 
+#' This layer creates a convolution kernel that is convolved
+#' with the layer input to produce a tensor of
+#' outputs. If `use_bias` is TRUE,
+#' a bias vector is created and added to the outputs. Finally, if
+#' `activation` is not `NULL`, it is applied to the outputs as well.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide the keyword argument `input_shape`
+#' (list of integers or `NULL`, does not include the sample axis),
+#' e.g. `input_shape=(128, 128, 128, 1)` for 128x128x128 volumes
+#' with a single channel,
+#' in `data_format="channels_last"`. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the number
+#' of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 3 integers, specifying the depth,
+#' height and width of the 3D convolution window. Can be a single integer
+#' to specify the same value for all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 3 integers, specifying the strides of
+#' the convolution along each spatial dimension. Can be a single integer to
+#' specify the same value for all spatial dimensions. Specifying any stride
+#' value != 1 is incompatible with specifying any `dilation_rate` value !=
+#' 1. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `batch_shape +
+#' (spatial_dim1, spatial_dim2, spatial_dim3, channels)` while
+#' `channels_first` corresponds to inputs with shape `batch_shape +
+#' (channels, spatial_dim1, spatial_dim2, spatial_dim3)`. When unspecified,
+#' uses `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'. Note that the
+#' `channels_first` format is currently not supported by TensorFlow on CPU.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' an integer or list of 3 integers, specifying the
+#' dilation rate to use for dilated convolution. Can be a single integer to
+#' specify the same value for all spatial dimensions. Currently, specifying
+#' any `dilation_rate` value != 1 is incompatible with specifying any
+#' stride value != 1. 
+#' 
+#' @param groups 
+#' A positive integer specifying the number of groups in which the
+#' input is split along the channel axis. Each group is convolved
+#' separately with `filters / groups` filters. The output is the
+#' concatenation of all the `groups` results along the channel axis. Input
+#' channels and `filters` must both be divisible by `groups`. 
+#' 
+#' @param activation 
+#' Activation function to use. If you don't specify anything, no
+#' activation is applied (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix (see
+#' `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector (see
+#' `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector (see
+#' `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its "activation") (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix (see
+#' `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector (see
+#' `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_3d <- 
+function(object, filters, kernel_size, strides = list(1L, 1L, 
+    1L), padding = "valid", data_format = NULL, dilation_rate = list(
+    1L, 1L, 1L), groups = 1L, activation = NULL, use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(groups = as.integer, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
+        ignore = "object")
+    create_layer(keras$layers$Conv3D, object, args)
+}
+
+
+#' Transposed convolution layer (sometimes called Deconvolution) 
+#' 
+#' @details 
+#' The need for transposed convolutions generally arises
+#' from the desire to use a transformation going in the opposite direction
+#' of a normal convolution, i.e., from something that has the shape of the
+#' output of some convolution to something that has the shape of its input
+#' while maintaining a connectivity pattern that is compatible with
+#' said convolution.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide the keyword argument `input_shape`
+#' (list of integers or `NULL`, does not include the sample axis),
+#' e.g. `input_shape=(128, 128, 128, 3)` for a 128x128x128 volume with 3
+#' channels if `data_format="channels_last"`. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space
+#' (i.e. the number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 3 integers, specifying the
+#' depth, height and width of the 3D convolution window.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 3 integers,
+#' specifying the strides of the convolution along the depth, height
+#'   and width.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions.
+#' Specifying any stride value != 1 is incompatible with specifying
+#' any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. 
+#' 
+#' @param output_padding 
+#' An integer or list of 3 integers,
+#' specifying the amount of padding along the depth, height, and
+#' width.
+#' Can be a single integer to specify the same value for all
+#' spatial dimensions.
+#' The amount of output padding along a given dimension must be
+#' lower than the stride along that same dimension.
+#' If set to `NULL` (default), the output shape is inferred. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, depth, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch_size, channels, depth, height, width)`.
+#' When unspecified, uses `image_data_format` value found in your Keras
+#' config file at `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' an integer or list of 3 integers, specifying
+#' the dilation rate to use for dilated convolution.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions.
+#' Currently, specifying any `dilation_rate` value != 1 is
+#' incompatible with specifying any stride value != 1. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix
+#' (see `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector
+#' (see `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to
+#' the `kernel` weights matrix
+#' (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation")
+#' (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector
+#' (see `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_3d_transpose <- 
+function(object, filters, kernel_size, strides = list(1L, 1L, 
+    1L), padding = "valid", output_padding = NULL, data_format = NULL, 
+    dilation_rate = list(1L, 1L, 1L), activation = NULL, use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
+        strides = as_integer_or_integer_tuple), ignore = "object")
+    create_layer(keras$layers$Conv3DTranspose, object, args)
+}
+
+
+#' 1D Convolutional LSTM 
+#' 
+#' @details 
+#' Similar to an LSTM layer, but the input transformations
+#' and recurrent transformations are both convolutional. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the number
+#' of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of n integers, specifying the
+#' dimensions of the convolution window. 
+#' 
+#' @param strides 
+#' An integer or list of n integers, specifying the strides of
+#' the convolution. Specifying any stride value != 1 is incompatible with
+#' specifying any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive). `"valid"` means
+#' no padding. `"same"` results in padding evenly to the left/right or
+#' up/down of the input such that output has the same height/width
+#' dimension as the input. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch, time, ...,
+#' channels)` while `channels_first` corresponds to inputs with shape
+#' `(batch, time, channels, ...)`. When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' An integer or list of n integers, specifying the
+#' dilation rate to use for dilated convolution. Currently, specifying any
+#' `dilation_rate` value != 1 is incompatible with specifying any `strides`
+#' value != 1. 
+#' 
+#' @param activation 
+#' Activation function to use. By default hyperbolic tangent
+#' activation function is applied (`tanh(x)`). 
+#' 
+#' @param recurrent_activation 
+#' Activation function to use for the recurrent step. 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix, used for
+#' the linear transformation of the inputs. 
+#' 
+#' @param recurrent_initializer 
+#' Initializer for the `recurrent_kernel` weights
+#' matrix, used for the linear transformation of the recurrent state. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. 
+#' 
+#' @param unit_forget_bias 
+#' Boolean. If TRUE, add 1 to the bias of the forget gate
+#' at initialization. Use in combination with `bias_initializer="zeros"`.
+#' This is recommended in [Jozefowicz et al., 2015](
+#' http://www.jmlr.org/proceedings/papers/v37/jozefowicz15.pdf) 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. 
+#' 
+#' @param recurrent_regularizer 
+#' Regularizer function applied to the
+#' `recurrent_kernel` weights matrix. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector. 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to. 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the `kernel` weights
+#' matrix. 
+#' 
+#' @param recurrent_constraint 
+#' Constraint function applied to the
+#' `recurrent_kernel` weights matrix. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. 
+#' 
+#' @param return_sequences 
+#' Boolean. Whether to return the last output in the output
+#' sequence, or the full sequence. (default FALSE) 
+#' 
+#' @param return_state 
+#' Boolean Whether to return the last state in addition to the
+#' output. (default FALSE) 
+#' 
+#' @param go_backwards 
+#' Boolean (default FALSE). If TRUE, process the input sequence
+#' backwards. 
+#' 
+#' @param stateful 
+#' Boolean (default FALSE). If TRUE, the last state for each sample
+#' at index i in a batch will be used as initial state for the sample of
+#' index i in the following batch. 
+#' 
+#' @param dropout 
+#' Float between 0 and 1. Fraction of the units to drop for the
+#' linear transformation of the inputs. 
+#' 
+#' @param recurrent_dropout 
+#' Float between 0 and 1. Fraction of the units to drop
+#' for the linear transformation of the recurrent state. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_lstm_1d <- 
+function(object, filters, kernel_size, strides = 1L, padding = "valid", 
+    data_format = NULL, dilation_rate = 1L, activation = "tanh", 
+    recurrent_activation = "hard_sigmoid", use_bias = TRUE, kernel_initializer = "glorot_uniform", 
+    recurrent_initializer = "orthogonal", bias_initializer = "zeros", 
+    unit_forget_bias = TRUE, kernel_regularizer = NULL, recurrent_regularizer = NULL, 
+    bias_regularizer = NULL, activity_regularizer = NULL, kernel_constraint = NULL, 
+    recurrent_constraint = NULL, bias_constraint = NULL, return_sequences = FALSE, 
+    return_state = FALSE, go_backwards = FALSE, stateful = FALSE, 
+    dropout = 0, recurrent_dropout = 0, ...) 
+{
+    args <- capture_args(match.call(), list(strides = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple), ignore = "object")
+    create_layer(keras$layers$ConvLSTM1D, object, args)
+}
+
+
+#' 2D Convolutional LSTM 
+#' 
+#' @details 
+#' Similar to an LSTM layer, but the input transformations
+#' and recurrent transformations are both convolutional. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the number
+#' of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of n integers, specifying the
+#' dimensions of the convolution window. 
+#' 
+#' @param strides 
+#' An integer or list of n integers, specifying the strides of
+#' the convolution. Specifying any stride value != 1 is incompatible with
+#' specifying any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive). `"valid"` means
+#' no padding. `"same"` results in padding evenly to the left/right or
+#' up/down of the input such that output has the same height/width
+#' dimension as the input. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch, time, ...,
+#' channels)` while `channels_first` corresponds to inputs with shape
+#' `(batch, time, channels, ...)`. When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' An integer or list of n integers, specifying the
+#' dilation rate to use for dilated convolution. Currently, specifying any
+#' `dilation_rate` value != 1 is incompatible with specifying any `strides`
+#' value != 1. 
+#' 
+#' @param activation 
+#' Activation function to use. By default hyperbolic tangent
+#' activation function is applied (`tanh(x)`). 
+#' 
+#' @param recurrent_activation 
+#' Activation function to use for the recurrent step. 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix, used for
+#' the linear transformation of the inputs. 
+#' 
+#' @param recurrent_initializer 
+#' Initializer for the `recurrent_kernel` weights
+#' matrix, used for the linear transformation of the recurrent state. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. 
+#' 
+#' @param unit_forget_bias 
+#' Boolean. If TRUE, add 1 to the bias of the forget gate
+#' at initialization. Use in combination with `bias_initializer="zeros"`.
+#' This is recommended in [Jozefowicz et al., 2015](
+#' http://www.jmlr.org/proceedings/papers/v37/jozefowicz15.pdf) 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. 
+#' 
+#' @param recurrent_regularizer 
+#' Regularizer function applied to the
+#' `recurrent_kernel` weights matrix. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector. 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to. 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the `kernel` weights
+#' matrix. 
+#' 
+#' @param recurrent_constraint 
+#' Constraint function applied to the
+#' `recurrent_kernel` weights matrix. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. 
+#' 
+#' @param return_sequences 
+#' Boolean. Whether to return the last output in the output
+#' sequence, or the full sequence. (default FALSE) 
+#' 
+#' @param return_state 
+#' Boolean Whether to return the last state in addition to the
+#' output. (default FALSE) 
+#' 
+#' @param go_backwards 
+#' Boolean (default FALSE). If TRUE, process the input sequence
+#' backwards. 
+#' 
+#' @param stateful 
+#' Boolean (default FALSE). If TRUE, the last state for each sample
+#' at index i in a batch will be used as initial state for the sample of
+#' index i in the following batch. 
+#' 
+#' @param dropout 
+#' Float between 0 and 1. Fraction of the units to drop for the
+#' linear transformation of the inputs. 
+#' 
+#' @param recurrent_dropout 
+#' Float between 0 and 1. Fraction of the units to drop
+#' for the linear transformation of the recurrent state. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_lstm_2d <- 
+function(object, filters, kernel_size, strides = list(1L, 1L), 
+    padding = "valid", data_format = NULL, dilation_rate = list(
+        1L, 1L), activation = "tanh", recurrent_activation = "hard_sigmoid", 
+    use_bias = TRUE, kernel_initializer = "glorot_uniform", recurrent_initializer = "orthogonal", 
+    bias_initializer = "zeros", unit_forget_bias = TRUE, kernel_regularizer = NULL, 
+    recurrent_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, recurrent_constraint = NULL, bias_constraint = NULL, 
+    return_sequences = FALSE, return_state = FALSE, go_backwards = FALSE, 
+    stateful = FALSE, dropout = 0, recurrent_dropout = 0, ...) 
+{
+    args <- capture_args(match.call(), list(filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
+        strides = as_integer_or_integer_tuple), ignore = "object")
+    create_layer(keras$layers$ConvLSTM2D, object, args)
+}
+
+
+#' 3D Convolutional LSTM 
+#' 
+#' @details 
+#' Similar to an LSTM layer, but the input transformations
+#' and recurrent transformations are both convolutional. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the number
+#' of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of n integers, specifying the
+#' dimensions of the convolution window. 
+#' 
+#' @param strides 
+#' An integer or list of n integers, specifying the strides of
+#' the convolution. Specifying any stride value != 1 is incompatible with
+#' specifying any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive). `"valid"` means
+#' no padding. `"same"` results in padding evenly to the left/right or
+#' up/down of the input such that output has the same height/width
+#' dimension as the input. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`. The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch, time, ...,
+#' channels)` while `channels_first` corresponds to inputs with shape
+#' `(batch, time, channels, ...)`. When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' An integer or list of n integers, specifying the
+#' dilation rate to use for dilated convolution. Currently, specifying any
+#' `dilation_rate` value != 1 is incompatible with specifying any `strides`
+#' value != 1. 
+#' 
+#' @param activation 
+#' Activation function to use. By default hyperbolic tangent
+#' activation function is applied (`tanh(x)`). 
+#' 
+#' @param recurrent_activation 
+#' Activation function to use for the recurrent step. 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix, used for
+#' the linear transformation of the inputs. 
+#' 
+#' @param recurrent_initializer 
+#' Initializer for the `recurrent_kernel` weights
+#' matrix, used for the linear transformation of the recurrent state. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. 
+#' 
+#' @param unit_forget_bias 
+#' Boolean. If TRUE, add 1 to the bias of the forget gate
+#' at initialization. Use in combination with `bias_initializer="zeros"`.
+#' This is recommended in [Jozefowicz et al., 2015](
+#' http://www.jmlr.org/proceedings/papers/v37/jozefowicz15.pdf) 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. 
+#' 
+#' @param recurrent_regularizer 
+#' Regularizer function applied to the
+#' `recurrent_kernel` weights matrix. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector. 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to. 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the `kernel` weights
+#' matrix. 
+#' 
+#' @param recurrent_constraint 
+#' Constraint function applied to the
+#' `recurrent_kernel` weights matrix. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. 
+#' 
+#' @param return_sequences 
+#' Boolean. Whether to return the last output in the output
+#' sequence, or the full sequence. (default FALSE) 
+#' 
+#' @param return_state 
+#' Boolean Whether to return the last state in addition to the
+#' output. (default FALSE) 
+#' 
+#' @param go_backwards 
+#' Boolean (default FALSE). If TRUE, process the input sequence
+#' backwards. 
+#' 
+#' @param stateful 
+#' Boolean (default FALSE). If TRUE, the last state for each sample
+#' at index i in a batch will be used as initial state for the sample of
+#' index i in the following batch. 
+#' 
+#' @param dropout 
+#' Float between 0 and 1. Fraction of the units to drop for the
+#' linear transformation of the inputs. 
+#' 
+#' @param recurrent_dropout 
+#' Float between 0 and 1. Fraction of the units to drop
+#' for the linear transformation of the recurrent state. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_lstm_3d <- 
+function(object, filters, kernel_size, strides = list(1L, 1L, 
+    1L), padding = "valid", data_format = NULL, dilation_rate = list(
+    1L, 1L, 1L), activation = "tanh", recurrent_activation = "hard_sigmoid", 
+    use_bias = TRUE, kernel_initializer = "glorot_uniform", recurrent_initializer = "orthogonal", 
+    bias_initializer = "zeros", unit_forget_bias = TRUE, kernel_regularizer = NULL, 
+    recurrent_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, recurrent_constraint = NULL, bias_constraint = NULL, 
+    return_sequences = FALSE, return_state = FALSE, go_backwards = FALSE, 
+    stateful = FALSE, dropout = 0, recurrent_dropout = 0, ...) 
+{
+    args <- capture_args(match.call(), list(filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
+        strides = as_integer_or_integer_tuple), ignore = "object")
+    create_layer(keras$layers$ConvLSTM3D, object, args)
+}
+
+
+#' 1D convolution layer (e.g. temporal convolution) 
+#' 
+#' @details 
+#' This layer creates a convolution kernel that is convolved
+#' with the layer input over a single spatial (or temporal) dimension
+#' to produce a tensor of outputs.
+#' If `use_bias` is TRUE, a bias vector is created and added to the outputs.
+#' Finally, if `activation` is not `NULL`,
+#' it is applied to the outputs as well.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide an `input_shape` argument
+#' (list of integers or `NULL`, e.g.
+#' `(10, 128)` for sequences of 10 vectors of 128-dimensional vectors,
+#' or `(NULL, 128)` for variable-length sequences of 128-dimensional vectors. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space
+#' (i.e. the number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of a single integer,
+#' specifying the length of the 1D convolution window. 
+#' 
+#' @param strides 
+#' An integer or list of a single integer,
+#' specifying the stride length of the convolution.
+#' Specifying any stride value != 1 is incompatible with specifying
+#' any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' One of `"valid"`, `"same"` or `"causal"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input.
+#' `"causal"` results in causal (dilated) convolutions, e.g. `output[t]`
+#' does not depend on `input[t+1:]`. Useful when modeling temporal data
+#' where the model should not violate the temporal order.
+#' See [WaveNet: A Generative Model for Raw Audio, section
+#'   2.1](https://arxiv.org/abs/1609.03499). 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`. The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch_size, width,
+#' channels)` while `channels_first` corresponds to inputs with shape
+#' `(batch_size, channels, width)`. Note that the `channels_first` format
+#' is currently not supported by TensorFlow on CPU. 
+#' 
+#' @param dilation_rate 
+#' an integer or list of a single integer, specifying
+#' the dilation rate to use for dilated convolution.
+#' Currently, specifying any `dilation_rate` value != 1 is
+#' incompatible with specifying any `strides` value != 1. 
+#' 
+#' @param groups 
+#' A positive integer specifying the number of groups in which the
+#' input is split along the channel axis. Each group is convolved
+#' separately with `filters / groups` filters. The output is the
+#' concatenation of all the `groups` results along the channel axis.
+#' Input channels and `filters` must both be divisible by `groups`. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix
+#' (see `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector
+#' (see `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to
+#' the `kernel` weights matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation")
+#' (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector
+#' (see `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_1d <- 
+function(object, filters, kernel_size, strides = 1L, padding = "valid", 
+    data_format = "channels_last", dilation_rate = 1L, groups = 1L, 
+    activation = NULL, use_bias = TRUE, kernel_initializer = "glorot_uniform", 
+    bias_initializer = "zeros", kernel_regularizer = NULL, bias_regularizer = NULL, 
+    activity_regularizer = NULL, kernel_constraint = NULL, bias_constraint = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), list(strides = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, groups = as.integer, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple), 
+        ignore = "object")
+    create_layer(keras$layers$Conv1D, object, args)
+}
+
+
+#' Transposed convolution layer (sometimes called Deconvolution) 
+#' 
+#' @details 
+#' The need for transposed convolutions generally arises
+#' from the desire to use a transformation going in the opposite direction
+#' of a normal convolution, i.e., from something that has the shape of the
+#' output of some convolution to something that has the shape of its input
+#' while maintaining a connectivity pattern that is compatible with
+#' said convolution.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide the keyword argument `input_shape`
+#' (list of integers or `NULL`, does not include the sample axis),
+#' e.g. `input_shape=(128, 3)` for data with 128 time steps and 3 channels. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space
+#' (i.e. the number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer length of the 1D convolution window. 
+#' 
+#' @param strides 
+#' An integer specifying the stride of the convolution along the
+#' time dimension. Specifying a stride value != 1 is incompatible with
+#' specifying a `dilation_rate` value != 1. Defaults to `1`. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. 
+#' 
+#' @param output_padding 
+#' An integer specifying the amount of padding along
+#' the time dimension of the output tensor.
+#' The amount of output padding must be lower than the stride.
+#' If set to `NULL` (default), the output shape is inferred. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, length, channels)` while `channels_first` corresponds to
+#' inputs with shape `(batch_size, channels, length)`. 
+#' 
+#' @param dilation_rate 
+#' an integer, specifying
+#' the dilation rate to use for dilated convolution.
+#' Currently, specifying a `dilation_rate` value != 1 is
+#' incompatible with specifying a stride value != 1.
+#' Also dilation rate larger than 1 is not currently supported. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix
+#' (see `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector
+#' (see `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to
+#' the `kernel` weights matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation") (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector
+#' (see `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_1d_transpose <- 
+function(object, filters, kernel_size, strides = 1L, padding = "valid", 
+    output_padding = NULL, data_format = NULL, dilation_rate = 1L, 
+    activation = NULL, use_bias = TRUE, kernel_initializer = "glorot_uniform", 
+    bias_initializer = "zeros", kernel_regularizer = NULL, bias_regularizer = NULL, 
+    activity_regularizer = NULL, kernel_constraint = NULL, bias_constraint = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), list(strides = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple), ignore = "object")
+    create_layer(keras$layers$Conv1DTranspose, object, args)
+}
+
+
+#' 2D convolution layer (e.g. spatial convolution over images) 
+#' 
+#' @details 
+#' This layer creates a convolution kernel that is convolved
+#' with the layer input to produce a tensor of
+#' outputs. If `use_bias` is TRUE,
+#' a bias vector is created and added to the outputs. Finally, if
+#' `activation` is not `NULL`, it is applied to the outputs as well.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide the keyword argument `input_shape`
+#' (list of integers or `NULL`, does not include the sample axis),
+#' e.g. `input_shape=(128, 128, 3)` for 128x128 RGB pictures
+#' in `data_format="channels_last"`. You can use `NULL` when
+#' a dimension has variable size. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the number
+#' of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 2 integers, specifying the height
+#' and width of the 2D convolution window. Can be a single integer to
+#' specify the same value for all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 2 integers, specifying the strides of
+#' the convolution along the height and width. Can be a single integer to
+#' specify the same value for all spatial dimensions. Specifying any stride
+#' value != 1 is incompatible with specifying any `dilation_rate` value !=
+#' 1. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input. When `padding="same"`
+#' and `strides=1`, the output has the same size as the input. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch_size, height,
+#' width, channels)` while `channels_first` corresponds to inputs with
+#' shape `(batch_size, channels, height, width)`. If left unspecified, it
+#' uses the `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Note that the `channels_first` format is currently not
+#' supported by TensorFlow on CPU. Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' an integer or list of 2 integers, specifying the
+#' dilation rate to use for dilated convolution. Can be a single integer to
+#' specify the same value for all spatial dimensions. Currently, specifying
+#' any `dilation_rate` value != 1 is incompatible with specifying any
+#' stride value != 1. 
+#' 
+#' @param groups 
+#' A positive integer specifying the number of groups in which the
+#' input is split along the channel axis. Each group is convolved
+#' separately with `filters / groups` filters. The output is the
+#' concatenation of all the `groups` results along the channel axis. Input
+#' channels and `filters` must both be divisible by `groups`. 
+#' 
+#' @param activation 
+#' Activation function to use. If you don't specify anything, no
+#' activation is applied (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix (see
+#' `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector (see
+#' `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector (see
+#' `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its "activation") (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix (see
+#' `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector (see
+#' `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_2d <- 
+function(object, filters, kernel_size, strides = list(1L, 1L), 
+    padding = "valid", data_format = NULL, dilation_rate = list(
+        1L, 1L), groups = 1L, activation = NULL, use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(groups = as.integer, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
+        ignore = "object")
+    create_layer(keras$layers$Conv2D, object, args)
+}
+
+
+#' Transposed convolution layer (sometimes called Deconvolution) 
+#' 
+#' @details 
+#' The need for transposed convolutions generally arises
+#' from the desire to use a transformation going in the opposite direction
+#' of a normal convolution, i.e., from something that has the shape of the
+#' output of some convolution to something that has the shape of its input
+#' while maintaining a connectivity pattern that is compatible with
+#' said convolution.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide the keyword argument `input_shape`
+#' (list of integers or `NULL`, does not include the sample axis),
+#' e.g. `input_shape=(128, 128, 3)` for 128x128 RGB pictures
+#' in `data_format="channels_last"`. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space
+#' (i.e. the number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 2 integers, specifying the
+#' height and width of the 2D convolution window.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 2 integers,
+#' specifying the strides of the convolution along the height and width.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions.
+#' Specifying any stride value != 1 is incompatible with specifying
+#' any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. 
+#' 
+#' @param output_padding 
+#' An integer or list of 2 integers,
+#' specifying the amount of padding along the height and width
+#' of the output tensor.
+#' Can be a single integer to specify the same value for all
+#' spatial dimensions.
+#' The amount of output padding along a given dimension must be
+#' lower than the stride along that same dimension.
+#' If set to `NULL` (default), the output shape is inferred. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch_size, channels, height, width)`.
+#' When unspecified, uses `image_data_format` value found in your Keras
+#' config file at `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to "channels_last". 
+#' 
+#' @param dilation_rate 
+#' an integer, specifying the dilation rate for all spatial
+#' dimensions for dilated convolution. Specifying different dilation rates
+#' for different dimensions is not supported.
+#' Currently, specifying any `dilation_rate` value != 1 is
+#' incompatible with specifying any stride value != 1. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix
+#' (see `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector
+#' (see `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to
+#' the `kernel` weights matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation") (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector
+#' (see `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_2d_transpose <- 
+function(object, filters, kernel_size, strides = list(1L, 1L), 
+    padding = "valid", output_padding = NULL, data_format = NULL, 
+    dilation_rate = list(1L, 1L), activation = NULL, use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
+        strides = as_integer_or_integer_tuple), ignore = "object")
+    create_layer(keras$layers$Conv2DTranspose, object, args)
+}
+
+
+#' 3D convolution layer (e.g. spatial convolution over volumes) 
+#' 
+#' @details 
+#' This layer creates a convolution kernel that is convolved
+#' with the layer input to produce a tensor of
+#' outputs. If `use_bias` is TRUE,
+#' a bias vector is created and added to the outputs. Finally, if
+#' `activation` is not `NULL`, it is applied to the outputs as well.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide the keyword argument `input_shape`
+#' (list of integers or `NULL`, does not include the sample axis),
+#' e.g. `input_shape=(128, 128, 128, 1)` for 128x128x128 volumes
+#' with a single channel,
+#' in `data_format="channels_last"`. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the number
+#' of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 3 integers, specifying the depth,
+#' height and width of the 3D convolution window. Can be a single integer
+#' to specify the same value for all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 3 integers, specifying the strides of
+#' the convolution along each spatial dimension. Can be a single integer to
+#' specify the same value for all spatial dimensions. Specifying any stride
+#' value != 1 is incompatible with specifying any `dilation_rate` value !=
+#' 1. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `batch_shape +
+#' (spatial_dim1, spatial_dim2, spatial_dim3, channels)` while
+#' `channels_first` corresponds to inputs with shape `batch_shape +
+#' (channels, spatial_dim1, spatial_dim2, spatial_dim3)`. When unspecified,
+#' uses `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'. Note that the
+#' `channels_first` format is currently not supported by TensorFlow on CPU.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' an integer or list of 3 integers, specifying the
+#' dilation rate to use for dilated convolution. Can be a single integer to
+#' specify the same value for all spatial dimensions. Currently, specifying
+#' any `dilation_rate` value != 1 is incompatible with specifying any
+#' stride value != 1. 
+#' 
+#' @param groups 
+#' A positive integer specifying the number of groups in which the
+#' input is split along the channel axis. Each group is convolved
+#' separately with `filters / groups` filters. The output is the
+#' concatenation of all the `groups` results along the channel axis. Input
+#' channels and `filters` must both be divisible by `groups`. 
+#' 
+#' @param activation 
+#' Activation function to use. If you don't specify anything, no
+#' activation is applied (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix (see
+#' `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector (see
+#' `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector (see
+#' `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its "activation") (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix (see
+#' `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector (see
+#' `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_3d <- 
+function(object, filters, kernel_size, strides = list(1L, 1L, 
+    1L), padding = "valid", data_format = NULL, dilation_rate = list(
+    1L, 1L, 1L), groups = 1L, activation = NULL, use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(groups = as.integer, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
+        ignore = "object")
+    create_layer(keras$layers$Conv3D, object, args)
+}
+
+
+#' Transposed convolution layer (sometimes called Deconvolution) 
+#' 
+#' @details 
+#' The need for transposed convolutions generally arises
+#' from the desire to use a transformation going in the opposite direction
+#' of a normal convolution, i.e., from something that has the shape of the
+#' output of some convolution to something that has the shape of its input
+#' while maintaining a connectivity pattern that is compatible with
+#' said convolution.
+#' 
+#' When using this layer as the first layer in a model,
+#' provide the keyword argument `input_shape`
+#' (list of integers or `NULL`, does not include the sample axis),
+#' e.g. `input_shape=(128, 128, 128, 3)` for a 128x128x128 volume with 3
+#' channels if `data_format="channels_last"`. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space
+#' (i.e. the number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 3 integers, specifying the
+#' depth, height and width of the 3D convolution window.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 3 integers,
+#' specifying the strides of the convolution along the depth, height
+#'   and width.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions.
+#' Specifying any stride value != 1 is incompatible with specifying
+#' any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. 
+#' 
+#' @param output_padding 
+#' An integer or list of 3 integers,
+#' specifying the amount of padding along the depth, height, and
+#' width.
+#' Can be a single integer to specify the same value for all
+#' spatial dimensions.
+#' The amount of output padding along a given dimension must be
+#' lower than the stride along that same dimension.
+#' If set to `NULL` (default), the output shape is inferred. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, depth, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch_size, channels, depth, height, width)`.
+#' When unspecified, uses `image_data_format` value found in your Keras
+#' config file at `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' an integer or list of 3 integers, specifying
+#' the dilation rate to use for dilated convolution.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions.
+#' Currently, specifying any `dilation_rate` value != 1 is
+#' incompatible with specifying any stride value != 1. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix
+#' (see `keras.initializers`). Defaults to 'glorot_uniform'. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector
+#' (see `keras.initializers`). Defaults to 'zeros'. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to
+#' the `kernel` weights matrix
+#' (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation")
+#' (see `keras.regularizers`). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector
+#' (see `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_conv_3d_transpose <- 
+function(object, filters, kernel_size, strides = list(1L, 1L, 
+    1L), padding = "valid", output_padding = NULL, data_format = NULL, 
+    dilation_rate = list(1L, 1L, 1L), activation = NULL, use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
+        strides = as_integer_or_integer_tuple), ignore = "object")
+    create_layer(keras$layers$Conv3DTranspose, object, args)
+}
+
+
+#' Cropping layer for 1D input (e.g. temporal sequence) 
+#' 
+#' It crops along the time dimension (axis 1). 
+#' 
+#' @param cropping 
+#' Int or list of int (length 2)
+#' How many units should be trimmed off at the beginning and end of
+#' the cropping dimension (axis 1).
+#' If a single int is provided, the same value will be used for both. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_cropping_1d <- 
+function(object, cropping = list(1L, 1L), ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Cropping1D, object, args)
+}
+
+
+#' Cropping layer for 2D input (e.g. picture) 
+#' 
+#' It crops along spatial dimensions, i.e. height and width. 
+#' 
+#' @param cropping 
+#' Int, or list of 2 ints, or list of 2 lists of 2 ints.
+#' - If int: the same symmetric cropping
+#'   is applied to height and width.
+#' - If list of 2 ints:
+#'   interpreted as two different
+#'   symmetric cropping values for height and width:
+#'   `(symmetric_height_crop, symmetric_width_crop)`.
+#' - If list of 2 lists of 2 ints:
+#'   interpreted as
+#'   `((top_crop, bottom_crop), (left_crop, right_crop))` 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch_size, channels, height, width)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_cropping_2d <- 
+function(object, cropping = list(list(0L, 0L), list(0L, 0L)), 
+    data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Cropping2D, object, args)
+}
+
+
+#' Cropping layer for 3D data (e.g. spatial or spatio-temporal) 
+#' 
+#' @details 
+#' Examples:
+#' 
+#' ```python
+#' >>> input_shape = (2, 28, 28, 10, 3)
+#' >>> x = np.arange(np.prod(input_shape)).reshape(input_shape)
+#' >>> y = tf.keras.layers.Cropping3D(cropping=(2, 4, 2))(x)
+#' >>> print(y.shape)
+#' (2, 24, 20, 6, 3)
+#' ```
+#'  
+#' 
+#' @param cropping 
+#' Int, or list of 3 ints, or list of 3 lists of 2 ints.
+#' - If int: the same symmetric cropping
+#'   is applied to depth, height, and width.
+#' - If list of 3 ints: interpreted as two different
+#'   symmetric cropping values for depth, height, and width:
+#'   `(symmetric_dim1_crop, symmetric_dim2_crop, symmetric_dim3_crop)`.
+#' - If list of 3 lists of 2 ints: interpreted as
+#'   `((left_dim1_crop, right_dim1_crop), (left_dim2_crop,
+#'     right_dim2_crop), (left_dim3_crop, right_dim3_crop))` 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#' while `channels_first` corresponds to inputs with shape
+#' `(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_cropping_3d <- 
+function(object, cropping = list(list(1L, 1L), list(1L, 1L), 
+    list(1L, 1L)), data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Cropping3D, object, args)
+}
+
+
+#' Just your regular densely-connected NN layer 
+#' 
+#' @details 
+#' `Dense` implements the operation:
+#' `output = activation(dot(input, kernel) + bias)`
+#' where `activation` is the element-wise activation function
+#' passed as the `activation` argument, `kernel` is a weights matrix
+#' created by the layer, and `bias` is a bias vector created by the layer
+#' (only applicable if `use_bias` is `TRUE`). These are all attributes of
+#' `Dense`.
+#' 
+#' Note: If the input to the layer has a rank greater than 2, then `Dense`
+#' computes the dot product between the `inputs` and the `kernel` along the
+#' last axis of the `inputs` and axis 0 of the `kernel` (using `tf.tensordot`).
+#' For example, if input has dimensions `(batch_size, d0, d1)`, then we create
+#' a `kernel` with shape `(d1, units)`, and the `kernel` operates along axis 2
+#' of the `input`, on every sub-tensor of shape `(1, 1, d1)` (there are
+#' `batch_size * d0` such sub-tensors).  The output in this case will have
+#' shape `(batch_size, d0, units)`.
+#' 
+#' Besides, layer attributes cannot be modified after the layer has been called
+#' once (except the `trainable` attribute).
+#' When a popular kwarg `input_shape` is passed, then keras will create
+#' an input layer to insert before the current layer. This can be treated
+#' equivalent to explicitly defining an `InputLayer`. 
+#' 
+#' @param units 
+#' Positive integer, dimensionality of the output space. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (ie. "linear" activation: `a(x) = x`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to
+#' the `kernel` weights matrix. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector. 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation"). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to
+#' the `kernel` weights matrix. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_dense <- 
+function(object, units, activation = NULL, use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Dense, object, args)
+}
+
+
+#' A layer that produces a dense `Tensor` based on given `feature_columns` 
+#' 
+#' @details 
+#' Generally a single example in training data is described with
+#' FeatureColumns.  At the first layer of the model, this column oriented data
+#' should be converted to a single `Tensor`.
+#' 
+#' This layer can be called multiple times with different features.
+#' 
+#' This is the V2 version of this layer that uses name_scopes to create
+#' variables instead of variable_scopes. But this approach currently lacks
+#' support for partitioned variables. In that case, use the V1 version instead. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_dense_features <- 
+function(object, feature_columns, trainable = TRUE, name = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$DenseFeatures, object, args)
+}
+
+
+#' Depthwise 1D convolution 
+#' 
+#' @details 
+#' Depthwise convolution is a type of convolution in which each input channel
+#' is convolved with a different kernel (called a depthwise kernel). You can
+#' understand depthwise convolution as the first step in a depthwise separable
+#' convolution.
+#' 
+#' It is implemented via the following steps:
+#' 
+#' - Split the input into individual channels.
+#' - Convolve each channel with an individual depthwise kernel with
+#'   `depth_multiplier` output channels.
+#' - Concatenate the convolved outputs along the channels axis.
+#' 
+#' Unlike a regular 1D convolution, depthwise convolution does not mix
+#' information across different input channels.
+#' 
+#' The `depth_multiplier` argument determines how many filter are applied to
+#' one input channel. As such, it controls the amount of output channels that
+#' are generated per input channel in the depthwise step. 
+#' 
+#' @param kernel_size 
+#' An integer, specifying the height and width of the 1D
+#' convolution window. Can be a single integer to specify the same value
+#' for all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer, specifying the strides of the convolution along the
+#' height and width. Can be a single integer to specify the same value for
+#' all spatial dimensions. Specifying any stride value != 1 is incompatible
+#' with specifying any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' one of `'valid'` or `'same'` (case-insensitive). `"valid"` means
+#' no padding. `"same"` results in padding with zeros evenly to the
+#' left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param depth_multiplier 
+#' The number of depthwise convolution output channels for
+#' each input channel. The total number of depthwise convolution output
+#' channels will be equal to `filters_in * depth_multiplier`. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch_size, height,
+#' width, channels)` while `channels_first` corresponds to inputs with
+#' shape `(batch_size, channels, height, width)`. When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' A single integer, specifying the dilation rate to use for
+#' dilated convolution. Currently, specifying any `dilation_rate`
+#' value != 1 is incompatible with specifying any stride value != 1. 
+#' 
+#' @param activation 
+#' Activation function to use. If you don't specify anything, no
+#' activation is applied (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param depthwise_initializer 
+#' Initializer for the depthwise kernel matrix (see
+#' `keras.initializers`). If NULL, the default initializer
+#' ('glorot_uniform') will be used. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector (see
+#' `keras.initializers`). If NULL, the default initializer ('zeros') will
+#' be used. 
+#' 
+#' @param depthwise_regularizer 
+#' Regularizer function applied to the depthwise
+#' kernel matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector (see
+#' `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its 'activation') (see `keras.regularizers`). 
+#' 
+#' @param depthwise_constraint 
+#' Constraint function applied to the depthwise kernel
+#' matrix (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector (see
+#' `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_depthwise_conv_1d <- 
+function(object, kernel_size, strides = 1L, padding = "valid", 
+    depth_multiplier = 1L, data_format = NULL, dilation_rate = 1L, 
+    activation = NULL, use_bias = TRUE, depthwise_initializer = "glorot_uniform", 
+    bias_initializer = "zeros", depthwise_regularizer = NULL, 
+    bias_regularizer = NULL, activity_regularizer = NULL, depthwise_constraint = NULL, 
+    bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(strides = as.integer, 
+        depth_multiplier = as.integer, dilation_rate = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$DepthwiseConv1D, object, args)
+}
+
+
+#' Depthwise 2D convolution 
+#' 
+#' @details 
+#' Depthwise convolution is a type of convolution in which each input channel
+#' is convolved with a different kernel (called a depthwise kernel). You can
+#' understand depthwise convolution as the first step in a depthwise separable
+#' convolution.
+#' 
+#' It is implemented via the following steps:
+#' 
+#' - Split the input into individual channels.
+#' - Convolve each channel with an individual depthwise kernel with
+#'   `depth_multiplier` output channels.
+#' - Concatenate the convolved outputs along the channels axis.
+#' 
+#' Unlike a regular 2D convolution, depthwise convolution does not mix
+#' information across different input channels.
+#' 
+#' The `depth_multiplier` argument determines how many filter are applied to
+#' one input channel. As such, it controls the amount of output channels that
+#' are generated per input channel in the depthwise step. 
+#' 
+#' @param kernel_size 
+#' An integer or list of 2 integers, specifying the height
+#' and width of the 2D convolution window. Can be a single integer to
+#' specify the same value for all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 2 integers, specifying the strides of
+#' the convolution along the height and width. Can be a single integer to
+#' specify the same value for all spatial dimensions. Current
+#' implementation only supports equal length strides in row and
+#' column dimensions. Specifying any stride value != 1 is incompatible
+#' with specifying any `dilation_rate` value !=1. 
+#' 
+#' @param padding 
+#' one of `'valid'` or `'same'` (case-insensitive). `"valid"` means
+#' no padding. `"same"` results in padding with zeros evenly to the
+#' left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param depth_multiplier 
+#' The number of depthwise convolution output channels for
+#' each input channel. The total number of depthwise convolution output
+#' channels will be equal to `filters_in * depth_multiplier`. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`. The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch_size, height,
+#' width, channels)` while `channels_first` corresponds to inputs with
+#' shape `(batch_size, channels, height, width)`. When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' An integer or list of 2 integers, specifying the
+#' dilation rate to use for dilated convolution. Currently, specifying any
+#' `dilation_rate` value != 1 is incompatible with specifying any `strides`
+#' value != 1. 
+#' 
+#' @param activation 
+#' Activation function to use. If you don't specify anything, no
+#' activation is applied (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param depthwise_initializer 
+#' Initializer for the depthwise kernel matrix (see
+#' `keras.initializers`). If NULL, the default initializer
+#' ('glorot_uniform') will be used. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector (see
+#' `keras.initializers`). If NULL, the default initializer ('zeros') will
+#' be used. 
+#' 
+#' @param depthwise_regularizer 
+#' Regularizer function applied to the depthwise
+#' kernel matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector (see
+#' `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its 'activation') (see `keras.regularizers`). 
+#' 
+#' @param depthwise_constraint 
+#' Constraint function applied to the depthwise kernel
+#' matrix (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector (see
+#' `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_depthwise_conv_2d <- 
+function(object, kernel_size, strides = list(1L, 1L), padding = "valid", 
+    depth_multiplier = 1L, data_format = NULL, dilation_rate = list(
+        1L, 1L), activation = NULL, use_bias = TRUE, depthwise_initializer = "glorot_uniform", 
+    bias_initializer = "zeros", depthwise_regularizer = NULL, 
+    bias_regularizer = NULL, activity_regularizer = NULL, depthwise_constraint = NULL, 
+    bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(depth_multiplier = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$DepthwiseConv2D, object, args)
+}
+
+
+#' A preprocessing layer which buckets continuous features by ranges 
+#' 
+#' @details 
+#' This layer will place each element of its input data into one of several
+#' contiguous ranges and output an integer index indicating which range each
+#' element was placed in.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#' 
+#' Input shape:
+#'   Any `tf.Tensor` or `tf.RaggedTensor` of dimension 2 or higher.
+#' 
+#' Output shape:
+#'   Same as input shape. 
+#' 
+#' @param bin_boundaries 
+#' A list of bin boundaries. The leftmost and rightmost bins
+#' will always extend to `-inf` and `inf`, so `bin_boundaries=[0., 1., 2.]`
+#' generates bins `(-inf, 0.)`, `[0., 1.)`, `[1., 2.)`, and `[2., +inf)`.
+#' If this option is set, `adapt()` should not be called. 
+#' 
+#' @param num_bins 
+#' The integer number of bins to compute. If this option is set,
+#' `adapt()` should be called to learn the bin boundaries. 
+#' 
+#' @param epsilon 
+#' Error tolerance, typically a small fraction close to zero (e.g.
+#' 0.01). Higher values of epsilon increase the quantile approximation, and
+#' hence result in more unequal buckets, but could improve performance
+#' and resource consumption. 
+#' 
+#' @param output_mode 
+#' Specification for the output of the layer. Values can be
+#' `"int"`, `"one_hot"`, `"multi_hot"`, or
+#' `"count"` configuring the layer as follows:
+#'   - `"int"`: Return the discretized bin indices directly.
+#'   - `"one_hot"`: Encodes each individual element in the input into an
+#'     array the same size as `num_bins`, containing a 1 at the input's bin
+#'     index. If the last dimension is size 1, will encode on that
+#'     dimension.  If the last dimension is not size 1, will append a new
+#'     dimension for the encoded output.
+#'   - `"multi_hot"`: Encodes each sample in the input into a single array
+#'     the same size as `num_bins`, containing a 1 for each bin index
+#'     index present in the sample. Treats the last dimension as the sample
+#'     dimension, if input shape is `(..., sample_length)`, output shape
+#'     will be `(..., num_tokens)`.
+#'   - `"count"`: As `"multi_hot"`, but the int array contains a count of
+#'     the number of times the bin index appeared in the sample.
+#' Defaults to `"int"`. 
+#' 
+#' @param sparse 
+#' Boolean. Only applicable to `"one_hot"`, `"multi_hot"`,
+#' and `"count"` output modes. If TRUE, returns a `SparseTensor` instead of
+#' a dense `Tensor`. Defaults to `FALSE`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_discretization <- 
+function(object, bin_boundaries = NULL, num_bins = NULL, epsilon = 0.01, 
+    output_mode = "int", sparse = FALSE, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Discretization, object, args)
+}
+
+
+#' Layer that computes a dot product between samples in two tensors 
+#' 
+#' @details 
+#' E.g. if applied to a list of two tensors `a` and `b` of shape
+#' `(batch_size, n)`, the output will be a tensor of shape `(batch_size, 1)`
+#' where each entry `i` will be the dot product between
+#' `a[i]` and `b[i]`.
+#' 
+#' ```python
+#' >>> x = np.arange(10).reshape(1, 5, 2)
+#' >>> print(x)
+#' [[[0 1]
+#'   [2 3]
+#'   [4 5]
+#'   [6 7]
+#'   [8 9]]]
+#' >>> y = np.arange(10, 20).reshape(1, 2, 5)
+#' >>> print(y)
+#' [[[10 11 12 13 14]
+#'   [15 16 17 18 19]]]
+#' >>> tf.keras.layers.Dot(axes=(1, 2))([x, y])
+#' <tf.Tensor: shape=(1, 2, 2), dtype=int64, numpy=
+#' array([[[260, 360],
+#'         [320, 445]]])>
+#' ```
+#' 
+#' ```python
+#' >>> x1 = tf.keras.layers.Dense(8)(np.arange(10).reshape(5, 2))
+#' >>> x2 = tf.keras.layers.Dense(8)(np.arange(10, 20).reshape(5, 2))
+#' >>> dotted = tf.keras.layers.Dot(axes=1)([x1, x2])
+#' >>> dotted.shape
+#' TensorShape([5, 1])
+#' ```
+#'  
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_dot <- 
+function(object, axes, normalize = FALSE, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Dot, object, args)
+}
+
+
+#' Applies Dropout to the input 
+#' 
+#' @details 
+#' The Dropout layer randomly sets input units to 0 with a frequency of `rate`
+#' at each step during training time, which helps prevent overfitting.
+#' Inputs not set to 0 are scaled up by 1/(1 - rate) such that the sum over
+#' all inputs is unchanged.
+#' 
+#' Note that the Dropout layer only applies when `training` is set to TRUE
+#' such that no values are dropped during inference. When using `model.fit`,
+#' `training` will be appropriately set to TRUE automatically, and in other
+#' contexts, you can set the kwarg explicitly to TRUE when calling the layer.
+#' 
+#' (This is in contrast to setting `trainable=FALSE` for a Dropout layer.
+#' `trainable` does not affect the layer's behavior, as Dropout does
+#' not have any variables/weights that can be frozen during training.)
+#' 
+#' ```python
+#' >>> tf.random.set_seed(0)
+#' >>> layer = tf.keras.layers.Dropout(.2, input_shape=(2,))
+#' >>> data = np.arange(10).reshape(5, 2).astype(np.float32)
+#' >>> print(data)
+#' [[0. 1.]
+#'  [2. 3.]
+#'  [4. 5.]
+#'  [6. 7.]
+#'  [8. 9.]]
+#' >>> outputs = layer(data, training=TRUE)
+#' >>> print(outputs)
+#' tf.Tensor(
+#' [[ 0.    1.25]
+#'  [ 2.5   3.75]
+#'  [ 5.    6.25]
+#'  [ 7.5   8.75]
+#'  [10.    0.  ]], shape=(5, 2), dtype=float32)
+#' ```
+#'  
+#' 
+#' @param rate 
+#' Float between 0 and 1. Fraction of the input units to drop. 
+#' 
+#' @param noise_shape 
+#' 1D integer tensor representing the shape of the
+#' binary dropout mask that will be multiplied with the input.
+#' For instance, if your inputs have shape
+#' `(batch_size, timesteps, features)` and
+#' you want the dropout mask to be the same for all timesteps,
+#' you can use `noise_shape=(batch_size, 1, features)`. 
+#' 
+#' @param seed 
+#' A Python integer to use as random seed. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_dropout <- 
+function(object, rate, noise_shape = NULL, seed = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Dropout, object, args)
+}
+
+
+#' A layer that uses `tf.einsum` as the backing computation 
+#' 
+#' This layer can perform einsum calculations of arbitrary dimensionality. 
+#' 
+#' @param equation 
+#' An equation describing the einsum to perform. This equation must
+#' be a valid einsum string of the form `ab,bc->ac`, `...ab,bc->...ac`, or
+#' `ab...,bc->ac...` where 'ab', 'bc', and 'ac' can be any valid einsum
+#' axis expression sequence. 
+#' 
+#' @param output_shape 
+#' The expected shape of the output tensor (excluding the batch
+#' dimension and any dimensions represented by ellipses). You can specify
+#' NULL for any dimension that is unknown or can be inferred from the input
+#' shape. 
+#' 
+#' @param activation 
+#' Activation function to use. If you don't specify anything, no
+#' activation is applied (that is, a "linear" activation: `a(x) = x`). 
+#' 
+#' @param bias_axes 
+#' A string containing the output dimension(s) to apply a bias to.
+#' Each character in the `bias_axes` string should correspond to a
+#' character in the output portion of the `equation` string. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector. 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its "activation"). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the `kernel` weights
+#' matrix. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_einsum_dense <- 
+function(object, equation, output_shape, activation = NULL, 
+    bias_axes = NULL, kernel_initializer = "glorot_uniform", 
+    bias_initializer = "zeros", kernel_regularizer = NULL, bias_regularizer = NULL, 
+    activity_regularizer = NULL, kernel_constraint = NULL, bias_constraint = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$EinsumDense, object, args)
+}
+
+
+#' Exponential Linear Unit 
+#' 
+#' @details 
+#' It follows:
+#' 
+#' ```
+#'     f(x) =  alpha * (exp(x) - 1.) for x < 0
+#'     f(x) = x for x >= 0
+#' ```
+#' 
+#' Input shape:
+#'     Arbitrary. Use the keyword argument `input_shape`
+#'     (list of integers, does not include the samples axis)
+#'     when using this layer as the first layer in a model.
+#' 
+#' Output shape:
+#'     Same shape as the input. 
+#' 
+#' @param alpha 
+#' Scale for the negative factor. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_elu <- 
+function(object, alpha = 1, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$ELU, object, args)
+}
+
+
+#' Turns positive integers (indexes) into dense vectors of fixed size 
+#' 
+#' @details 
+#' e.g. `[[4], [20]] -> [[0.25, 0.1], [0.6, -0.2]]`
+#' 
+#' This layer can only be used on positive integer inputs of a fixed range. The
+#' `tf.keras.layers.TextVectorization`, `tf.keras.layers.StringLookup`,
+#' and `tf.keras.layers.IntegerLookup` preprocessing layers can help prepare
+#' inputs for an `Embedding` layer.
+#' 
+#' This layer accepts `tf.Tensor`, `tf.RaggedTensor` and `tf.SparseTensor`
+#' input. 
+#' 
+#' @param input_dim 
+#' Integer. Size of the vocabulary,
+#' i.e. maximum integer index + 1. 
+#' 
+#' @param output_dim 
+#' Integer. Dimension of the dense embedding. 
+#' 
+#' @param embeddings_initializer 
+#' Initializer for the `embeddings`
+#' matrix (see `keras.initializers`). 
+#' 
+#' @param embeddings_regularizer 
+#' Regularizer function applied to
+#' the `embeddings` matrix (see `keras.regularizers`). 
+#' 
+#' @param embeddings_constraint 
+#' Constraint function applied to
+#' the `embeddings` matrix (see `keras.constraints`). 
+#' 
+#' @param mask_zero 
+#' Boolean, whether or not the input value 0 is a special
+#' "padding" value that should be masked out. This is useful when using
+#' recurrent layers which may take variable length input. If this is
+#' `TRUE`, then all subsequent layers in the model need to support masking
+#' or an exception will be raised. If mask_zero is set to TRUE, as a
+#' consequence, index 0 cannot be used in the vocabulary (input_dim should
+#' equal size of vocabulary + 1). 
+#' 
+#' @param input_length 
+#' Length of input sequences, when it is constant.
+#' This argument is required if you are going to connect
+#' `Flatten` then `Dense` layers upstream
+#' (without it, the shape of the dense outputs cannot be computed). 
+#' 
+#' @param sparse 
+#' If TRUE, calling this layer returns a `tf.SparseTensor`. If FALSE,
+#' the layer returns a dense `tf.Tensor`. For an entry with no features in
+#' a sparse tensor (entry with value 0), the embedding vector of index 0 is
+#' returned by default. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_embedding <- 
+function(object, input_dim, output_dim, embeddings_initializer = "uniform", 
+    embeddings_regularizer = NULL, activity_regularizer = NULL, 
+    embeddings_constraint = NULL, mask_zero = FALSE, input_length = NULL, 
+    sparse = FALSE, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Embedding, object, args)
+}
+
+
+#' Flattens the input. Does not affect the batch size 
+#' 
+#' @details 
+#' Note: If inputs are shaped `(batch,)` without a feature axis, then
+#' flattening adds an extra channel dimension and output shape is `(batch, 1)`. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, ..., channels)` while `channels_first` corresponds to
+#' inputs with shape `(batch, channels, ...)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_flatten <- 
+function(object, data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Flatten, object, args)
+}
+
+
+#' Apply multiplicative 1-centered Gaussian noise 
+#' 
+#' As it is a regularization layer, it is only active at training time. 
+#' 
+#' @param rate 
+#' Float, drop probability (as with `Dropout`).
+#' The multiplicative noise will have
+#' standard deviation `sqrt(rate / (1 - rate))`. 
+#' 
+#' @param seed 
+#' Integer, optional random seed to enable deterministic behavior. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_gaussian_dropout <- 
+function(object, rate, seed = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$GaussianDropout, object, args)
+}
+
+
+#' Apply additive zero-centered Gaussian noise 
+#' 
+#' @details 
+#' This is useful to mitigate overfitting
+#' (you could see it as a form of random data augmentation).
+#' Gaussian Noise (GS) is a natural choice as corruption process
+#' for real valued inputs.
+#' 
+#' As it is a regularization layer, it is only active at training time. 
+#' 
+#' @param stddev 
+#' Float, standard deviation of the noise distribution. 
+#' 
+#' @param seed 
+#' Integer, optional random seed to enable deterministic behavior. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_gaussian_noise <- 
+function(object, stddev, seed = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$GaussianNoise, object, args)
+}
+
+
+#' Global average pooling operation for temporal data 
+#' 
+#'  
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, steps, features)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, features, steps)`. 
+#' 
+#' @param keepdims 
+#' A boolean, whether to keep the temporal dimension or not.
+#' If `keepdims` is `FALSE` (default), the rank of the tensor is reduced
+#' for spatial dimensions.
+#' If `keepdims` is `TRUE`, the temporal dimension are retained with
+#' length 1.
+#' The behavior is the same as for `tf.reduce_mean` or `np.mean`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_global_average_pooling_1d <- 
+function(object, data_format = "channels_last", ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$GlobalAveragePooling1D, object, 
+        args)
+}
+
+
+#' Global average pooling operation for spatial data 
+#' 
+#'  
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, channels, height, width)`.
+#' When unspecified, uses `image_data_format` value found
+#' in your Keras config file at `~/.keras/keras.json`
+#' (if exists) else 'channels_last'. Defaults to 'channels_last'. 
+#' 
+#' @param keepdims 
+#' A boolean, whether to keep the spatial dimensions or not.
+#' If `keepdims` is `FALSE` (default), the rank of the tensor is reduced
+#' for spatial dimensions.
+#' If `keepdims` is `TRUE`, the spatial dimensions are retained with
+#' length 1.
+#' The behavior is the same as for `tf.reduce_mean` or `np.mean`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_global_average_pooling_2d <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$GlobalAveragePooling2D, object, 
+        args)
+}
+
+
+#' Global Average pooling operation for 3D data 
+#' 
+#'  
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#' while `channels_first` corresponds to inputs with shape
+#' `(batch, channels, spatial_dim1, spatial_dim2, spatial_dim3)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param keepdims 
+#' A boolean, whether to keep the spatial dimensions or not.
+#' If `keepdims` is `FALSE` (default), the rank of the tensor is reduced
+#' for spatial dimensions.
+#' If `keepdims` is `TRUE`, the spatial dimensions are retained with
+#' length 1.
+#' The behavior is the same as for `tf.reduce_mean` or `np.mean`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_global_average_pooling_3d <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$GlobalAveragePooling3D, object, 
+        args)
+}
+
+
+#' Global max pooling operation for 1D temporal data 
+#' 
+#' @details 
+#' Downsamples the input representation by taking the maximum value over
+#' the time dimension.
+#' 
+#' For example:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3.], [4., 5., 6.], [7., 8., 9.]])
+#' >>> x = tf.reshape(x, [3, 3, 1])
+#' >>> x
+#' <tf.Tensor: shape=(3, 3, 1), dtype=float32, numpy=
+#' array([[[1.], [2.], [3.]],
+#'        [[4.], [5.], [6.]],
+#'        [[7.], [8.], [9.]]], dtype=float32)>
+#' >>> max_pool_1d = tf.keras.layers.GlobalMaxPooling1D()
+#' >>> max_pool_1d(x)
+#' <tf.Tensor: shape=(3, 1), dtype=float32, numpy=
+#' array([[3.],
+#'        [6.],
+#'        [9.], dtype=float32)>
+#' ```
+#'  
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, steps, features)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, features, steps)`. 
+#' 
+#' @param keepdims 
+#' A boolean, whether to keep the temporal dimension or not.
+#' If `keepdims` is `FALSE` (default), the rank of the tensor is reduced
+#' for spatial dimensions.
+#' If `keepdims` is `TRUE`, the temporal dimension are retained with
+#' length 1.
+#' The behavior is the same as for `tf.reduce_max` or `np.max`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_global_max_pooling_1d <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$GlobalMaxPooling1D, object, args)
+}
+
+
+#' Global max pooling operation for spatial data 
+#' 
+#'  
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, channels, height, width)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param keepdims 
+#' A boolean, whether to keep the spatial dimensions or not.
+#' If `keepdims` is `FALSE` (default), the rank of the tensor is reduced
+#' for spatial dimensions.
+#' If `keepdims` is `TRUE`, the spatial dimensions are retained with
+#' length 1.
+#' The behavior is the same as for `tf.reduce_max` or `np.max`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_global_max_pooling_2d <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$GlobalMaxPooling2D, object, args)
+}
+
+
+#' Global Max pooling operation for 3D data 
+#' 
+#'  
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#' while `channels_first` corresponds to inputs with shape
+#' `(batch, channels, spatial_dim1, spatial_dim2, spatial_dim3)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param keepdims 
+#' A boolean, whether to keep the spatial dimensions or not.
+#' If `keepdims` is `FALSE` (default), the rank of the tensor is reduced
+#' for spatial dimensions.
+#' If `keepdims` is `TRUE`, the spatial dimensions are retained with
+#' length 1.
+#' The behavior is the same as for `tf.reduce_max` or `np.max`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_global_max_pooling_3d <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$GlobalMaxPooling3D, object, args)
+}
+
+
+#' Group normalization layer 
+#' 
+#' @details 
+#' Group Normalization divides the channels into groups and computes
+#' within each group the mean and variance for normalization.
+#' Empirically, its accuracy is more stable than batch norm in a wide
+#' range of small batch sizes, if learning rate is adjusted linearly
+#' with batch sizes.
+#' 
+#' Relation to Layer Normalization:
+#' If the number of groups is set to 1, then this operation becomes nearly
+#' identical to Layer Normalization (see Layer Normalization docs for details).
+#' 
+#' Relation to Instance Normalization:
+#' If the number of groups is set to the input dimension (number of groups is
+#' equal to number of channels), then this operation becomes identical to
+#' Instance Normalization. 
+#' 
+#' @param groups 
+#' Integer, the number of groups for Group Normalization. Can be in
+#' the range [1, N] where N is the input dimension. The input dimension
+#' must be divisible by the number of groups. Defaults to `32`. 
+#' 
+#' @param axis 
+#' Integer or List/Tuple. The axis or axes to normalize across.
+#' Typically, this is the features axis/axes. The left-out axes are
+#' typically the batch axis/axes. `-1` is the last dimension in the
+#' input. Defaults to `-1`. 
+#' 
+#' @param epsilon 
+#' Small float added to variance to avoid dividing by zero. Defaults
+#' to 1e-3 
+#' 
+#' @param center 
+#' If TRUE, add offset of `beta` to normalized tensor. If FALSE,
+#' `beta` is ignored. Defaults to `TRUE`. 
+#' 
+#' @param scale 
+#' If TRUE, multiply by `gamma`. If FALSE, `gamma` is not used.
+#' When the next layer is linear (also e.g. `nn.relu`), this can be
+#' disabled since the scaling will be done by the next layer.
+#' Defaults to `TRUE`. 
+#' 
+#' @param beta_initializer 
+#' Initializer for the beta weight. Defaults to zeros. 
+#' 
+#' @param gamma_initializer 
+#' Initializer for the gamma weight. Defaults to ones. 
+#' 
+#' @param beta_regularizer 
+#' Optional regularizer for the beta weight. NULL by
+#' default. 
+#' 
+#' @param gamma_regularizer 
+#' Optional regularizer for the gamma weight. NULL by
+#' default. 
+#' 
+#' @param beta_constraint 
+#' Optional constraint for the beta weight. NULL by default. 
+#' 
+#' @param gamma_constraint 
+#' Optional constraint for the gamma weight. NULL by
+#' default.  Input shape: Arbitrary. Use the keyword argument `input_shape`
+#' (list of integers, does not include the samples axis) when using this
+#' layer as the first layer in a model.  Output shape: Same shape as input. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_group_normalization <- 
+function(object, groups = 32L, axis = -1L, epsilon = 0.001, 
+    center = TRUE, scale = TRUE, beta_initializer = "zeros", 
+    gamma_initializer = "ones", beta_regularizer = NULL, gamma_regularizer = NULL, 
+    beta_constraint = NULL, gamma_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(groups = as.integer, 
+        axis = as_axis), ignore = "object")
+    create_layer(keras$layers$GroupNormalization, object, args)
+}
+
+
+#' Gated Recurrent Unit - Cho et al. 2014 
+#' 
+#' @details 
+#' See [the Keras RNN API guide](https://www.tensorflow.org/guide/keras/rnn)
+#' for details about the usage of RNN API.
+#' 
+#' Based on available runtime hardware and constraints, this layer
+#' will choose different implementations (cuDNN-based or pure-TensorFlow)
+#' to maximize the performance. If a GPU is available and all
+#' the arguments to the layer meet the requirement of the cuDNN kernel
+#' (see below for details), the layer will use a fast cuDNN implementation.
+#' 
+#' The requirements to use the cuDNN implementation are:
+#' 
+#' 1. `activation` == `tanh`
+#' 2. `recurrent_activation` == `sigmoid`
+#' 3. `recurrent_dropout` == 0
+#' 4. `unroll` is `FALSE`
+#' 5. `use_bias` is `TRUE`
+#' 6. `reset_after` is `TRUE`
+#' 7. Inputs, if use masking, are strictly right-padded.
+#' 8. Eager execution is enabled in the outermost context.
+#' 
+#' There are two variants of the GRU implementation. The default one is based
+#' on [v3](https://arxiv.org/abs/1406.1078v3) and has reset gate applied to
+#' hidden state before matrix multiplication. The other one is based on
+#' [original](https://arxiv.org/abs/1406.1078v1) and has the order reversed.
+#' 
+#' The second variant is compatible with CuDNNGRU (GPU-only) and allows
+#' inference on CPU. Thus it has separate biases for `kernel` and
+#' `recurrent_kernel`. To use this variant, set `reset_after=TRUE` and
+#' `recurrent_activation='sigmoid'`.
+#' 
+#' For example:
+#' 
+#' ```python
+#' >>> inputs = tf.random.normal([32, 10, 8])
+#' >>> gru = tf.keras.layers.GRU(4)
+#' >>> output = gru(inputs)
+#' >>> print(output.shape)
+#' (32, 4)
+#' >>> gru = tf.keras.layers.GRU(4, return_sequences=TRUE, return_state=TRUE)
+#' >>> whole_sequence_output, final_state = gru(inputs)
+#' >>> print(whole_sequence_output.shape)
+#' (32, 10, 4)
+#' >>> print(final_state.shape)
+#' (32, 4)
+#' ```
+#'  
+#' 
+#' @param units 
+#' Positive integer, dimensionality of the output space. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' Default: hyperbolic tangent (`tanh`).
+#' If you pass `NULL`, no activation is applied
+#' (ie. "linear" activation: `a(x) = x`). 
+#' 
+#' @param recurrent_activation 
+#' Activation function to use
+#' for the recurrent step.
+#' Default: sigmoid (`sigmoid`).
+#' If you pass `NULL`, no activation is applied
+#' (ie. "linear" activation: `a(x) = x`). 
+#' 
+#' @param use_bias 
+#' Boolean, (default `TRUE`), whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix,
+#' used for the linear transformation of the inputs. Default:
+#' `glorot_uniform`. 
+#' 
+#' @param recurrent_initializer 
+#' Initializer for the `recurrent_kernel`
+#' weights matrix, used for the linear transformation of the recurrent
+#' state. Default: `orthogonal`. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. Default: `zeros`. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. Default: `NULL`. 
+#' 
+#' @param recurrent_regularizer 
+#' Regularizer function applied to the
+#' `recurrent_kernel` weights matrix. Default: `NULL`. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector.
+#' Default: `NULL`. 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its "activation"). Default: `NULL`. 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the `kernel` weights
+#' matrix. Default: `NULL`. 
+#' 
+#' @param recurrent_constraint 
+#' Constraint function applied to the
+#' `recurrent_kernel` weights matrix. Default: `NULL`. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. Default:
+#' `NULL`. 
+#' 
+#' @param dropout 
+#' Float between 0 and 1. Fraction of the units to drop for the
+#' linear transformation of the inputs. Default: 0. 
+#' 
+#' @param recurrent_dropout 
+#' Float between 0 and 1. Fraction of the units to drop
+#' for the linear transformation of the recurrent state. Default: 0. 
+#' 
+#' @param return_sequences 
+#' Boolean. Whether to return the last output
+#' in the output sequence, or the full sequence. Default: `FALSE`. 
+#' 
+#' @param return_state 
+#' Boolean. Whether to return the last state in addition to the
+#' output. Default: `FALSE`. 
+#' 
+#' @param go_backwards 
+#' Boolean (default `FALSE`).
+#' If TRUE, process the input sequence backwards and return the
+#' reversed sequence. 
+#' 
+#' @param stateful 
+#' Boolean (default FALSE). If TRUE, the last state
+#' for each sample at index i in a batch will be used as initial
+#' state for the sample of index i in the following batch. 
+#' 
+#' @param unroll 
+#' Boolean (default FALSE).
+#' If TRUE, the network will be unrolled,
+#' else a symbolic loop will be used.
+#' Unrolling can speed-up a RNN,
+#' although it tends to be more memory-intensive.
+#' Unrolling is only suitable for short sequences. 
+#' 
+#' @param time_major 
+#' The shape format of the `inputs` and `outputs` tensors.
+#' If TRUE, the inputs and outputs will be in shape
+#' `[timesteps, batch, feature]`, whereas in the FALSE case, it will be
+#' `[batch, timesteps, feature]`. Using `time_major = TRUE` is a bit more
+#' efficient because it avoids transposes at the beginning and end of the
+#' RNN calculation. However, most TensorFlow data is batch-major, so by
+#' default this function accepts input and emits output in batch-major
+#' form. 
+#' 
+#' @param reset_after 
+#' GRU convention (whether to apply reset gate after or
+#' before matrix multiplication). FALSE = "before",
+#' TRUE = "after" (default and cuDNN compatible). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_gru <- 
+function(object, units, activation = "tanh", recurrent_activation = "sigmoid", 
+    use_bias = TRUE, kernel_initializer = "glorot_uniform", recurrent_initializer = "orthogonal", 
+    bias_initializer = "zeros", kernel_regularizer = NULL, recurrent_regularizer = NULL, 
+    bias_regularizer = NULL, activity_regularizer = NULL, kernel_constraint = NULL, 
+    recurrent_constraint = NULL, bias_constraint = NULL, dropout = 0, 
+    recurrent_dropout = 0, return_sequences = FALSE, return_state = FALSE, 
+    go_backwards = FALSE, stateful = FALSE, unroll = FALSE, time_major = FALSE, 
+    reset_after = TRUE, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$GRU, object, args)
+}
+
+
+#' Cell class for the GRU layer 
+#' 
+#' @details 
+#' See [the Keras RNN API guide](https://www.tensorflow.org/guide/keras/rnn)
+#' for details about the usage of RNN API.
+#' 
+#' This class processes one step within the whole time sequence input, whereas
+#' `tf.keras.layer.GRU` processes the whole sequence.
+#' 
+#' For example:
+#' 
+#' ```python
+#' >>> inputs = tf.random.normal([32, 10, 8])
+#' >>> rnn = tf.keras.layers.RNN(tf.keras.layers.GRUCell(4))
+#' >>> output = rnn(inputs)
+#' >>> print(output.shape)
+#' (32, 4)
+#' >>> rnn = tf.keras.layers.RNN(
+#' ...    tf.keras.layers.GRUCell(4),
+#' ...    return_sequences=TRUE,
+#' ...    return_state=TRUE)
+#' >>> whole_sequence_output, final_state = rnn(inputs)
+#' >>> print(whole_sequence_output.shape)
+#' (32, 10, 4)
+#' >>> print(final_state.shape)
+#' (32, 4)
+#' ```
+#'  
+#' 
+#' @param units 
+#' Positive integer, dimensionality of the output space. 
+#' 
+#' @param activation 
+#' Activation function to use. Default: hyperbolic tangent
+#' (`tanh`). If you pass NULL, no activation is applied
+#' (ie. "linear" activation: `a(x) = x`). 
+#' 
+#' @param recurrent_activation 
+#' Activation function to use for the recurrent step.
+#' Default: sigmoid (`sigmoid`). If you pass `NULL`, no activation is
+#' applied (ie. "linear" activation: `a(x) = x`). 
+#' 
+#' @param use_bias 
+#' Boolean, (default `TRUE`), whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix,
+#' used for the linear transformation of the inputs. Default:
+#' `glorot_uniform`. 
+#' 
+#' @param recurrent_initializer 
+#' Initializer for the `recurrent_kernel`
+#' weights matrix, used for the linear transformation of the recurrent
+#' state.  Default: `orthogonal`. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. Default: `zeros`. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. Default: `NULL`. 
+#' 
+#' @param recurrent_regularizer 
+#' Regularizer function applied to the
+#' `recurrent_kernel` weights matrix. Default: `NULL`. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector.
+#' Default: `NULL`. 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the `kernel` weights
+#' matrix. Default: `NULL`. 
+#' 
+#' @param recurrent_constraint 
+#' Constraint function applied to the
+#' `recurrent_kernel` weights matrix. Default: `NULL`. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. Default:
+#' `NULL`. 
+#' 
+#' @param dropout 
+#' Float between 0 and 1. Fraction of the units to drop for the
+#' linear transformation of the inputs. Default: 0. 
+#' 
+#' @param recurrent_dropout 
+#' Float between 0 and 1. Fraction of the units to drop
+#' for the linear transformation of the recurrent state. Default: 0. 
+#' 
+#' @param reset_after 
+#' GRU convention (whether to apply reset gate after or
+#' before matrix multiplication). FALSE = "before",
+#' TRUE = "after" (default and cuDNN compatible). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_gru_cell <- 
+function(object, units, activation = "tanh", recurrent_activation = "sigmoid", 
+    use_bias = TRUE, kernel_initializer = "glorot_uniform", recurrent_initializer = "orthogonal", 
+    bias_initializer = "zeros", kernel_regularizer = NULL, recurrent_regularizer = NULL, 
+    bias_regularizer = NULL, kernel_constraint = NULL, recurrent_constraint = NULL, 
+    bias_constraint = NULL, dropout = 0, recurrent_dropout = 0, 
+    reset_after = TRUE, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$GRUCell, object, args)
+}
+
+
+#' A preprocessing layer which crosses features using the "hashing trick" 
+#' 
+#' @details 
+#' This layer performs crosses of categorical features using the "hashing
+#' trick". Conceptually, the transformation can be thought of as:
+#' `hash(concatenate(features)) % num_bins`.
+#' 
+#' This layer currently only performs crosses of scalar inputs and batches of
+#' scalar inputs. Valid input shapes are `(batch_size, 1)`, `(batch_size,)` and
+#' `()`.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param num_bins 
+#' Number of hash bins. 
+#' 
+#' @param output_mode 
+#' Specification for the output of the layer. Values can be
+#' `"int"`, or `"one_hot"` configuring the layer as follows:
+#' - `"int"`: Return the integer bin indices directly.
+#' - `"one_hot"`: Encodes each individual element in the input into an
+#'     array the same size as `num_bins`, containing a 1 at the input's
+#'     bin index. Defaults to `"int"`. 
+#' 
+#' @param sparse 
+#' Boolean. Only applicable to `"one_hot"` mode. If `TRUE`,
+#' returns a `SparseTensor` instead of a dense `Tensor`.
+#' Defaults to `FALSE`. 
+#' 
+#' @param **kwargs 
+#' Keyword arguments to construct a layer. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_hashed_crossing <- 
+function(object, num_bins, output_mode = "int", sparse = FALSE, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$HashedCrossing, object, args)
+}
+
+
+#' A preprocessing layer which hashes and bins categorical features 
+#' 
+#' @details 
+#' This layer transforms categorical inputs to hashed output. It element-wise
+#' converts a ints or strings to ints in a fixed range. The stable hash
+#' function uses `tensorflow::ops::Fingerprint` to produce the same output
+#' consistently across all platforms.
+#' 
+#' This layer uses [FarmHash64](https://github.com/google/farmhash) by default,
+#' which provides a consistent hashed output across different platforms and is
+#' stable across invocations, regardless of device and context, by mixing the
+#' input bits thoroughly.
+#' 
+#' If you want to obfuscate the hashed output, you can also pass a random
+#' `salt` argument in the constructor. In that case, the layer will use the
+#' [SipHash64](https://github.com/google/highwayhash) hash function, with
+#' the `salt` value serving as additional input to the hash function.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#' 
+#' **Example (FarmHash64)**
+#' 
+#' ```python
+#' >>> layer = tf.keras.layers.Hashing(num_bins=3)
+#' >>> inp = [['A'], ['B'], ['C'], ['D'], ['E']]
+#' >>> layer(inp)
+#' <tf.Tensor: shape=(5, 1), dtype=int64, numpy=
+#'   array([[1],
+#'          [0],
+#'          [1],
+#'          [1],
+#'          [2]])>
+#' ```
+#' 
+#' **Example (FarmHash64) with a mask value**
+#' 
+#' ```python
+#' >>> layer = tf.keras.layers.Hashing(num_bins=3, mask_value='')
+#' >>> inp = [['A'], ['B'], [''], ['C'], ['D']]
+#' >>> layer(inp)
+#' <tf.Tensor: shape=(5, 1), dtype=int64, numpy=
+#'   array([[1],
+#'          [1],
+#'          [0],
+#'          [2],
+#'          [2]])>
+#' ```
+#' 
+#' **Example (SipHash64)**
+#' 
+#' ```python
+#' >>> layer = tf.keras.layers.Hashing(num_bins=3, salt=[133, 137])
+#' >>> inp = [['A'], ['B'], ['C'], ['D'], ['E']]
+#' >>> layer(inp)
+#' <tf.Tensor: shape=(5, 1), dtype=int64, numpy=
+#'   array([[1],
+#'          [2],
+#'          [1],
+#'          [0],
+#'          [2]])>
+#' ```
+#' 
+#' **Example (Siphash64 with a single integer, same as `salt=[133, 133]`)**
+#' 
+#' ```python
+#' >>> layer = tf.keras.layers.Hashing(num_bins=3, salt=133)
+#' >>> inp = [['A'], ['B'], ['C'], ['D'], ['E']]
+#' >>> layer(inp)
+#' <tf.Tensor: shape=(5, 1), dtype=int64, numpy=
+#'   array([[0],
+#'          [0],
+#'          [2],
+#'          [1],
+#'          [0]])>
+#' ```
+#'  
+#' 
+#' @param num_bins 
+#' Number of hash bins. Note that this includes the `mask_value`
+#' bin, so the effective number of bins is `(num_bins - 1)` if `mask_value`
+#' is set. 
+#' 
+#' @param mask_value 
+#' A value that represents masked inputs, which are mapped to
+#' index 0. `NULL` means no mask term will be added and the
+#' hashing will start at index 0. Defaults to `NULL`. 
+#' 
+#' @param salt 
+#' A single unsigned integer or NULL.
+#' If passed, the hash function used will be SipHash64, with these values
+#' used as an additional input (known as a "salt" in cryptography).
+#' These should be non-zero. If `NULL`, uses the FarmHash64 hash function.
+#' It also supports list of 2 unsigned integer numbers, see
+#' reference paper for details. Defaults to `NULL`. 
+#' 
+#' @param output_mode 
+#' Specification for the output of the layer. Values can bes
+#' `"int"`, `"one_hot"`, `"multi_hot"`, or
+#' `"count"` configuring the layer as follows:
+#'   - `"int"`: Return the integer bin indices directly.
+#'   - `"one_hot"`: Encodes each individual element in the input into an
+#'     array the same size as `num_bins`, containing a 1 at the input's bin
+#'     index. If the last dimension is size 1, will encode on that
+#'     dimension.  If the last dimension is not size 1, will append a new
+#'     dimension for the encoded output.
+#'   - `"multi_hot"`: Encodes each sample in the input into a single array
+#'     the same size as `num_bins`, containing a 1 for each bin index
+#'     index present in the sample. Treats the last dimension as the sample
+#'     dimension, if input shape is `(..., sample_length)`, output shape
+#'     will be `(..., num_tokens)`.
+#'   - `"count"`: As `"multi_hot"`, but the int array contains a count of
+#'     the number of times the bin index appeared in the sample.
+#' Defaults to `"int"`. 
+#' 
+#' @param sparse 
+#' Boolean. Only applicable to `"one_hot"`, `"multi_hot"`,
+#' and `"count"` output modes. If TRUE, returns a `SparseTensor` instead of
+#' a dense `Tensor`. Defaults to `FALSE`. 
+#' 
+#' @param **kwargs 
+#' Keyword arguments to construct a layer. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_hashing <- 
+function(object, num_bins, mask_value = NULL, salt = NULL, output_mode = "int", 
+    sparse = FALSE, ...) 
+{
+    args <- capture_args(match.call(), list(num_bins = as.integer, 
+        salt = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$Hashing, object, args)
+}
+
+
+#' Identity layer 
+#' 
+#' @details 
+#' This layer should be used as a placeholder when no operation is to be
+#' performed. The layer is argument insensitive, and returns its `inputs`
+#' argument as output. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_identity <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Identity, object, args)
+}
+
+
+#' `Input()` is used to instantiate a Keras tensor 
+#' 
+#' @details 
+#' A Keras tensor is a symbolic tensor-like object, which we augment with
+#' certain attributes that allow us to build a Keras model just by knowing the
+#' inputs and outputs of the model.
+#' 
+#' For instance, if `a`, `b` and `c` are Keras tensors,
+#' it becomes possible to do:
+#' `model = Model(input=[a, b], output=c)` 
+#' 
+#' @param shape 
+#' A shape list (integers), not including the batch size.
+#' For instance, `shape=(32,)` indicates that the expected input
+#' will be batches of 32-dimensional vectors. Elements of this list
+#' can be NULL; 'NULL' elements represent dimensions where the shape is
+#' not known. 
+#' 
+#' @param batch_size 
+#' optional static batch size (integer). 
+#' 
+#' @param sparse 
+#' A boolean specifying whether the placeholder to be created is
+#' sparse. Only one of 'ragged' and 'sparse' can be TRUE. Note that,
+#' if `sparse` is FALSE, sparse tensors can still be passed into the
+#' input - they will be densified with a default value of 0. 
+#' 
+#' @param tensor 
+#' Optional existing tensor to wrap into the `Input` layer.
+#' If set, the layer will use the `tf.TypeSpec` of this tensor rather
+#' than creating a new placeholder tensor. 
+#' 
+#' @param ragged 
+#' A boolean specifying whether the placeholder to be created is
+#' ragged. Only one of 'ragged' and 'sparse' can be TRUE. In this case,
+#' values of 'NULL' in the 'shape' argument represent ragged
+#' dimensions.  For more information about RaggedTensors, see
+#' [this guide](https://www.tensorflow.org/guide/ragged_tensor). 
+#' 
+#' @param type_spec 
+#' A `tf.TypeSpec` object to create the input placeholder from.
+#' When provided, all other args except name must be NULL. 
+#' 
+#' @param **kwargs 
+#' deprecated arguments support. Supports `batch_shape` and
+#' `batch_input_shape`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_input <- 
+function(shape = NULL, batch_size = NULL, name = NULL, dtype = NULL, 
+    sparse = NULL, tensor = NULL, ragged = NULL, type_spec = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), list(shape = normalize_shape))
+    create_layer(keras$layers$Input, NULL, args)
+}
+
+
+#' Layer to be used as an entry point into a Network (a graph of layers) 
+#' 
+#' @details 
+#' It can either wrap an existing tensor (pass an `input_tensor` argument)
+#' or create a placeholder tensor (pass arguments `input_shape`, and
+#' optionally, `dtype`).
+#' 
+#' It is generally recommend to use the Keras Functional model via `Input`,
+#' (which creates an `InputLayer`) without directly using `InputLayer`.
+#' 
+#' When using `InputLayer` with the Keras Sequential model, it can be skipped
+#' by moving the `input_shape` parameter to the first layer after the
+#' `InputLayer`.
+#' 
+#' This class can create placeholders for `tf.Tensors`, `tf.SparseTensors`, and
+#' `tf.RaggedTensors` by choosing `sparse=TRUE` or `ragged=TRUE`. Note that
+#' `sparse` and `ragged` can't be configured to `TRUE` at the same time.
+#' Usage:
+#' 
+#' ```python
+#' # With explicit InputLayer.
+#' model = tf.keras.Sequential([
+#'   tf.keras.layers.InputLayer(input_shape=(4,)),
+#'   tf.keras.layers.Dense(8)])
+#' model.compile(tf.keras.optimizers.RMSprop(0.001), loss='mse')
+#' model.fit(np.zeros((10, 4)),
+#'           np.ones((10, 8)))
+#' 
+#' # Without InputLayer and let the first layer to have the input_shape.
+#' # Keras will add a input for the model behind the scene.
+#' model = tf.keras.Sequential([
+#'   tf.keras.layers.Dense(8, input_shape=(4,))])
+#' model.compile(tf.keras.optimizers.RMSprop(0.001), loss='mse')
+#' model.fit(np.zeros((10, 4)),
+#'           np.ones((10, 8)))
+#' ``` 
+#' 
+#' @param input_shape 
+#' Shape list (not including the batch axis), or
+#' `TensorShape` instance (not including the batch axis). 
+#' 
+#' @param batch_size 
+#' Optional input batch size (integer or `NULL`). 
+#' 
+#' @param input_tensor 
+#' Optional tensor to use as layer input. If set, the layer
+#' will use the `tf.TypeSpec` of this tensor rather
+#' than creating a new placeholder tensor. 
+#' 
+#' @param sparse 
+#' Boolean, whether the placeholder created is meant to be sparse.
+#' Defaults to `FALSE`. 
+#' 
+#' @param ragged 
+#' Boolean, whether the placeholder created is meant to be ragged.
+#' In this case, values of `NULL` in the `shape` argument represent
+#' ragged dimensions. For more information about `tf.RaggedTensor`, see
+#' [this guide](https://www.tensorflow.org/guide/ragged_tensor).
+#' Defaults to `FALSE`. 
+#' 
+#' @param type_spec 
+#' A `tf.TypeSpec` object to create Input from. This
+#' `tf.TypeSpec` represents the entire batch. When provided, all other
+#' args except name must be `NULL`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_input_layer <- 
+function(object, input_shape = NULL, batch_size = NULL, dtype = NULL, 
+    input_tensor = NULL, sparse = NULL, name = NULL, ragged = NULL, 
+    type_spec = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$InputLayer, object, args)
+}
+
+
+#' A preprocessing layer which maps integer features to contiguous ranges 
+#' 
+#' @details 
+#' This layer maps a set of arbitrary integer input tokens into indexed integer
+#' output via a table-based vocabulary lookup. The layer's output indices will
+#' be contiguously arranged up to the maximum vocab size, even if the input
+#' tokens are non-continguous or unbounded. The layer supports multiple options
+#' for encoding the output via `output_mode`, and has optional support for
+#' out-of-vocabulary (OOV) tokens and masking.
+#' 
+#' The vocabulary for the layer must be either supplied on construction or
+#' learned via `adapt()`. During `adapt()`, the layer will analyze a data set,
+#' determine the frequency of individual integer tokens, and create a
+#' vocabulary from them. If the vocabulary is capped in size, the most frequent
+#' tokens will be used to create the vocabulary and all others will be treated
+#' as OOV.
+#' 
+#' There are two possible output modes for the layer.  When `output_mode` is
+#' `"int"`, input integers are converted to their index in the vocabulary (an
+#' integer).  When `output_mode` is `"multi_hot"`, `"count"`, or `"tf_idf"`,
+#' input integers are encoded into an array where each dimension corresponds to
+#' an element in the vocabulary.
+#' 
+#' The vocabulary can optionally contain a mask token as well as an OOV token
+#' (which can optionally occupy multiple indices in the vocabulary, as set
+#' by `num_oov_indices`).
+#' The position of these tokens in the vocabulary is fixed. When `output_mode`
+#' is `"int"`, the vocabulary will begin with the mask token at index 0,
+#' followed by OOV indices, followed by the rest of the vocabulary. When
+#' `output_mode` is `"multi_hot"`, `"count"`, or `"tf_idf"` the vocabulary will
+#' begin with OOV indices and instances of the mask token will be dropped.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param max_tokens 
+#' Maximum size of the vocabulary for this layer. This should
+#' only be specified when adapting the vocabulary or when setting
+#' `pad_to_max_tokens=TRUE`. If NULL, there is no cap on the size of the
+#' vocabulary. Note that this size includes the OOV and mask tokens.
+#' Defaults to `NULL`. 
+#' 
+#' @param num_oov_indices 
+#' The number of out-of-vocabulary tokens to use. If this
+#' value is more than 1, OOV inputs are modulated to determine their OOV
+#' value. If this value is 0, OOV inputs will cause an error when calling
+#' the layer. Defaults to `1`. 
+#' 
+#' @param mask_token 
+#' An integer token that represents masked inputs. When
+#' `output_mode` is `"int"`, the token is included in vocabulary and mapped
+#' to index 0. In other output modes, the token will not appear in the
+#' vocabulary and instances of the mask token in the input will be dropped.
+#' If set to NULL, no mask term will be added. Defaults to `NULL`. 
+#' 
+#' @param oov_token 
+#' Only used when `invert` is TRUE. The token to return for OOV
+#' indices. Defaults to `-1`. 
+#' 
+#' @param vocabulary 
+#' Optional. Either an array of integers or a string path to a
+#' text file. If passing an array, can pass a list, list, 1D numpy array,
+#' or 1D tensor containing the integer vocbulary terms. If passing a file
+#' path, the file should contain one line per term in the vocabulary. If
+#' this argument is set, there is no need to `adapt()` the layer. 
+#' 
+#' @param vocabulary_dtype 
+#' The dtype of the vocabulary terms, for example
+#' `"int64"` or `"int32"`. Defaults to `"int64"`. 
+#' 
+#' @param idf_weights 
+#' Only valid when `output_mode` is `"tf_idf"`. A list, list,
+#' 1D numpy array, or 1D tensor or the same length as the vocabulary,
+#' containing the floating point inverse document frequency weights, which
+#' will be multiplied by per sample term counts for the final `tf_idf`
+#' weight. If the `vocabulary` argument is set, and `output_mode` is
+#' `"tf_idf"`, this argument must be supplied. 
+#' 
+#' @param invert 
+#' Only valid when `output_mode` is `"int"`. If TRUE, this layer will
+#' map indices to vocabulary items instead of mapping vocabulary items to
+#' indices. Defaults to `FALSE`. 
+#' 
+#' @param output_mode 
+#' Specification for the output of the layer. Values can be
+#' `"int"`, `"one_hot"`, `"multi_hot"`, `"count"`, or `"tf_idf"`
+#' configuring the layer as follows:
+#'   - `"int"`: Return the vocabulary indices of the input tokens.
+#'   - `"one_hot"`: Encodes each individual element in the input into an
+#'     array the same size as the vocabulary, containing a 1 at the element
+#'     index. If the last dimension is size 1, will encode on that
+#'     dimension.  If the last dimension is not size 1, will append a new
+#'     dimension for the encoded output.
+#'   - `"multi_hot"`: Encodes each sample in the input into a single array
+#'     the same size as the vocabulary, containing a 1 for each vocabulary
+#'     term present in the sample. Treats the last dimension as the sample
+#'     dimension, if input shape is (..., sample_length), output shape will
+#'     be (..., num_tokens).
+#'   - `"count"`: As `"multi_hot"`, but the int array contains a count of
+#'     the number of times the token at that index appeared in the sample.
+#'   - `"tf_idf"`: As `"multi_hot"`, but the TF-IDF algorithm is applied to
+#'     find the value in each token slot.
+#' For `"int"` output, any shape of input and output is supported. For all
+#' other output modes, currently only output up to rank 2 is supported.
+#' Defaults to `"int"`. 
+#' 
+#' @param pad_to_max_tokens 
+#' Only applicable when `output_mode` is `"multi_hot"`,
+#' `"count"`, or `"tf_idf"`. If TRUE, the output will have its feature axis
+#' padded to `max_tokens` even if the number of unique tokens in the
+#' vocabulary is less than max_tokens, resulting in a tensor of shape
+#' [batch_size, max_tokens] regardless of vocabulary size. Defaults to
+#' FALSE. 
+#' 
+#' @param sparse 
+#' Boolean. Only applicable when `output_mode` is `"multi_hot"`,
+#' `"count"`, or `"tf_idf"`. If TRUE, returns a `SparseTensor` instead of a
+#' dense `Tensor`. Defaults to `FALSE`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_integer_lookup <- 
+function(object, max_tokens = NULL, num_oov_indices = 1L, mask_token = NULL, 
+    oov_token = -1L, vocabulary = NULL, vocabulary_dtype = "int64", 
+    idf_weights = NULL, invert = FALSE, output_mode = "int", 
+    sparse = FALSE, pad_to_max_tokens = FALSE, ...) 
+{
+    args <- capture_args(match.call(), list(num_oov_indices = as.integer, 
+        oov_token = as.integer), ignore = "object")
+    create_layer(keras$layers$IntegerLookup, object, args)
+}
+
+
+#' Wraps arbitrary expressions as a `Layer` object 
+#' 
+#' @details 
+#' The `Lambda` layer exists so that arbitrary expressions can be used
+#' as a `Layer` when constructing Sequential
+#' and Functional API models. `Lambda` layers are best suited for simple
+#' operations or quick experimentation. For more advanced use cases, follow
+#' [this guide](
+#' https://www.tensorflow.org/guide/keras/custom_layers_and_models)
+#' for subclassing `tf.keras.layers.Layer`.
+#' 
+#' WARNING: `tf.keras.layers.Lambda` layers have (de)serialization limitations!
+#' 
+#' The main reason to subclass `tf.keras.layers.Layer` instead of using a
+#' `Lambda` layer is saving and inspecting a Model. `Lambda` layers
+#' are saved by serializing the Python bytecode, which is fundamentally
+#' non-portable. They should only be loaded in the same environment where
+#' they were saved. Subclassed layers can be saved in a more portable way
+#' by overriding their `get_config()` method. Models that rely on
+#' subclassed Layers are also often easier to visualize and reason about. 
+#' 
+#' @param function 
+#' The function to be evaluated. Takes input tensor as first
+#' argument. 
+#' 
+#' @param output_shape 
+#' Expected output shape from function. This argument can be
+#' inferred if not explicitly provided. Can be a list or function. If a
+#' list, it only specifies the first dimension onward;
+#' sample dimension is assumed either the same as the input:
+#' `output_shape = (input_shape[0], ) + output_shape` or, the input is
+#' `NULL` and the sample dimension is also `NULL`:
+#' `output_shape = (NULL, ) + output_shape` If a function, it specifies the
+#' entire shape as a function of the input shape:
+#' `output_shape = f(input_shape)` 
+#' 
+#' @param mask 
+#' Either NULL (indicating no masking) or a callable with the same
+#' signature as the `compute_mask` layer method, or a tensor that will be
+#' returned as output mask regardless of what the input is. 
+#' 
+#' @param arguments 
+#' Optional dictionary of keyword arguments to be passed to the
+#' function. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_lambda <- 
+function(object, `function`, output_shape = NULL, mask = NULL, 
+    arguments = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Lambda, object, args)
+}
+
+
+#' Layer normalization layer (Ba et al., 2016) 
+#' 
+#' @details 
+#' Normalize the activations of the previous layer for each given example in a
+#' batch independently, rather than across a batch like Batch Normalization.
+#' i.e. applies a transformation that maintains the mean activation within each
+#' example close to 0 and the activation standard deviation close to 1.
+#' 
+#' Given a tensor `inputs`, moments are calculated and normalization
+#' is performed across the axes specified in `axis`. 
+#' 
+#' @param axis 
+#' Integer or List/Tuple. The axis or axes to normalize across.
+#' Typically, this is the features axis/axes. The left-out axes are
+#' typically the batch axis/axes. `-1` is the last dimension in the
+#' input. Defaults to `-1`. 
+#' 
+#' @param epsilon 
+#' Small float added to variance to avoid dividing by zero. Defaults
+#' to 1e-3 
+#' 
+#' @param center 
+#' If TRUE, add offset of `beta` to normalized tensor. If FALSE,
+#' `beta` is ignored. Defaults to `TRUE`. 
+#' 
+#' @param scale 
+#' If TRUE, multiply by `gamma`. If FALSE, `gamma` is not used.
+#' When the next layer is linear (also e.g. `nn.relu`), this can be
+#' disabled since the scaling will be done by the next layer.
+#' Defaults to `TRUE`. 
+#' 
+#' @param beta_initializer 
+#' Initializer for the beta weight. Defaults to zeros. 
+#' 
+#' @param gamma_initializer 
+#' Initializer for the gamma weight. Defaults to ones. 
+#' 
+#' @param beta_regularizer 
+#' Optional regularizer for the beta weight. NULL by
+#' default. 
+#' 
+#' @param gamma_regularizer 
+#' Optional regularizer for the gamma weight. NULL by
+#' default. 
+#' 
+#' @param beta_constraint 
+#' Optional constraint for the beta weight. NULL by default. 
+#' 
+#' @param gamma_constraint 
+#' Optional constraint for the gamma weight. NULL by
+#' default. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_layer_normalization <- 
+function(object, axis = -1L, epsilon = 0.001, center = TRUE, 
+    scale = TRUE, beta_initializer = "zeros", gamma_initializer = "ones", 
+    beta_regularizer = NULL, gamma_regularizer = NULL, beta_constraint = NULL, 
+    gamma_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(axis = as_axis), 
+        ignore = "object")
+    create_layer(keras$layers$LayerNormalization, object, args)
+}
+
+
+#' Leaky version of a Rectified Linear Unit 
+#' 
+#' @details 
+#' It allows a small gradient when the unit is not active:
+#' 
+#' ```
+#'     f(x) = alpha * x if x < 0
+#'     f(x) = x if x >= 0
+#' ```
+#' 
+#' Usage:
+#' 
+#' ```python
+#' >>> layer = tf.keras.layers.LeakyReLU()
+#' >>> output = layer([-3.0, -1.0, 0.0, 2.0])
+#' >>> list(output.numpy())
+#' [-0.9, -0.3, 0.0, 2.0]
+#' >>> layer = tf.keras.layers.LeakyReLU(alpha=0.1)
+#' >>> output = layer([-3.0, -1.0, 0.0, 2.0])
+#' >>> list(output.numpy())
+#' [-0.3, -0.1, 0.0, 2.0]
+#' ```
+#' 
+#' Input shape:
+#'     Arbitrary. Use the keyword argument `input_shape`
+#'     (list of integers, does not include the batch axis)
+#'     when using this layer as the first layer in a model.
+#' 
+#' Output shape:
+#'     Same shape as the input. 
+#' 
+#' @param alpha 
+#' Float >= `0.`. Negative slope coefficient. Defaults to `0.3`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_leaky_relu <- 
+function(object, alpha = 0.3, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$LeakyReLU, object, args)
+}
+
+
+#' Locally-connected layer for 1D inputs 
+#' 
+#' @details 
+#' The `LocallyConnected1D` layer works similarly to
+#' the `Conv1D` layer, except that weights are unshared,
+#' that is, a different set of filters is applied at each different patch
+#' of the input.
+#' 
+#' Note: layer attributes cannot be modified after the layer has been called
+#' once (except the `trainable` attribute). 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the
+#' number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of a single integer, specifying
+#' the length of the 1D convolution window. 
+#' 
+#' @param strides 
+#' An integer or list of a single integer, specifying the
+#' stride length of the convolution. 
+#' 
+#' @param padding 
+#' Currently only supports `"valid"` (case-insensitive). `"same"`
+#' may be supported in the future. `"valid"` means no padding. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`. The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch, length,
+#' channels)` while `channels_first` corresponds to inputs with shape
+#' `(batch, channels, length)`. When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param activation 
+#' Activation function to use. If you don't specify anything,
+#' no activation is applied (ie. "linear" activation: `a(x) = x`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector. 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its "activation").. 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. 
+#' 
+#' @param implementation 
+#' implementation mode, either `1`, `2`, or `3`. `1` loops
+#' over input spatial locations to perform the forward pass. It is
+#' memory-efficient but performs a lot of (small) ops.  `2` stores layer
+#' weights in a dense but sparsely-populated 2D matrix and implements the
+#' forward pass as a single matrix-multiply. It uses a lot of RAM but
+#' performs few (large) ops.  `3` stores layer weights in a sparse tensor
+#' and implements the forward pass as a single sparse matrix-multiply.
+#'   How to choose:
+#'   `1`: large, dense models,
+#'   `2`: small models,
+#'   `3`: large, sparse models,  where "large" stands for large
+#'     input/output activations (i.e. many `filters`, `input_filters`,
+#'     large `input_size`, `output_size`), and "sparse" stands for few
+#'     connections between inputs and outputs, i.e. small ratio
+#'     `filters * input_filters * kernel_size / (input_size * strides)`,
+#'     where inputs to and outputs of the layer are assumed to have
+#'     shapes `(input_size, input_filters)`, `(output_size, filters)`
+#'     respectively.  It is recommended to benchmark each in the setting
+#'     of interest to pick the most efficient one (in terms of speed and
+#'     memory usage). Correct choice of implementation can lead to
+#'     dramatic speed improvements (e.g. 50X), potentially at the expense
+#'     of RAM.  Also, only `padding="valid"` is supported by
+#'     `implementation=1`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_locally_connected_1d <- 
+function(object, filters, kernel_size, strides = 1L, padding = "valid", 
+    data_format = NULL, activation = NULL, use_bias = TRUE, kernel_initializer = "glorot_uniform", 
+    bias_initializer = "zeros", kernel_regularizer = NULL, bias_regularizer = NULL, 
+    activity_regularizer = NULL, kernel_constraint = NULL, bias_constraint = NULL, 
+    implementation = 1L, ...) 
+{
+    args <- capture_args(match.call(), list(strides = as.integer, 
+        implementation = as.integer), ignore = "object")
+    create_layer(keras$layers$LocallyConnected1D, object, args)
+}
+
+
+#' Locally-connected layer for 2D inputs 
+#' 
+#' @details 
+#' The `LocallyConnected2D` layer works similarly
+#' to the `Conv2D` layer, except that weights are unshared,
+#' that is, a different set of filters is applied at each
+#' different patch of the input.
+#' 
+#' Note: layer attributes cannot be modified after the layer has been called
+#' once (except the `trainable` attribute). 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the
+#' number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 2 integers, specifying the
+#' width and height of the 2D convolution window. Can be a single integer
+#' to specify the same value for all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 2 integers, specifying the strides
+#' of the convolution along the width and height. Can be a single integer
+#' to specify the same value for all spatial dimensions. 
+#' 
+#' @param padding 
+#' Currently only support `"valid"` (case-insensitive). `"same"`
+#' will be supported in future. `"valid"` means no padding. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`. The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape `(batch, height,
+#'   width, channels)` while `channels_first` corresponds to inputs with
+#'   shape
+#' `(batch, channels, height, width)`. When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param activation 
+#' Activation function to use. If you don't specify anything,
+#' no activation is applied (ie. "linear" activation: `a(x) = x`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector. 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its "activation"). 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the kernel matrix. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. 
+#' 
+#' @param implementation 
+#' implementation mode, either `1`, `2`, or `3`. `1` loops
+#' over input spatial locations to perform the forward pass. It is
+#' memory-efficient but performs a lot of (small) ops.  `2` stores layer
+#' weights in a dense but sparsely-populated 2D matrix and implements the
+#' forward pass as a single matrix-multiply. It uses a lot of RAM but
+#' performs few (large) ops.  `3` stores layer weights in a sparse tensor
+#' and implements the forward pass as a single sparse matrix-multiply.
+#'   How to choose:
+#'   `1`: large, dense models,
+#'   `2`: small models,
+#'   `3`: large, sparse models,  where "large" stands for large
+#'     input/output activations (i.e. many `filters`, `input_filters`,
+#'     large `np.prod(input_size)`, `np.prod(output_size)`), and "sparse"
+#'     stands for few connections between inputs and outputs, i.e. small
+#'     ratio `filters * input_filters * np.prod(kernel_size) /
+#'     (np.prod(input_size) * np.prod(strides))`, where inputs to and
+#'     outputs of the layer are assumed to have shapes `input_size +
+#'     (input_filters,)`, `output_size + (filters,)` respectively. It is
+#'     recommended to benchmark each in the setting of interest to pick
+#'     the most efficient one (in terms of speed and memory usage).
+#'     Correct choice of implementation can lead to dramatic speed
+#'     improvements (e.g. 50X), potentially at the expense of RAM. Also,
+#'     only `padding="valid"` is supported by `implementation=1`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_locally_connected_2d <- 
+function(object, filters, kernel_size, strides = list(1L, 1L), 
+    padding = "valid", data_format = NULL, activation = NULL, 
+    use_bias = TRUE, kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, implementation = 1L, 
+    ...) 
+{
+    args <- capture_args(match.call(), list(implementation = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$LocallyConnected2D, object, args)
+}
+
+
+#' Long Short-Term Memory layer - Hochreiter 1997 
+#' 
+#' @details 
+#' See [the Keras RNN API guide](https://www.tensorflow.org/guide/keras/rnn)
+#' for details about the usage of RNN API.
+#' 
+#' Based on available runtime hardware and constraints, this layer
+#' will choose different implementations (cuDNN-based or pure-TensorFlow)
+#' to maximize the performance. If a GPU is available and all
+#' the arguments to the layer meet the requirement of the cuDNN kernel
+#' (see below for details), the layer will use a fast cuDNN implementation.
+#' 
+#' The requirements to use the cuDNN implementation are:
+#' 
+#' 1. `activation` == `tanh`
+#' 2. `recurrent_activation` == `sigmoid`
+#' 3. `recurrent_dropout` == 0
+#' 4. `unroll` is `FALSE`
+#' 5. `use_bias` is `TRUE`
+#' 6. Inputs, if use masking, are strictly right-padded.
+#' 7. Eager execution is enabled in the outermost context.
+#' 
+#' For example:
+#' 
+#' ```python
+#' >>> inputs = tf.random.normal([32, 10, 8])
+#' >>> lstm = tf.keras.layers.LSTM(4)
+#' >>> output = lstm(inputs)
+#' >>> print(output.shape)
+#' (32, 4)
+#' >>> lstm = tf.keras.layers.LSTM(4, return_sequences=TRUE, return_state=TRUE)
+#' >>> whole_seq_output, final_memory_state, final_carry_state = lstm(inputs)
+#' >>> print(whole_seq_output.shape)
+#' (32, 10, 4)
+#' >>> print(final_memory_state.shape)
+#' (32, 4)
+#' >>> print(final_carry_state.shape)
+#' (32, 4)
+#' ```
+#' 
+#' Args:
+#'   units: Positive integer, dimensionality of the output space.
+#'   activation: Activation function to use.
+#'     Default: hyperbolic tangent (`tanh`). If you pass `NULL`, no activation
+#'     is applied (ie. "linear" activation: `a(x) = x`).
+#'   recurrent_activation: Activation function to use for the recurrent step.
+#'     Default: sigmoid (`sigmoid`). If you pass `NULL`, no activation is
+#'     applied (ie. "linear" activation: `a(x) = x`).
+#'   use_bias: Boolean (default `TRUE`), whether the layer uses a bias vector.
+#'   kernel_initializer: Initializer for the `kernel` weights matrix, used for
+#'     the linear transformation of the inputs. Default: `glorot_uniform`.
+#'   recurrent_initializer: Initializer for the `recurrent_kernel` weights
+#'     matrix, used for the linear transformation of the recurrent state.
+#'     Default: `orthogonal`.
+#'   bias_initializer: Initializer for the bias vector. Default: `zeros`.
+#'   unit_forget_bias: Boolean (default `TRUE`). If TRUE, add 1 to the bias of
+#'     the forget gate at initialization. Setting it to true will also force
+#'     `bias_initializer="zeros"`. This is recommended in [Jozefowicz et
+#'         al.](http://www.jmlr.org/proceedings/papers/v37/jozefowicz15.pdf).
+#'   kernel_regularizer: Regularizer function applied to the `kernel` weights
+#'     matrix. Default: `NULL`.
+#'   recurrent_regularizer: Regularizer function applied to the
+#'     `recurrent_kernel` weights matrix. Default: `NULL`.
+#'   bias_regularizer: Regularizer function applied to the bias vector.
+#'     Default: `NULL`.
+#'   activity_regularizer: Regularizer function applied to the output of the
+#'     layer (its "activation"). Default: `NULL`.
+#'   kernel_constraint: Constraint function applied to the `kernel` weights
+#'     matrix. Default: `NULL`.
+#'   recurrent_constraint: Constraint function applied to the
+#'     `recurrent_kernel` weights matrix. Default: `NULL`.
+#'   bias_constraint: Constraint function applied to the bias vector. Default:
+#'     `NULL`.
+#'   dropout: Float between 0 and 1. Fraction of the units to drop for the
+#'     linear transformation of the inputs. Default: 0.
+#'   recurrent_dropout: Float between 0 and 1. Fraction of the units to drop
+#'     for the linear transformation of the recurrent state. Default: 0.
+#'   return_sequences: Boolean. Whether to return the last output in the output
+#'     sequence, or the full sequence. Default: `FALSE`.
+#'   return_state: Boolean. Whether to return the last state in addition to the
+#'     output. Default: `FALSE`.
+#'   go_backwards: Boolean (default `FALSE`). If TRUE, process the input
+#'     sequence backwards and return the reversed sequence.
+#'   stateful: Boolean (default `FALSE`). If TRUE, the last state for each
+#'   sample at index i in a batch will be used as initial state for the sample
+#'     of index i in the following batch.
+#'   time_major: The shape format of the `inputs` and `outputs` tensors.
+#'     If TRUE, the inputs and outputs will be in shape
+#'     `[timesteps, batch, feature]`, whereas in the FALSE case, it will be
+#'     `[batch, timesteps, feature]`. Using `time_major = TRUE` is a bit more
+#'     efficient because it avoids transposes at the beginning and end of the
+#'     RNN calculation. However, most TensorFlow data is batch-major, so by
+#'     default this function accepts input and emits output in batch-major
+#'     form.
+#'   unroll: Boolean (default `FALSE`). If TRUE, the network will be unrolled,
+#'     else a symbolic loop will be used. Unrolling can speed-up a RNN,
+#'     although it tends to be more memory-intensive. Unrolling is only
+#'     suitable for short sequences.
+#' 
+#' Call arguments:
+#'   inputs: A 3D tensor with shape `[batch, timesteps, feature]`.
+#'   mask: Binary tensor of shape `[batch, timesteps]` indicating whether
+#'     a given timestep should be masked (optional).
+#'     An individual `TRUE` entry indicates that the corresponding timestep
+#'     should be utilized, while a `FALSE` entry indicates that the
+#'     corresponding timestep should be ignored. Defaults to `NULL`.
+#'   training: Python boolean indicating whether the layer should behave in
+#'     training mode or in inference mode. This argument is passed to the cell
+#'     when calling it. This is only relevant if `dropout` or
+#'     `recurrent_dropout` is used (optional). Defaults to `NULL`.
+#'   initial_state: List of initial state tensors to be passed to the first
+#'     call of the cell (optional, `NULL` causes creation
+#'     of zero-filled initial state tensors). Defaults to `NULL`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_lstm <- 
+function(object, units, activation = "tanh", recurrent_activation = "sigmoid", 
+    use_bias = TRUE, kernel_initializer = "glorot_uniform", recurrent_initializer = "orthogonal", 
+    bias_initializer = "zeros", unit_forget_bias = TRUE, kernel_regularizer = NULL, 
+    recurrent_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, recurrent_constraint = NULL, bias_constraint = NULL, 
+    dropout = 0, recurrent_dropout = 0, return_sequences = FALSE, 
+    return_state = FALSE, go_backwards = FALSE, stateful = FALSE, 
+    time_major = FALSE, unroll = FALSE, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$LSTM, object, args)
+}
+
+
+#' Cell class for the LSTM layer 
+#' 
+#' @details 
+#' See [the Keras RNN API guide](https://www.tensorflow.org/guide/keras/rnn)
+#' for details about the usage of RNN API.
+#' 
+#' This class processes one step within the whole time sequence input, whereas
+#' `tf.keras.layer.LSTM` processes the whole sequence.
+#' 
+#' For example:
+#' 
+#' ```python
+#' >>> inputs = tf.random.normal([32, 10, 8])
+#' >>> rnn = tf.keras.layers.RNN(tf.keras.layers.LSTMCell(4))
+#' >>> output = rnn(inputs)
+#' >>> print(output.shape)
+#' (32, 4)
+#' >>> rnn = tf.keras.layers.RNN(
+#' ...    tf.keras.layers.LSTMCell(4),
+#' ...    return_sequences=TRUE,
+#' ...    return_state=TRUE)
+#' >>> whole_seq_output, final_memory_state, final_carry_state = rnn(inputs)
+#' >>> print(whole_seq_output.shape)
+#' (32, 10, 4)
+#' >>> print(final_memory_state.shape)
+#' (32, 4)
+#' >>> print(final_carry_state.shape)
+#' (32, 4)
+#' ```
+#'  
+#' 
+#' @param units 
+#' Positive integer, dimensionality of the output space. 
+#' 
+#' @param activation 
+#' Activation function to use. Default: hyperbolic tangent
+#' (`tanh`). If you pass `NULL`, no activation is applied (ie. "linear"
+#' activation: `a(x) = x`). 
+#' 
+#' @param recurrent_activation 
+#' Activation function to use for the recurrent step.
+#' Default: sigmoid (`sigmoid`). If you pass `NULL`, no activation is
+#' applied (ie. "linear" activation: `a(x) = x`). 
+#' 
+#' @param use_bias 
+#' Boolean, (default `TRUE`), whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix, used for
+#' the linear transformation of the inputs. Default: `glorot_uniform`. 
+#' 
+#' @param recurrent_initializer 
+#' Initializer for the `recurrent_kernel` weights
+#' matrix, used for the linear transformation of the recurrent state.
+#' Default: `orthogonal`. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. Default: `zeros`. 
+#' 
+#' @param unit_forget_bias 
+#' Boolean (default `TRUE`). If TRUE, add 1 to the bias of
+#' the forget gate at initialization. Setting it to true will also force
+#' `bias_initializer="zeros"`. This is recommended in [Jozefowicz et
+#'   al.](https://github.com/mlresearch/v37/blob/gh-pages/jozefowicz15.pdf) 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. Default: `NULL`. 
+#' 
+#' @param recurrent_regularizer 
+#' Regularizer function applied to
+#' the `recurrent_kernel` weights matrix. Default: `NULL`. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector.
+#' Default: `NULL`. 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the `kernel` weights
+#' matrix. Default: `NULL`. 
+#' 
+#' @param recurrent_constraint 
+#' Constraint function applied to the
+#' `recurrent_kernel` weights matrix. Default: `NULL`. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. Default:
+#' `NULL`. 
+#' 
+#' @param dropout 
+#' Float between 0 and 1. Fraction of the units to drop for the
+#' linear transformation of the inputs. Default: 0. 
+#' 
+#' @param recurrent_dropout 
+#' Float between 0 and 1. Fraction of the units to drop
+#' for the linear transformation of the recurrent state. Default: 0. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_lstm_cell <- 
+function(object, units, activation = "tanh", recurrent_activation = "sigmoid", 
+    use_bias = TRUE, kernel_initializer = "glorot_uniform", recurrent_initializer = "orthogonal", 
+    bias_initializer = "zeros", unit_forget_bias = TRUE, kernel_regularizer = NULL, 
+    recurrent_regularizer = NULL, bias_regularizer = NULL, kernel_constraint = NULL, 
+    recurrent_constraint = NULL, bias_constraint = NULL, dropout = 0, 
+    recurrent_dropout = 0, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$LSTMCell, object, args)
+}
+
+
+#' Masks a sequence by using a mask value to skip timesteps 
+#' 
+#' @details 
+#' For each timestep in the input tensor (dimension #1 in the tensor),
+#' if all values in the input tensor at that timestep
+#' are equal to `mask_value`, then the timestep will be masked (skipped)
+#' in all downstream layers (as long as they support masking).
+#' 
+#' If any downstream layer does not support masking yet receives such
+#' an input mask, an exception will be raised. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_masking <- 
+function(object, mask_value = 0, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Masking, object, args)
+}
+
+
+#' Layer that computes the maximum (element-wise) a list of inputs 
+#' 
+#' @details 
+#' It takes as input a list of tensors, all of the same shape, and returns
+#' a single tensor (also of the same shape).
+#' 
+#' ```python
+#' >>> tf.keras.layers.Maximum()([np.arange(5).reshape(5, 1),
+#' ...                            np.arange(5, 10).reshape(5, 1)])
+#' <tf.Tensor: shape=(5, 1), dtype=int64, numpy=
+#' array([[5],
+#'      [6],
+#'      [7],
+#'      [8],
+#'      [9]])>
+#' ```
+#' 
+#' ```python
+#' >>> x1 = tf.keras.layers.Dense(8)(np.arange(10).reshape(5, 2))
+#' >>> x2 = tf.keras.layers.Dense(8)(np.arange(10, 20).reshape(5, 2))
+#' >>> maxed = tf.keras.layers.Maximum()([x1, x2])
+#' >>> maxed.shape
+#' TensorShape([5, 8])
+#' ```
+#'  
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_maximum <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Maximum, object, args)
+}
+
+
+#' Max pooling operation for 1D temporal data 
+#' 
+#' @details 
+#' Downsamples the input representation by taking the maximum value over a
+#' spatial window of size `pool_size`. The window is shifted by `strides`.  The
+#' resulting output, when using the `"valid"` padding option, has a shape of:
+#' `output_shape = (input_shape - pool_size + 1) / strides)`
+#' 
+#' The resulting output shape when using the `"same"` padding option is:
+#' `output_shape = input_shape / strides`
+#' 
+#' For example, for `strides=1` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> max_pool_1d = tf.keras.layers.MaxPooling1D(pool_size=2,
+#' ...    strides=1, padding='valid')
+#' >>> max_pool_1d(x)
+#' <tf.Tensor: shape=(1, 4, 1), dtype=float32, numpy=
+#' array([[[2.],
+#'         [3.],
+#'         [4.],
+#'         [5.]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for `strides=2` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> max_pool_1d = tf.keras.layers.MaxPooling1D(pool_size=2,
+#' ...    strides=2, padding='valid')
+#' >>> max_pool_1d(x)
+#' <tf.Tensor: shape=(1, 2, 1), dtype=float32, numpy=
+#' array([[[2.],
+#'         [4.]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for `strides=1` and `padding="same"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> max_pool_1d = tf.keras.layers.MaxPooling1D(pool_size=2,
+#' ...    strides=1, padding='same')
+#' >>> max_pool_1d(x)
+#' <tf.Tensor: shape=(1, 5, 1), dtype=float32, numpy=
+#' array([[[2.],
+#'         [3.],
+#'         [4.],
+#'         [5.],
+#'         [5.]]], dtype=float32)>
+#' ```
+#'  
+#' 
+#' @param pool_size 
+#' Integer, size of the max pooling window. 
+#' 
+#' @param strides 
+#' Integer, or NULL. Specifies how much the pooling window moves
+#' for each pooling step.
+#' If NULL, it will default to `pool_size`. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, steps, features)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, features, steps)`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_max_pooling_1d <- 
+function(object, pool_size = 2L, strides = NULL, padding = "valid", 
+    data_format = "channels_last", ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$MaxPooling1D, object, args)
+}
+
+
+#' Max pooling operation for 2D spatial data 
+#' 
+#' @details 
+#' Downsamples the input along its spatial dimensions (height and width)
+#' by taking the maximum value over an input window
+#' (of size defined by `pool_size`) for each channel of the input.
+#' The window is shifted by `strides` along each dimension.
+#' 
+#' The resulting output,
+#' when using the `"valid"` padding option, has a spatial shape
+#' (number of rows or columns) of:
+#' `output_shape = math.floor((input_shape - pool_size) / strides) + 1`
+#' (when `input_shape >= pool_size`)
+#' 
+#' The resulting output shape when using the `"same"` padding option is:
+#' `output_shape = math.floor((input_shape - 1) / strides) + 1`
+#' 
+#' For example, for `strides=(1, 1)` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3.],
+#' ...                  [4., 5., 6.],
+#' ...                  [7., 8., 9.]])
+#' >>> x = tf.reshape(x, [1, 3, 3, 1])
+#' >>> max_pool_2d = tf.keras.layers.MaxPooling2D(pool_size=(2, 2),
+#' ...    strides=(1, 1), padding='valid')
+#' >>> max_pool_2d(x)
+#' <tf.Tensor: shape=(1, 2, 2, 1), dtype=float32, numpy=
+#'   array([[[[5.],
+#'            [6.]],
+#'           [[8.],
+#'            [9.]]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for `strides=(2, 2)` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3., 4.],
+#' ...                  [5., 6., 7., 8.],
+#' ...                  [9., 10., 11., 12.]])
+#' >>> x = tf.reshape(x, [1, 3, 4, 1])
+#' >>> max_pool_2d = tf.keras.layers.MaxPooling2D(pool_size=(2, 2),
+#' ...    strides=(2, 2), padding='valid')
+#' >>> max_pool_2d(x)
+#' <tf.Tensor: shape=(1, 1, 2, 1), dtype=float32, numpy=
+#'   array([[[[6.],
+#'            [8.]]]], dtype=float32)>
+#' ```
+#' 
+#' Usage Example:
+#' 
+#' ```python
+#' >>> input_image = tf.constant([[[[1.], [1.], [2.], [4.]],
+#' ...                            [[2.], [2.], [3.], [2.]],
+#' ...                            [[4.], [1.], [1.], [1.]],
+#' ...                            [[2.], [2.], [1.], [4.]]]])
+#' >>> output = tf.constant([[[[1], [0]],
+#' ...                       [[0], [1]]]])
+#' >>> model = tf.keras.models.Sequential()
+#' >>> model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2),
+#' ...    input_shape=(4, 4, 1)))
+#' >>> model.compile('adam', 'mean_squared_error')
+#' >>> model.predict(input_image, steps=1)
+#' array([[[[2.],
+#'          [4.]],
+#'         [[4.],
+#'          [4.]]]], dtype=float32)
+#' ```
+#' 
+#' For example, for stride=(1, 1) and padding="same":
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3.],
+#' ...                  [4., 5., 6.],
+#' ...                  [7., 8., 9.]])
+#' >>> x = tf.reshape(x, [1, 3, 3, 1])
+#' >>> max_pool_2d = tf.keras.layers.MaxPooling2D(pool_size=(2, 2),
+#' ...    strides=(1, 1), padding='same')
+#' >>> max_pool_2d(x)
+#' <tf.Tensor: shape=(1, 3, 3, 1), dtype=float32, numpy=
+#'   array([[[[5.],
+#'            [6.],
+#'            [6.]],
+#'           [[8.],
+#'            [9.],
+#'            [9.]],
+#'           [[8.],
+#'            [9.],
+#'            [9.]]]], dtype=float32)>
+#' ```
+#'  
+#' 
+#' @param pool_size 
+#' integer or list of 2 integers,
+#' window size over which to take the maximum.
+#' `(2, 2)` will take the max value over a 2x2 pooling window.
+#' If only one integer is specified, the same window length
+#' will be used for both dimensions. 
+#' 
+#' @param strides 
+#' Integer, list of 2 integers, or NULL.
+#' Strides values.  Specifies how far the pooling window moves
+#' for each pooling step. If NULL, it will default to `pool_size`. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, channels, height, width)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_max_pooling_2d <- 
+function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid", 
+    data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$MaxPooling2D, object, args)
+}
+
+
+#' Max pooling operation for 3D data (spatial or spatio-temporal) 
+#' 
+#' @details 
+#' Downsamples the input along its spatial dimensions (depth, height, and
+#' width) by taking the maximum value over an input window (of size defined by
+#' `pool_size`) for each channel of the input.  The window is shifted by
+#' `strides` along each dimension. 
+#' 
+#' @param pool_size 
+#' Tuple of 3 integers,
+#' factors by which to downscale (dim1, dim2, dim3).
+#' `(2, 2, 2)` will halve the size of the 3D input in each dimension. 
+#' 
+#' @param strides 
+#' list of 3 integers, or NULL. Strides values. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#' while `channels_first` corresponds to inputs with shape
+#' `(batch, channels, spatial_dim1, spatial_dim2, spatial_dim3)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_max_pooling_3d <- 
+function(object, pool_size = list(2L, 2L, 2L), strides = NULL, 
+    padding = "valid", data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$MaxPooling3D, object, args)
+}
+
+
+#' Max pooling operation for 1D temporal data 
+#' 
+#' @details 
+#' Downsamples the input representation by taking the maximum value over a
+#' spatial window of size `pool_size`. The window is shifted by `strides`.  The
+#' resulting output, when using the `"valid"` padding option, has a shape of:
+#' `output_shape = (input_shape - pool_size + 1) / strides)`
+#' 
+#' The resulting output shape when using the `"same"` padding option is:
+#' `output_shape = input_shape / strides`
+#' 
+#' For example, for `strides=1` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> max_pool_1d = tf.keras.layers.MaxPooling1D(pool_size=2,
+#' ...    strides=1, padding='valid')
+#' >>> max_pool_1d(x)
+#' <tf.Tensor: shape=(1, 4, 1), dtype=float32, numpy=
+#' array([[[2.],
+#'         [3.],
+#'         [4.],
+#'         [5.]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for `strides=2` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> max_pool_1d = tf.keras.layers.MaxPooling1D(pool_size=2,
+#' ...    strides=2, padding='valid')
+#' >>> max_pool_1d(x)
+#' <tf.Tensor: shape=(1, 2, 1), dtype=float32, numpy=
+#' array([[[2.],
+#'         [4.]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for `strides=1` and `padding="same"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([1., 2., 3., 4., 5.])
+#' >>> x = tf.reshape(x, [1, 5, 1])
+#' >>> max_pool_1d = tf.keras.layers.MaxPooling1D(pool_size=2,
+#' ...    strides=1, padding='same')
+#' >>> max_pool_1d(x)
+#' <tf.Tensor: shape=(1, 5, 1), dtype=float32, numpy=
+#' array([[[2.],
+#'         [3.],
+#'         [4.],
+#'         [5.],
+#'         [5.]]], dtype=float32)>
+#' ```
+#'  
+#' 
+#' @param pool_size 
+#' Integer, size of the max pooling window. 
+#' 
+#' @param strides 
+#' Integer, or NULL. Specifies how much the pooling window moves
+#' for each pooling step.
+#' If NULL, it will default to `pool_size`. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, steps, features)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, features, steps)`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_max_pooling_1d <- 
+function(object, pool_size = 2L, strides = NULL, padding = "valid", 
+    data_format = "channels_last", ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$MaxPooling1D, object, args)
+}
+
+
+#' Max pooling operation for 2D spatial data 
+#' 
+#' @details 
+#' Downsamples the input along its spatial dimensions (height and width)
+#' by taking the maximum value over an input window
+#' (of size defined by `pool_size`) for each channel of the input.
+#' The window is shifted by `strides` along each dimension.
+#' 
+#' The resulting output,
+#' when using the `"valid"` padding option, has a spatial shape
+#' (number of rows or columns) of:
+#' `output_shape = math.floor((input_shape - pool_size) / strides) + 1`
+#' (when `input_shape >= pool_size`)
+#' 
+#' The resulting output shape when using the `"same"` padding option is:
+#' `output_shape = math.floor((input_shape - 1) / strides) + 1`
+#' 
+#' For example, for `strides=(1, 1)` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3.],
+#' ...                  [4., 5., 6.],
+#' ...                  [7., 8., 9.]])
+#' >>> x = tf.reshape(x, [1, 3, 3, 1])
+#' >>> max_pool_2d = tf.keras.layers.MaxPooling2D(pool_size=(2, 2),
+#' ...    strides=(1, 1), padding='valid')
+#' >>> max_pool_2d(x)
+#' <tf.Tensor: shape=(1, 2, 2, 1), dtype=float32, numpy=
+#'   array([[[[5.],
+#'            [6.]],
+#'           [[8.],
+#'            [9.]]]], dtype=float32)>
+#' ```
+#' 
+#' For example, for `strides=(2, 2)` and `padding="valid"`:
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3., 4.],
+#' ...                  [5., 6., 7., 8.],
+#' ...                  [9., 10., 11., 12.]])
+#' >>> x = tf.reshape(x, [1, 3, 4, 1])
+#' >>> max_pool_2d = tf.keras.layers.MaxPooling2D(pool_size=(2, 2),
+#' ...    strides=(2, 2), padding='valid')
+#' >>> max_pool_2d(x)
+#' <tf.Tensor: shape=(1, 1, 2, 1), dtype=float32, numpy=
+#'   array([[[[6.],
+#'            [8.]]]], dtype=float32)>
+#' ```
+#' 
+#' Usage Example:
+#' 
+#' ```python
+#' >>> input_image = tf.constant([[[[1.], [1.], [2.], [4.]],
+#' ...                            [[2.], [2.], [3.], [2.]],
+#' ...                            [[4.], [1.], [1.], [1.]],
+#' ...                            [[2.], [2.], [1.], [4.]]]])
+#' >>> output = tf.constant([[[[1], [0]],
+#' ...                       [[0], [1]]]])
+#' >>> model = tf.keras.models.Sequential()
+#' >>> model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2),
+#' ...    input_shape=(4, 4, 1)))
+#' >>> model.compile('adam', 'mean_squared_error')
+#' >>> model.predict(input_image, steps=1)
+#' array([[[[2.],
+#'          [4.]],
+#'         [[4.],
+#'          [4.]]]], dtype=float32)
+#' ```
+#' 
+#' For example, for stride=(1, 1) and padding="same":
+#' 
+#' ```python
+#' >>> x = tf.constant([[1., 2., 3.],
+#' ...                  [4., 5., 6.],
+#' ...                  [7., 8., 9.]])
+#' >>> x = tf.reshape(x, [1, 3, 3, 1])
+#' >>> max_pool_2d = tf.keras.layers.MaxPooling2D(pool_size=(2, 2),
+#' ...    strides=(1, 1), padding='same')
+#' >>> max_pool_2d(x)
+#' <tf.Tensor: shape=(1, 3, 3, 1), dtype=float32, numpy=
+#'   array([[[[5.],
+#'            [6.],
+#'            [6.]],
+#'           [[8.],
+#'            [9.],
+#'            [9.]],
+#'           [[8.],
+#'            [9.],
+#'            [9.]]]], dtype=float32)>
+#' ```
+#'  
+#' 
+#' @param pool_size 
+#' integer or list of 2 integers,
+#' window size over which to take the maximum.
+#' `(2, 2)` will take the max value over a 2x2 pooling window.
+#' If only one integer is specified, the same window length
+#' will be used for both dimensions. 
+#' 
+#' @param strides 
+#' Integer, list of 2 integers, or NULL.
+#' Strides values.  Specifies how far the pooling window moves
+#' for each pooling step. If NULL, it will default to `pool_size`. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch, channels, height, width)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_max_pooling_2d <- 
+function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid", 
+    data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$MaxPooling2D, object, args)
+}
+
+
+#' Max pooling operation for 3D data (spatial or spatio-temporal) 
+#' 
+#' @details 
+#' Downsamples the input along its spatial dimensions (depth, height, and
+#' width) by taking the maximum value over an input window (of size defined by
+#' `pool_size`) for each channel of the input.  The window is shifted by
+#' `strides` along each dimension. 
+#' 
+#' @param pool_size 
+#' Tuple of 3 integers,
+#' factors by which to downscale (dim1, dim2, dim3).
+#' `(2, 2, 2)` will halve the size of the 3D input in each dimension. 
+#' 
+#' @param strides 
+#' list of 3 integers, or NULL. Strides values. 
+#' 
+#' @param padding 
+#' One of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding evenly to
+#' the left/right or up/down of the input such that output has the same
+#' height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#' while `channels_first` corresponds to inputs with shape
+#' `(batch, channels, spatial_dim1, spatial_dim2, spatial_dim3)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_max_pooling_3d <- 
+function(object, pool_size = list(2L, 2L, 2L), strides = NULL, 
+    padding = "valid", data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(pool_size = as.integer, 
+        strides = as_nullable_integer), ignore = "object")
+    create_layer(keras$layers$MaxPooling3D, object, args)
+}
+
+
+#' Layer that computes the minimum (element-wise) a list of inputs 
+#' 
+#' @details 
+#' It takes as input a list of tensors, all of the same shape, and returns
+#' a single tensor (also of the same shape).
+#' 
+#' ```python
+#' >>> tf.keras.layers.Minimum()([np.arange(5).reshape(5, 1),
+#' ...                            np.arange(5, 10).reshape(5, 1)])
+#' <tf.Tensor: shape=(5, 1), dtype=int64, numpy=
+#' array([[0],
+#'      [1],
+#'      [2],
+#'      [3],
+#'      [4]])>
+#' ```
+#' 
+#' ```python
+#' >>> x1 = tf.keras.layers.Dense(8)(np.arange(10).reshape(5, 2))
+#' >>> x2 = tf.keras.layers.Dense(8)(np.arange(10, 20).reshape(5, 2))
+#' >>> minned = tf.keras.layers.Minimum()([x1, x2])
+#' >>> minned.shape
+#' TensorShape([5, 8])
+#' ```
+#'  
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_minimum <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Minimum, object, args)
+}
+
+
+#' MultiHeadAttention layer 
+#' 
+#' @details 
+#' This is an implementation of multi-headed attention as described in the
+#' paper "Attention is all you Need" (Vaswani et al., 2017).
+#' If `query`, `key,` `value` are the same, then
+#' this is self-attention. Each timestep in `query` attends to the
+#' corresponding sequence in `key`, and returns a fixed-width vector.
+#' 
+#' This layer first projects `query`, `key` and `value`. These are
+#' (effectively) a list of tensors of length `num_attention_heads`, where the
+#' corresponding shapes are `(batch_size, <query dimensions>, key_dim)`,
+#' `(batch_size, <key/value dimensions>, key_dim)`,
+#' `(batch_size, <key/value dimensions>, value_dim)`.
+#' 
+#' Then, the query and key tensors are dot-producted and scaled. These are
+#' softmaxed to obtain attention probabilities. The value tensors are then
+#' interpolated by these probabilities, then concatenated back to a single
+#' tensor.
+#' 
+#' Finally, the result tensor with the last dimension as value_dim can take an
+#' linear projection and return.
+#' 
+#' When using `MultiHeadAttention` inside a custom layer, the custom layer must
+#' implement its own `build()` method and call `MultiHeadAttention`'s
+#' `_build_from_signature()` there.
+#' This enables weights to be restored correctly when the model is loaded. 
+#' 
+#' @param num_heads 
+#' Number of attention heads. 
+#' 
+#' @param key_dim 
+#' Size of each attention head for query and key. 
+#' 
+#' @param value_dim 
+#' Size of each attention head for value. 
+#' 
+#' @param dropout 
+#' Dropout probability. 
+#' 
+#' @param use_bias 
+#' Boolean, whether the dense layers use bias vectors/matrices. 
+#' 
+#' @param output_shape 
+#' The expected shape of an output tensor, besides the batch
+#' and sequence dims. If not specified, projects back to the query
+#' feature dim (the query input's last dimension). 
+#' 
+#' @param attention_axes 
+#' axes over which the attention is applied. `NULL` means
+#' attention over all axes, but batch, heads, and features. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for dense layer kernels. 
+#' 
+#' @param bias_initializer 
+#' Initializer for dense layer biases. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer for dense layer kernels. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer for dense layer biases. 
+#' 
+#' @param activity_regularizer 
+#' Regularizer for dense layer activity. 
+#' 
+#' @param kernel_constraint 
+#' Constraint for dense layer kernels. 
+#' 
+#' @param bias_constraint 
+#' Constraint for dense layer kernels. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_multi_head_attention <- 
+function(object, num_heads, key_dim, value_dim = NULL, dropout = 0, 
+    use_bias = TRUE, output_shape = NULL, attention_axes = NULL, 
+    kernel_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    kernel_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$MultiHeadAttention, object, args)
+}
+
+
+#' Layer that multiplies (element-wise) a list of inputs 
+#' 
+#' @details 
+#' It takes as input a list of tensors, all of the same shape, and returns
+#' a single tensor (also of the same shape).
+#' 
+#' ```python
+#' >>> tf.keras.layers.Multiply()([np.arange(5).reshape(5, 1),
+#' ...                             np.arange(5, 10).reshape(5, 1)])
+#' <tf.Tensor: shape=(5, 1), dtype=int64, numpy=
+#' array([[ 0],
+#'      [ 6],
+#'      [14],
+#'      [24],
+#'      [36]])>
+#' ```
+#' 
+#' ```python
+#' >>> x1 = tf.keras.layers.Dense(8)(np.arange(10).reshape(5, 2))
+#' >>> x2 = tf.keras.layers.Dense(8)(np.arange(10, 20).reshape(5, 2))
+#' >>> multiplied = tf.keras.layers.Multiply()([x1, x2])
+#' >>> multiplied.shape
+#' TensorShape([5, 8])
+#' ```
+#'  
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_multiply <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Multiply, object, args)
+}
+
+
+#' A preprocessing layer which normalizes continuous features 
+#' 
+#' @details 
+#' This layer will shift and scale inputs into a distribution centered around
+#' 0 with standard deviation 1. It accomplishes this by precomputing the mean
+#' and variance of the data, and calling `(input - mean) / sqrt(var)` at
+#' runtime.
+#' 
+#' The mean and variance values for the layer must be either supplied on
+#' construction or learned via `adapt()`. `adapt()` will compute the mean and
+#' variance of the data and store them as the layer's weights. `adapt()` should
+#' be called before `fit()`, `evaluate()`, or `predict()`.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param axis 
+#' Integer, list of integers, or NULL. The axis or axes that should
+#' have a separate mean and variance for each index in the shape. For
+#' example, if shape is `(NULL, 5)` and `axis=1`, the layer will track 5
+#' separate mean and variance values for the last axis. If `axis` is set
+#' to `NULL`, the layer will normalize all elements in the input by a
+#' scalar mean and variance. When `-1` the last axis of the
+#' input is assumed to be a feature dimension and is normalized per
+#' index. Note that in the specific case of batched scalar inputs where
+#' the only axis is the batch axis, the default will normalize each index
+#' in the batch separately. In this case, consider passing `axis=NULL`.
+#' Defaults to `-1`. 
+#' 
+#' @param mean 
+#' The mean value(s) to use during normalization. The passed value(s)
+#' will be broadcast to the shape of the kept axes above; if the value(s)
+#' cannot be broadcast, an error will be raised when this layer's
+#' `build()` method is called. 
+#' 
+#' @param variance 
+#' The variance value(s) to use during normalization. The passed
+#' value(s) will be broadcast to the shape of the kept axes above; if the
+#' value(s) cannot be broadcast, an error will be raised when this
+#' layer's `build()` method is called. 
+#' 
+#' @param invert 
+#' If TRUE, this layer will apply the inverse transformation
+#' to its inputs: it would turn a normalized input back into its
+#' original form. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_normalization <- 
+function(object, axis = -1L, mean = NULL, variance = NULL, invert = FALSE, 
+    ...) 
+{
+    args <- capture_args(match.call(), list(axis = as_axis), 
+        ignore = "object")
+    create_layer(keras$layers$Normalization, object, args)
+}
+
+
+#' Permutes the dimensions of the input according to a given pattern 
+#' 
+#' Useful e.g. connecting RNNs and convnets. 
+#' 
+#' @param dims 
+#' Tuple of integers. Permutation pattern does not include the
+#' samples dimension. Indexing starts at 1.
+#' For instance, `(2, 1)` permutes the first and second dimensions
+#' of the input. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_permute <- 
+function(object, dims, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Permute, object, args)
+}
+
+
+#' Parametric Rectified Linear Unit 
+#' 
+#' @details 
+#' It follows:
+#' 
+#' ```
+#'     f(x) = alpha * x for x < 0
+#'     f(x) = x for x >= 0
+#' ```
+#' 
+#' where `alpha` is a learned array with the same shape as x.
+#' 
+#' Input shape:
+#'     Arbitrary. Use the keyword argument `input_shape`
+#'     (list of integers, does not include the samples axis)
+#'     when using this layer as the first layer in a model.
+#' 
+#' Output shape:
+#'     Same shape as the input. 
+#' 
+#' @param alpha_initializer 
+#' Initializer function for the weights. 
+#' 
+#' @param alpha_regularizer 
+#' Regularizer for the weights. 
+#' 
+#' @param alpha_constraint 
+#' Constraint for the weights. 
+#' 
+#' @param shared_axes 
+#' The axes along which to share learnable
+#' parameters for the activation function.
+#' For example, if the incoming feature maps
+#' are from a 2D convolution
+#' with output shape `(batch, height, width, channels)`,
+#' and you wish to share parameters across space
+#' so that each filter only has one set of parameters,
+#' set `shared_axes=[1, 2]`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_p_relu <- 
+function(object, alpha_initializer = "zeros", alpha_regularizer = NULL, 
+    alpha_constraint = NULL, shared_axes = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$PReLU, object, args)
+}
+
+
+#' A preprocessing layer which randomly adjusts brightness during training 
+#' 
+#' @details 
+#' This layer will randomly increase/reduce the brightness for the input RGB
+#' images. At inference time, the output will be identical to the input.
+#' Call the layer with `training=TRUE` to adjust the brightness of the input.
+#' 
+#' Note that different brightness adjustment factors
+#' will be apply to each the images in the batch.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param factor 
+#' Float or a list of 2 floats between -1.0 and 1.0. The
+#' factor is used to determine the lower bound and upper bound of the
+#' brightness adjustment. A float value will be chosen randomly between
+#' the limits. When -1.0 is chosen, the output image will be black, and
+#' when 1.0 is chosen, the image will be fully white.
+#' When only one float is provided, eg, 0.2,
+#' then -0.2 will be used for lower bound and 0.2
+#' will be used for upper bound. 
+#' 
+#' @param value_range 
+#' Optional list of 2 floats
+#' for the lower and upper limit
+#' of the values of the input data.
+#' To make no change, use [0.0, 1.0], e.g., if the image input
+#' has been scaled before this layer. Defaults to [0.0, 255.0].
+#' The brightness adjustment will be scaled to this range, and the
+#' output values will be clipped to this range. 
+#' 
+#' @param seed 
+#' optional integer, for fixed RNG behavior. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_random_brightness <- 
+function(object, factor, value_range = list(0L, 255L), seed = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RandomBrightness, object, args)
+}
+
+
+#' A preprocessing layer which randomly adjusts contrast during training 
+#' 
+#' @details 
+#' This layer will randomly adjust the contrast of an image or images
+#' by a random factor. Contrast is adjusted independently
+#' for each channel of each image during training.
+#' 
+#' For each channel, this layer computes the mean of the image pixels in the
+#' channel and then adjusts each component `x` of each pixel to
+#' `(x - mean) * contrast_factor + mean`.
+#' 
+#' Input pixel values can be of any range (e.g. `[0., 1.)` or `[0, 255]`) and
+#' in integer or floating point dtype.
+#' By default, the layer will output floats.
+#' The output value will be clipped to the range `[0, 255]`, the valid
+#' range of RGB colors.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#' 
+#' Input shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format.
+#' 
+#' Output shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format. 
+#' 
+#' @param factor 
+#' a positive float represented as fraction of value, or a list of
+#' size 2 representing lower and upper bound.
+#' When represented as a single float, lower = upper.
+#' The contrast factor will be randomly picked between
+#' `[1.0 - lower, 1.0 + upper]`. For any pixel x in the channel,
+#' the output will be `(x - mean) * factor + mean`
+#' where `mean` is the mean value of the channel. 
+#' 
+#' @param seed 
+#' Integer. Used to create a random seed. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_random_contrast <- 
+function(object, factor, seed = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RandomContrast, object, args)
+}
+
+
+#' A preprocessing layer which randomly crops images during training 
+#' 
+#' @details 
+#' During training, this layer will randomly choose a location to crop images
+#' down to a target size. The layer will crop all the images in the same batch
+#' to the same cropping location.
+#' 
+#' At inference time, and during training if an input image is smaller than the
+#' target size, the input will be resized and cropped so as to return the
+#' largest possible window in the image that matches the target aspect ratio.
+#' If you need to apply random cropping at inference time, set `training` to
+#' TRUE when calling the layer.
+#' 
+#' Input pixel values can be of any range (e.g. `[0., 1.)` or `[0, 255]`) and
+#' of integer or floating point dtype. By default, the layer will output
+#' floats.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#' 
+#' Input shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format.
+#' 
+#' Output shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., target_height, target_width, channels)`. 
+#' 
+#' @param height 
+#' Integer, the height of the output shape. 
+#' 
+#' @param width 
+#' Integer, the width of the output shape. 
+#' 
+#' @param seed 
+#' Integer. Used to create a random seed. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_random_crop <- 
+function(object, height, width, seed = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RandomCrop, object, args)
+}
+
+
+#' A preprocessing layer which randomly flips images during training 
+#' 
+#' @details 
+#' This layer will flip the images horizontally and or vertically based on the
+#' `mode` attribute. During inference time, the output will be identical to
+#' input. Call the layer with `training=TRUE` to flip the input.
+#' 
+#' Input pixel values can be of any range (e.g. `[0., 1.)` or `[0, 255]`) and
+#' of integer or floating point dtype.
+#' By default, the layer will output floats.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#' 
+#' Input shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format.
+#' 
+#' Output shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format. 
+#' 
+#' @param mode 
+#' String indicating which flip mode to use. Can be `"horizontal"`,
+#' `"vertical"`, or `"horizontal_and_vertical"`. `"horizontal"` is a
+#' left-right flip and `"vertical"` is a top-bottom flip. Defaults to
+#' `"horizontal_and_vertical"` 
+#' 
+#' @param seed 
+#' Integer. Used to create a random seed. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_random_flip <- 
+function(object, mode = "horizontal_and_vertical", seed = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RandomFlip, object, args)
+}
+
+
+#' A preprocessing layer which randomly varies image height during training 
+#' 
+#' @details 
+#' This layer adjusts the height of a batch of images by a random factor.
+#' The input should be a 3D (unbatched) or 4D (batched) tensor in the
+#' `"channels_last"` image data format. Input pixel values can be of any range
+#' (e.g. `[0., 1.)` or `[0, 255]`) and of integer or floating point dtype. By
+#' default, the layer will output floats.
+#' 
+#' 
+#' By default, this layer is inactive during inference.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param factor 
+#' A positive float (fraction of original height),
+#' or a list of size 2 representing lower and upper bound
+#' for resizing vertically. When represented as a single float,
+#' this value is used for both the upper and
+#' lower bound. For instance, `factor=(0.2, 0.3)` results
+#' in an output with
+#' height changed by a random amount in the range `[20%, 30%]`.
+#' `factor=(-0.2, 0.3)` results in an output with height
+#' changed by a random amount in the range `[-20%, +30%]`.
+#' `factor=0.2` results in an output with
+#' height changed by a random amount in the range `[-20%, +20%]`. 
+#' 
+#' @param interpolation 
+#' String, the interpolation method.
+#' Supports `"bilinear"`, `"nearest"`, `"bicubic"`, `"area"`,
+#' `"lanczos3"`, `"lanczos5"`, `"gaussian"`, `"mitchellcubic"`.
+#' Defaults to `"bilinear"`. 
+#' 
+#' @param seed 
+#' Integer. Used to create a random seed. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_random_height <- 
+function(object, factor, interpolation = "bilinear", seed = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RandomHeight, object, args)
+}
+
+
+#' A preprocessing layer which randomly rotates images during training 
+#' 
+#' @details 
+#' This layer will apply random rotations to each image, filling empty space
+#' according to `fill_mode`.
+#' 
+#' By default, random rotations are only applied during training.
+#' At inference time, the layer does nothing. If you need to apply random
+#' rotations at inference time, set `training` to TRUE when calling the layer.
+#' 
+#' Input pixel values can be of any range (e.g. `[0., 1.)` or `[0, 255]`) and
+#' of integer or floating point dtype.
+#' By default, the layer will output floats.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#' 
+#' Input shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format
+#' 
+#' Output shape:
+#'     3D (unbatched) or 4D (batched) tensor with shape:
+#'     `(..., height, width, channels)`, in `"channels_last"` format 
+#' 
+#' @param factor 
+#' a float represented as fraction of 2 Pi, or a list of size 2
+#' representing lower and upper bound for rotating clockwise and
+#' counter-clockwise. A positive values means rotating
+#' counter clock-wise,
+#' while a negative value means clock-wise.
+#' When represented as a single
+#' float, this value is used for both the upper and lower bound.
+#' For instance, `factor=(-0.2, 0.3)`
+#' results in an output rotation by a random
+#' amount in the range `[-20% * 2pi, 30% * 2pi]`.
+#' `factor=0.2` results in an
+#' output rotating by a random amount
+#' in the range `[-20% * 2pi, 20% * 2pi]`. 
+#' 
+#' @param fill_mode 
+#' Points outside the boundaries of the input are filled
+#' according to the given mode
+#' (one of `{"constant", "reflect", "wrap", "nearest"}`).
+#' - *reflect*: `(d c b a | a b c d | d c b a)`
+#'     The input is extended by reflecting about
+#'     the edge of the last pixel.
+#' - *constant*: `(k k k k | a b c d | k k k k)`
+#'     The input is extended by
+#'     filling all values beyond the edge with
+#'     the same constant value k = 0.
+#' - *wrap*: `(a b c d | a b c d | a b c d)` The input is extended by
+#'     wrapping around to the opposite edge.
+#' - *nearest*: `(a a a a | a b c d | d d d d)`
+#'     The input is extended by the nearest pixel. 
+#' 
+#' @param interpolation 
+#' Interpolation mode. Supported values: `"nearest"`,
+#' `"bilinear"`. 
+#' 
+#' @param seed 
+#' Integer. Used to create a random seed. 
+#' 
+#' @param fill_value 
+#' a float represents the value to be filled outside
+#' the boundaries when `fill_mode="constant"`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_random_rotation <- 
+function(object, factor, fill_mode = "reflect", interpolation = "bilinear", 
+    seed = NULL, fill_value = 0, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RandomRotation, object, args)
+}
+
+
+#' A preprocessing layer which randomly translates images during training 
+#' 
+#' @details 
+#' This layer will apply random translations to each image during training,
+#' filling empty space according to `fill_mode`.
+#' 
+#' Input pixel values can be of any range (e.g. `[0., 1.)` or `[0, 255]`) and
+#' of integer or floating point dtype. By default, the layer will output
+#' floats.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param height_factor 
+#' a float represented as fraction of value, or a list of
+#' size 2 representing lower and upper bound for shifting vertically. A
+#' negative value means shifting image up, while a positive value means
+#' shifting image down. When represented as a single positive float, this
+#' value is used for both the upper and lower bound. For instance,
+#' `height_factor=(-0.2, 0.3)` results in an output shifted by a random
+#' amount in the range `[-20%, +30%]`.  `height_factor=0.2` results in an
+#' output height shifted by a random amount in the range `[-20%, +20%]`. 
+#' 
+#' @param width_factor 
+#' a float represented as fraction of value, or a list of size
+#' 2 representing lower and upper bound for shifting horizontally. A
+#' negative value means shifting image left, while a positive value means
+#' shifting image right. When represented as a single positive float,
+#' this value is used for both the upper and lower bound. For instance,
+#' `width_factor=(-0.2, 0.3)` results in an output shifted left by 20%,
+#' and shifted right by 30%. `width_factor=0.2` results
+#' in an output height shifted left or right by 20%. 
+#' 
+#' @param fill_mode 
+#' Points outside the boundaries of the input are filled according
+#' to the given mode
+#' (one of `{"constant", "reflect", "wrap", "nearest"}`).
+#' - *reflect*: `(d c b a | a b c d | d c b a)` The input is extended by
+#'     reflecting about the edge of the last pixel.
+#' - *constant*: `(k k k k | a b c d | k k k k)` The input is extended by
+#'     filling all values beyond the edge with the same constant value
+#'     k = 0.
+#' - *wrap*: `(a b c d | a b c d | a b c d)` The input is extended by
+#'     wrapping around to the opposite edge.
+#' - *nearest*: `(a a a a | a b c d | d d d d)` The input is extended by
+#'     the nearest pixel. 
+#' 
+#' @param interpolation 
+#' Interpolation mode. Supported values: `"nearest"`,
+#' `"bilinear"`. 
+#' 
+#' @param seed 
+#' Integer. Used to create a random seed. 
+#' 
+#' @param fill_value 
+#' a float represents the value to be filled outside the
+#' boundaries when `fill_mode="constant"`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_random_translation <- 
+function(object, height_factor, width_factor, fill_mode = "reflect", 
+    interpolation = "bilinear", seed = NULL, fill_value = 0, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RandomTranslation, object, args)
+}
+
+
+#' A preprocessing layer which randomly varies image width during training 
+#' 
+#' @details 
+#' This layer will randomly adjusts the width of a batch of images of a
+#' batch of images by a random factor. The input should be a 3D (unbatched) or
+#' 4D (batched) tensor in the `"channels_last"` image data format. Input pixel
+#' values can be of any range (e.g. `[0., 1.)` or `[0, 255]`) and of integer or
+#' floating point dtype. By default, the layer will output floats.
+#' 
+#' By default, this layer is inactive during inference.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param factor 
+#' A positive float (fraction of original width),
+#' or a list of size 2 representing lower and upper bound
+#' for resizing horizontally. When represented as a single float,
+#' this value is used for both the upper and
+#' lower bound. For instance, `factor=(0.2, 0.3)`
+#' results in an output with
+#' width changed by a random amount in the range `[20%, 30%]`.
+#' `factor=(-0.2, 0.3)` results in an output with width changed
+#' by a random amount in the range `[-20%, +30%]`.
+#' `factor=0.2` results in an output with width changed
+#' by a random amount in the range `[-20%, +20%]`. 
+#' 
+#' @param interpolation 
+#' String, the interpolation method.
+#' Supports `"bilinear"`, `"nearest"`, `"bicubic"`, `"area"`,
+#' `"lanczos3"`, `"lanczos5"`, `"gaussian"`, `"mitchellcubic"`.
+#' Defaults to `bilinear`. 
+#' 
+#' @param seed 
+#' Integer. Used to create a random seed. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_random_width <- 
+function(object, factor, interpolation = "bilinear", seed = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RandomWidth, object, args)
+}
+
+
+#' A preprocessing layer which randomly zooms images during training 
+#' 
+#' @details 
+#' This layer will randomly zoom in or out on each axis of an image
+#' independently, filling empty space according to `fill_mode`.
+#' 
+#' Input pixel values can be of any range (e.g. `[0., 1.)` or `[0, 255]`) and
+#' of integer or floating point dtype.
+#' By default, the layer will output floats.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param height_factor 
+#' a float represented as fraction of value,
+#' or a list of size 2 representing lower and upper bound
+#' for zooming vertically. When represented as a single float,
+#' this value is used for both the upper and
+#' lower bound. A positive value means zooming out,
+#' while a negative value
+#' means zooming in. For instance, `height_factor=(0.2, 0.3)`
+#' result in an output zoomed out by a random amount
+#' in the range `[+20%, +30%]`.
+#' `height_factor=(-0.3, -0.2)` result in an output zoomed
+#' in by a random amount in the range `[+20%, +30%]`. 
+#' 
+#' @param width_factor 
+#' a float represented as fraction of value,
+#' or a list of size 2 representing lower and upper bound
+#' for zooming horizontally. When
+#' represented as a single float, this value is used
+#' for both the upper and
+#' lower bound. For instance, `width_factor=(0.2, 0.3)`
+#' result in an output
+#' zooming out between 20% to 30%.
+#' `width_factor=(-0.3, -0.2)` result in an
+#' output zooming in between 20% to 30%. `NULL` means
+#' i.e., zooming vertical and horizontal directions
+#' by preserving the aspect ratio. Defaults to `NULL`. 
+#' 
+#' @param fill_mode 
+#' Points outside the boundaries of the input are
+#' filled according to the given mode
+#' (one of `{"constant", "reflect", "wrap", "nearest"}`).
+#' - *reflect*: `(d c b a | a b c d | d c b a)`
+#'     The input is extended by reflecting about
+#'     the edge of the last pixel.
+#' - *constant*: `(k k k k | a b c d | k k k k)`
+#'     The input is extended by filling all values beyond
+#'     the edge with the same constant value k = 0.
+#' - *wrap*: `(a b c d | a b c d | a b c d)` The input is extended by
+#'     wrapping around to the opposite edge.
+#' - *nearest*: `(a a a a | a b c d | d d d d)`
+#'     The input is extended by the nearest pixel. 
+#' 
+#' @param interpolation 
+#' Interpolation mode. Supported values: `"nearest"`,
+#' `"bilinear"`. 
+#' 
+#' @param seed 
+#' Integer. Used to create a random seed. 
+#' 
+#' @param fill_value 
+#' a float represents the value to be filled outside
+#' the boundaries when `fill_mode="constant"`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_random_zoom <- 
+function(object, height_factor, width_factor = NULL, fill_mode = "reflect", 
+    interpolation = "bilinear", seed = NULL, fill_value = 0, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RandomZoom, object, args)
+}
+
+
+#' Rectified Linear Unit activation function 
+#' 
+#' @details 
+#' With default values, it returns element-wise `max(x, 0)`.
+#' 
+#' Otherwise, it follows:
+#' 
+#' ```
+#'     f(x) = max_value if x >= max_value
+#'     f(x) = x if threshold <= x < max_value
+#'     f(x) = negative_slope * (x - threshold) otherwise
+#' ```
+#' 
+#' Usage:
+#' 
+#' ```python
+#' >>> layer = tf.keras.layers.ReLU()
+#' >>> output = layer([-3.0, -1.0, 0.0, 2.0])
+#' >>> list(output.numpy())
+#' [0.0, 0.0, 0.0, 2.0]
+#' >>> layer = tf.keras.layers.ReLU(max_value=1.0)
+#' >>> output = layer([-3.0, -1.0, 0.0, 2.0])
+#' >>> list(output.numpy())
+#' [0.0, 0.0, 0.0, 1.0]
+#' >>> layer = tf.keras.layers.ReLU(negative_slope=1.0)
+#' >>> output = layer([-3.0, -1.0, 0.0, 2.0])
+#' >>> list(output.numpy())
+#' [-3.0, -1.0, 0.0, 2.0]
+#' >>> layer = tf.keras.layers.ReLU(threshold=1.5)
+#' >>> output = layer([-3.0, -1.0, 1.0, 2.0])
+#' >>> list(output.numpy())
+#' [0.0, 0.0, 0.0, 2.0]
+#' ```
+#' 
+#' Input shape:
+#'     Arbitrary. Use the keyword argument `input_shape`
+#'     (list of integers, does not include the batch axis)
+#'     when using this layer as the first layer in a model.
+#' 
+#' Output shape:
+#'     Same shape as the input. 
+#' 
+#' @param max_value 
+#' Float >= 0. Maximum activation value. NULL means unlimited.
+#' Defaults to `NULL`. 
+#' 
+#' @param negative_slope 
+#' Float >= 0. Negative slope coefficient.
+#' Defaults to `0.`. 
+#' 
+#' @param threshold 
+#' Float >= 0. Threshold value for thresholded activation.
+#' Defaults to `0.`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_relu <- 
+function(object, max_value = NULL, negative_slope = 0, threshold = 0, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$ReLU, object, args)
+}
+
+
+#' Repeats the input n times 
+#' 
+#'  
+#' 
+#' @param n 
+#' Integer, repetition factor. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_repeat_vector <- 
+function(object, n, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RepeatVector, object, args)
+}
+
+
+#' A preprocessing layer which rescales input values to a new range 
+#' 
+#' @details 
+#' This layer rescales every value of an input (often an image) by multiplying
+#' by `scale` and adding `offset`.
+#' 
+#' For instance:
+#' 
+#' 1. To rescale an input in the `[0, 255]` range
+#' to be in the `[0, 1]` range, you would pass `scale=1./255`.
+#' 
+#' 2. To rescale an input in the `[0, 255]` range to be in the `[-1, 1]` range,
+#' you would pass `scale=1./127.5, offset=-1`.
+#' 
+#' The rescaling is applied both during training and inference. Inputs can be
+#' of integer or floating point dtype, and by default the layer will output
+#' floats.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers).
+#' 
+#' Input shape:
+#'     Arbitrary.
+#' 
+#' Output shape:
+#'     Same as input. 
+#' 
+#' @param scale 
+#' Float, the scale to apply to the inputs. 
+#' 
+#' @param offset 
+#' Float, the offset to apply to the inputs. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_rescaling <- 
+function(object, scale, offset = 0, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Rescaling, object, args)
+}
+
+
+#' Layer that reshapes inputs into the given shape 
+#' 
+#' @details 
+#' Input shape:
+#'   Arbitrary, although all dimensions in the input shape must be known/fixed.
+#'   Use the keyword argument `input_shape` (list of integers, does not
+#'   include the samples/batch size axis) when using this layer as the first
+#'   layer in a model.
+#' 
+#' Output shape:
+#'   `(batch_size,) + target_shape` 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_reshape <- 
+function(object, target_shape, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Reshape, object, args)
+}
+
+
+#' A preprocessing layer which resizes images 
+#' 
+#' @details 
+#' This layer resizes an image input to a target height and width. The input
+#' should be a 4D (batched) or 3D (unbatched) tensor in `"channels_last"`
+#' format. Input pixel values can be of any range
+#' (e.g. `[0., 1.)` or `[0, 255]`) and of integer or floating point dtype.
+#' By default, the layer will output floats.
+#' 
+#' This layer can be called on tf.RaggedTensor batches of input images of
+#' distinct sizes, and will resize the outputs to dense tensors of uniform
+#' size.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param height 
+#' Integer, the height of the output shape. 
+#' 
+#' @param width 
+#' Integer, the width of the output shape. 
+#' 
+#' @param interpolation 
+#' String, the interpolation method.
+#' Supports `"bilinear"`, `"nearest"`, `"bicubic"`, `"area"`,
+#' `"lanczos3"`, `"lanczos5"`, `"gaussian"`, `"mitchellcubic"`.
+#' Defaults to `"bilinear"`. 
+#' 
+#' @param crop_to_aspect_ratio 
+#' If TRUE, resize the images without aspect
+#' ratio distortion. When the original aspect ratio differs
+#' from the target aspect ratio, the output image will be
+#' cropped so as to return the
+#' largest possible window in the image (of size `(height, width)`)
+#' that matches the target aspect ratio. By default
+#' (`crop_to_aspect_ratio=FALSE`), aspect ratio may not be preserved. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_resizing <- 
+function(object, height, width, interpolation = "bilinear", 
+    crop_to_aspect_ratio = FALSE, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Resizing, object, args)
+}
+
+
+#' Base class for recurrent layers 
+#' 
+#' @details 
+#' See [the Keras RNN API guide](https://www.tensorflow.org/guide/keras/rnn)
+#' for details about the usage of RNN API. 
+#' 
+#' @param cell 
+#' A RNN cell instance or a list of RNN cell instances.
+#' A RNN cell is a class that has:
+#' - A `call(input_at_t, states_at_t)` method, returning
+#'   `(output_at_t, states_at_t_plus_1)`. The call method of the
+#'   cell can also take the optional argument `constants`, see
+#'   section "Note on passing external constants" below.
+#' - A `state_size` attribute. This can be a single integer
+#'   (single state) in which case it is the size of the recurrent
+#'   state. This can also be a list of integers (one size per state).
+#'   The `state_size` can also be TensorShape or list of
+#'   TensorShape, to represent high dimension state.
+#' - A `output_size` attribute. This can be a single integer or a
+#'   TensorShape, which represent the shape of the output. For backward
+#'   compatible reason, if this attribute is not available for the
+#'   cell, the value will be inferred by the first element of the
+#'   `state_size`.
+#' - A `get_initial_state(inputs=NULL, batch_size=NULL, dtype=NULL)`
+#'   method that creates a tensor meant to be fed to `call()` as the
+#'   initial state, if the user didn't specify any initial state via other
+#'   means. The returned initial state should have a shape of
+#'   [batch_size, cell.state_size]. The cell might choose to create a
+#'   tensor full of zeros, or full of other values based on the cell's
+#'   implementation.
+#'   `inputs` is the input tensor to the RNN layer, which should
+#'   contain the batch size as its shape[0], and also dtype. Note that
+#'   the shape[0] might be `NULL` during the graph construction. Either
+#'   the `inputs` or the pair of `batch_size` and `dtype` are provided.
+#'   `batch_size` is a scalar tensor that represents the batch size
+#'   of the inputs. `dtype` is `tf.DType` that represents the dtype of
+#'   the inputs.
+#'   For backward compatibility, if this method is not implemented
+#'   by the cell, the RNN layer will create a zero filled tensor with the
+#'   size of [batch_size, cell.state_size].
+#' In the case that `cell` is a list of RNN cell instances, the cells
+#' will be stacked on top of each other in the RNN, resulting in an
+#' efficient stacked RNN. 
+#' 
+#' @param return_sequences 
+#' Boolean (default `FALSE`). Whether to return the last
+#' output in the output sequence, or the full sequence. 
+#' 
+#' @param return_state 
+#' Boolean (default `FALSE`). Whether to return the last state
+#' in addition to the output. 
+#' 
+#' @param go_backwards 
+#' Boolean (default `FALSE`).
+#' If TRUE, process the input sequence backwards and return the
+#' reversed sequence. 
+#' 
+#' @param stateful 
+#' Boolean (default `FALSE`). If TRUE, the last state
+#' for each sample at index i in a batch will be used as initial
+#' state for the sample of index i in the following batch. 
+#' 
+#' @param unroll 
+#' Boolean (default `FALSE`).
+#' If TRUE, the network will be unrolled, else a symbolic loop will be
+#' used. Unrolling can speed-up a RNN, although it tends to be more
+#' memory-intensive. Unrolling is only suitable for short sequences. 
+#' 
+#' @param time_major 
+#' The shape format of the `inputs` and `outputs` tensors.
+#' If TRUE, the inputs and outputs will be in shape
+#' `(timesteps, batch, ...)`, whereas in the FALSE case, it will be
+#' `(batch, timesteps, ...)`. Using `time_major = TRUE` is a bit more
+#' efficient because it avoids transposes at the beginning and end of the
+#' RNN calculation. However, most TensorFlow data is batch-major, so by
+#' default this function accepts input and emits output in batch-major
+#' form. 
+#' 
+#' @param zero_output_for_mask 
+#' Boolean (default `FALSE`).
+#' Whether the output should use zeros for the masked timesteps. Note that
+#' this field is only used when `return_sequences` is TRUE and mask is
+#' provided. It can useful if you want to reuse the raw output sequence of
+#' the RNN without interference from the masked timesteps, eg, merging
+#' bidirectional RNNs. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_rnn <- 
+function(object, cell, return_sequences = FALSE, return_state = FALSE, 
+    go_backwards = FALSE, stateful = FALSE, unroll = FALSE, time_major = FALSE, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$RNN, object, args)
+}
+
+
+#' Depthwise separable 1D convolution 
+#' 
+#' @details 
+#' This layer performs a depthwise convolution that acts separately on
+#' channels, followed by a pointwise convolution that mixes channels.
+#' If `use_bias` is TRUE and a bias initializer is provided,
+#' it adds a bias vector to the output.
+#' It then optionally applies an activation function to produce the final
+#' output. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the number
+#' of filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' A single integer specifying the spatial
+#' dimensions of the filters. 
+#' 
+#' @param strides 
+#' A single integer specifying the strides
+#' of the convolution.
+#' Specifying any `stride` value != 1 is incompatible with specifying
+#' any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' One of `"valid"`, `"same"`, or `"causal"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. `"causal"` results in
+#' causal (dilated) convolutions, e.g. `output[t]` does not depend on
+#' `input[t+1:]`. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, length, channels)` while `channels_first` corresponds to
+#' inputs with shape `(batch_size, channels, length)`. 
+#' 
+#' @param dilation_rate 
+#' A single integer, specifying
+#' the dilation rate to use for dilated convolution. 
+#' 
+#' @param depth_multiplier 
+#' The number of depthwise convolution output channels for
+#' each input channel. The total number of depthwise convolution output
+#' channels will be equal to `num_filters_in * depth_multiplier`. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias. 
+#' 
+#' @param depthwise_initializer 
+#' An initializer for the depthwise convolution kernel
+#' (see `keras.initializers`). If NULL, then the default initializer
+#' ('glorot_uniform') will be used. 
+#' 
+#' @param pointwise_initializer 
+#' An initializer for the pointwise convolution kernel
+#' (see `keras.initializers`). If NULL, then the default initializer
+#' ('glorot_uniform') will be used. 
+#' 
+#' @param bias_initializer 
+#' An initializer for the bias vector. If NULL, the default
+#' initializer ('zeros') will be used (see `keras.initializers`). 
+#' 
+#' @param depthwise_regularizer 
+#' Optional regularizer for the depthwise
+#' convolution kernel (see `keras.regularizers`). 
+#' 
+#' @param pointwise_regularizer 
+#' Optional regularizer for the pointwise
+#' convolution kernel (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Optional regularizer for the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Optional regularizer function for the output
+#' (see `keras.regularizers`). 
+#' 
+#' @param depthwise_constraint 
+#' Optional projection function to be applied to the
+#' depthwise kernel after being updated by an `Optimizer` (e.g. used for
+#' norm constraints or value constraints for layer weights). The function
+#' must take as input the unprojected variable and must return the
+#' projected variable (which must have the same shape). Constraints are
+#' not safe to use when doing asynchronous distributed training
+#' (see `keras.constraints`). 
+#' 
+#' @param pointwise_constraint 
+#' Optional projection function to be applied to the
+#' pointwise kernel after being updated by an `Optimizer`
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Optional projection function to be applied to the
+#' bias after being updated by an `Optimizer`
+#' (see `keras.constraints`). 
+#' 
+#' @param trainable 
+#' Boolean, if `TRUE` the weights of this layer will be marked as
+#' trainable (and listed in `layer.trainable_weights`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_separable_conv_1d <- 
+function(object, filters, kernel_size, strides = 1L, padding = "valid", 
+    data_format = NULL, dilation_rate = 1L, depth_multiplier = 1L, 
+    activation = NULL, use_bias = TRUE, depthwise_initializer = "glorot_uniform", 
+    pointwise_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    depthwise_regularizer = NULL, pointwise_regularizer = NULL, 
+    bias_regularizer = NULL, activity_regularizer = NULL, depthwise_constraint = NULL, 
+    pointwise_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(strides = as.integer, 
+        dilation_rate = as.integer, depth_multiplier = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$SeparableConv1D, object, args)
+}
+
+
+#' Depthwise separable 2D convolution 
+#' 
+#' @details 
+#' Separable convolutions consist of first performing
+#' a depthwise spatial convolution
+#' (which acts on each input channel separately)
+#' followed by a pointwise convolution which mixes the resulting
+#' output channels. The `depth_multiplier` argument controls how many
+#' output channels are generated per input channel in the depthwise step.
+#' 
+#' Intuitively, separable convolutions can be understood as
+#' a way to factorize a convolution kernel into two smaller kernels,
+#' or as an extreme version of an Inception block. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space
+#' (i.e. the number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 2 integers, specifying the
+#' height and width of the 2D convolution window.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 2 integers,
+#' specifying the strides of the convolution along the height and width.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions. Current implementation only supports equal
+#' length strides in the row and column dimensions.
+#' Specifying any stride value != 1 is incompatible with specifying
+#' any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch_size, channels, height, width)`.
+#' When unspecified, uses `image_data_format` value found in your Keras
+#' config file at `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' An integer or list of 2 integers, specifying
+#' the dilation rate to use for dilated convolution. 
+#' 
+#' @param depth_multiplier 
+#' The number of depthwise convolution output channels
+#' for each input channel.
+#' The total number of depthwise convolution output
+#' channels will be equal to `filters_in * depth_multiplier`. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param depthwise_initializer 
+#' An initializer for the depthwise convolution kernel
+#' (see `keras.initializers`). If NULL, then the default initializer
+#' ('glorot_uniform') will be used. 
+#' 
+#' @param pointwise_initializer 
+#' An initializer for the pointwise convolution kernel
+#' (see `keras.initializers`). If NULL, then the default initializer
+#' ('glorot_uniform') will be used. 
+#' 
+#' @param bias_initializer 
+#' An initializer for the bias vector. If NULL, the default
+#' initializer ('zeros') will be used (see `keras.initializers`). 
+#' 
+#' @param depthwise_regularizer 
+#' Regularizer function applied to
+#' the depthwise kernel matrix (see `keras.regularizers`). 
+#' 
+#' @param pointwise_regularizer 
+#' Regularizer function applied to
+#' the pointwise kernel matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation")
+#' (see `keras.regularizers`). 
+#' 
+#' @param depthwise_constraint 
+#' Constraint function applied to
+#' the depthwise kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param pointwise_constraint 
+#' Constraint function applied to
+#' the pointwise kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector
+#' (see `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_separable_conv_2d <- 
+function(object, filters, kernel_size, strides = list(1L, 1L), 
+    padding = "valid", data_format = NULL, dilation_rate = list(
+        1L, 1L), depth_multiplier = 1L, activation = NULL, use_bias = TRUE, 
+    depthwise_initializer = "glorot_uniform", pointwise_initializer = "glorot_uniform", 
+    bias_initializer = "zeros", depthwise_regularizer = NULL, 
+    pointwise_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    depthwise_constraint = NULL, pointwise_constraint = NULL, 
+    bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(depth_multiplier = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$SeparableConv2D, object, args)
+}
+
+
+#' Depthwise separable 1D convolution 
+#' 
+#' @details 
+#' This layer performs a depthwise convolution that acts separately on
+#' channels, followed by a pointwise convolution that mixes channels.
+#' If `use_bias` is TRUE and a bias initializer is provided,
+#' it adds a bias vector to the output.
+#' It then optionally applies an activation function to produce the final
+#' output. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space (i.e. the number
+#' of filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' A single integer specifying the spatial
+#' dimensions of the filters. 
+#' 
+#' @param strides 
+#' A single integer specifying the strides
+#' of the convolution.
+#' Specifying any `stride` value != 1 is incompatible with specifying
+#' any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' One of `"valid"`, `"same"`, or `"causal"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. `"causal"` results in
+#' causal (dilated) convolutions, e.g. `output[t]` does not depend on
+#' `input[t+1:]`. 
+#' 
+#' @param data_format 
+#' A string, one of `channels_last` (default) or
+#' `channels_first`.  The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, length, channels)` while `channels_first` corresponds to
+#' inputs with shape `(batch_size, channels, length)`. 
+#' 
+#' @param dilation_rate 
+#' A single integer, specifying
+#' the dilation rate to use for dilated convolution. 
+#' 
+#' @param depth_multiplier 
+#' The number of depthwise convolution output channels for
+#' each input channel. The total number of depthwise convolution output
+#' channels will be equal to `num_filters_in * depth_multiplier`. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias. 
+#' 
+#' @param depthwise_initializer 
+#' An initializer for the depthwise convolution kernel
+#' (see `keras.initializers`). If NULL, then the default initializer
+#' ('glorot_uniform') will be used. 
+#' 
+#' @param pointwise_initializer 
+#' An initializer for the pointwise convolution kernel
+#' (see `keras.initializers`). If NULL, then the default initializer
+#' ('glorot_uniform') will be used. 
+#' 
+#' @param bias_initializer 
+#' An initializer for the bias vector. If NULL, the default
+#' initializer ('zeros') will be used (see `keras.initializers`). 
+#' 
+#' @param depthwise_regularizer 
+#' Optional regularizer for the depthwise
+#' convolution kernel (see `keras.regularizers`). 
+#' 
+#' @param pointwise_regularizer 
+#' Optional regularizer for the pointwise
+#' convolution kernel (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Optional regularizer for the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Optional regularizer function for the output
+#' (see `keras.regularizers`). 
+#' 
+#' @param depthwise_constraint 
+#' Optional projection function to be applied to the
+#' depthwise kernel after being updated by an `Optimizer` (e.g. used for
+#' norm constraints or value constraints for layer weights). The function
+#' must take as input the unprojected variable and must return the
+#' projected variable (which must have the same shape). Constraints are
+#' not safe to use when doing asynchronous distributed training
+#' (see `keras.constraints`). 
+#' 
+#' @param pointwise_constraint 
+#' Optional projection function to be applied to the
+#' pointwise kernel after being updated by an `Optimizer`
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Optional projection function to be applied to the
+#' bias after being updated by an `Optimizer`
+#' (see `keras.constraints`). 
+#' 
+#' @param trainable 
+#' Boolean, if `TRUE` the weights of this layer will be marked as
+#' trainable (and listed in `layer.trainable_weights`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_separable_conv_1d <- 
+function(object, filters, kernel_size, strides = 1L, padding = "valid", 
+    data_format = NULL, dilation_rate = 1L, depth_multiplier = 1L, 
+    activation = NULL, use_bias = TRUE, depthwise_initializer = "glorot_uniform", 
+    pointwise_initializer = "glorot_uniform", bias_initializer = "zeros", 
+    depthwise_regularizer = NULL, pointwise_regularizer = NULL, 
+    bias_regularizer = NULL, activity_regularizer = NULL, depthwise_constraint = NULL, 
+    pointwise_constraint = NULL, bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(strides = as.integer, 
+        dilation_rate = as.integer, depth_multiplier = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$SeparableConv1D, object, args)
+}
+
+
+#' Depthwise separable 2D convolution 
+#' 
+#' @details 
+#' Separable convolutions consist of first performing
+#' a depthwise spatial convolution
+#' (which acts on each input channel separately)
+#' followed by a pointwise convolution which mixes the resulting
+#' output channels. The `depth_multiplier` argument controls how many
+#' output channels are generated per input channel in the depthwise step.
+#' 
+#' Intuitively, separable convolutions can be understood as
+#' a way to factorize a convolution kernel into two smaller kernels,
+#' or as an extreme version of an Inception block. 
+#' 
+#' @param filters 
+#' Integer, the dimensionality of the output space
+#' (i.e. the number of output filters in the convolution). 
+#' 
+#' @param kernel_size 
+#' An integer or list of 2 integers, specifying the
+#' height and width of the 2D convolution window.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions. 
+#' 
+#' @param strides 
+#' An integer or list of 2 integers,
+#' specifying the strides of the convolution along the height and width.
+#' Can be a single integer to specify the same value for
+#' all spatial dimensions. Current implementation only supports equal
+#' length strides in the row and column dimensions.
+#' Specifying any stride value != 1 is incompatible with specifying
+#' any `dilation_rate` value != 1. 
+#' 
+#' @param padding 
+#' one of `"valid"` or `"same"` (case-insensitive).
+#' `"valid"` means no padding. `"same"` results in padding with zeros
+#' evenly to the left/right or up/down of the input such that output has
+#' the same height/width dimension as the input. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch_size, channels, height, width)`.
+#' When unspecified, uses `image_data_format` value found in your Keras
+#' config file at `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param dilation_rate 
+#' An integer or list of 2 integers, specifying
+#' the dilation rate to use for dilated convolution. 
+#' 
+#' @param depth_multiplier 
+#' The number of depthwise convolution output channels
+#' for each input channel.
+#' The total number of depthwise convolution output
+#' channels will be equal to `filters_in * depth_multiplier`. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' If you don't specify anything, no activation is applied
+#' (see `keras.activations`). 
+#' 
+#' @param use_bias 
+#' Boolean, whether the layer uses a bias vector. 
+#' 
+#' @param depthwise_initializer 
+#' An initializer for the depthwise convolution kernel
+#' (see `keras.initializers`). If NULL, then the default initializer
+#' ('glorot_uniform') will be used. 
+#' 
+#' @param pointwise_initializer 
+#' An initializer for the pointwise convolution kernel
+#' (see `keras.initializers`). If NULL, then the default initializer
+#' ('glorot_uniform') will be used. 
+#' 
+#' @param bias_initializer 
+#' An initializer for the bias vector. If NULL, the default
+#' initializer ('zeros') will be used (see `keras.initializers`). 
+#' 
+#' @param depthwise_regularizer 
+#' Regularizer function applied to
+#' the depthwise kernel matrix (see `keras.regularizers`). 
+#' 
+#' @param pointwise_regularizer 
+#' Regularizer function applied to
+#' the pointwise kernel matrix (see `keras.regularizers`). 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector
+#' (see `keras.regularizers`). 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to
+#' the output of the layer (its "activation")
+#' (see `keras.regularizers`). 
+#' 
+#' @param depthwise_constraint 
+#' Constraint function applied to
+#' the depthwise kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param pointwise_constraint 
+#' Constraint function applied to
+#' the pointwise kernel matrix
+#' (see `keras.constraints`). 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector
+#' (see `keras.constraints`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_separable_conv_2d <- 
+function(object, filters, kernel_size, strides = list(1L, 1L), 
+    padding = "valid", data_format = NULL, dilation_rate = list(
+        1L, 1L), depth_multiplier = 1L, activation = NULL, use_bias = TRUE, 
+    depthwise_initializer = "glorot_uniform", pointwise_initializer = "glorot_uniform", 
+    bias_initializer = "zeros", depthwise_regularizer = NULL, 
+    pointwise_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
+    depthwise_constraint = NULL, pointwise_constraint = NULL, 
+    bias_constraint = NULL, ...) 
+{
+    args <- capture_args(match.call(), list(depth_multiplier = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$SeparableConv2D, object, args)
+}
+
+
+#' Fully-connected RNN where the output is to be fed back to input 
+#' 
+#' @details 
+#' See [the Keras RNN API guide](https://www.tensorflow.org/guide/keras/rnn)
+#' for details about the usage of RNN API. 
+#' 
+#' @param units 
+#' Positive integer, dimensionality of the output space. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' Default: hyperbolic tangent (`tanh`).
+#' If you pass NULL, no activation is applied
+#' (ie. "linear" activation: `a(x) = x`). 
+#' 
+#' @param use_bias 
+#' Boolean, (default `TRUE`), whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix,
+#' used for the linear transformation of the inputs. Default:
+#' `glorot_uniform`. 
+#' 
+#' @param recurrent_initializer 
+#' Initializer for the `recurrent_kernel`
+#' weights matrix, used for the linear transformation of the recurrent
+#' state.  Default: `orthogonal`. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. Default: `zeros`. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. Default: `NULL`. 
+#' 
+#' @param recurrent_regularizer 
+#' Regularizer function applied to the
+#' `recurrent_kernel` weights matrix. Default: `NULL`. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector.
+#' Default: `NULL`. 
+#' 
+#' @param activity_regularizer 
+#' Regularizer function applied to the output of the
+#' layer (its "activation"). Default: `NULL`. 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the `kernel` weights
+#' matrix. Default: `NULL`. 
+#' 
+#' @param recurrent_constraint 
+#' Constraint function applied to the
+#' `recurrent_kernel` weights matrix.  Default: `NULL`. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. Default:
+#' `NULL`. 
+#' 
+#' @param dropout 
+#' Float between 0 and 1.
+#' Fraction of the units to drop for the linear transformation of the
+#' inputs. Default: 0. 
+#' 
+#' @param recurrent_dropout 
+#' Float between 0 and 1.
+#' Fraction of the units to drop for the linear transformation of the
+#' recurrent state. Default: 0. 
+#' 
+#' @param return_sequences 
+#' Boolean. Whether to return the last output
+#' in the output sequence, or the full sequence. Default: `FALSE`. 
+#' 
+#' @param return_state 
+#' Boolean. Whether to return the last state
+#' in addition to the output. Default: `FALSE` 
+#' 
+#' @param go_backwards 
+#' Boolean (default FALSE).
+#' If TRUE, process the input sequence backwards and return the
+#' reversed sequence. 
+#' 
+#' @param stateful 
+#' Boolean (default FALSE). If TRUE, the last state
+#' for each sample at index i in a batch will be used as initial
+#' state for the sample of index i in the following batch. 
+#' 
+#' @param unroll 
+#' Boolean (default FALSE).
+#' If TRUE, the network will be unrolled,
+#' else a symbolic loop will be used.
+#' Unrolling can speed-up a RNN,
+#' although it tends to be more memory-intensive.
+#' Unrolling is only suitable for short sequences. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_simple_rnn <- 
+function(object, units, activation = "tanh", use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", recurrent_initializer = "orthogonal", 
+    bias_initializer = "zeros", kernel_regularizer = NULL, recurrent_regularizer = NULL, 
+    bias_regularizer = NULL, activity_regularizer = NULL, kernel_constraint = NULL, 
+    recurrent_constraint = NULL, bias_constraint = NULL, dropout = 0, 
+    recurrent_dropout = 0, return_sequences = FALSE, return_state = FALSE, 
+    go_backwards = FALSE, stateful = FALSE, unroll = FALSE, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$SimpleRNN, object, args)
+}
+
+
+#' Cell class for SimpleRNN 
+#' 
+#' @details 
+#' See [the Keras RNN API guide](https://www.tensorflow.org/guide/keras/rnn)
+#' for details about the usage of RNN API.
+#' 
+#' This class processes one step within the whole time sequence input, whereas
+#' `tf.keras.layer.SimpleRNN` processes the whole sequence. 
+#' 
+#' @param units 
+#' Positive integer, dimensionality of the output space. 
+#' 
+#' @param activation 
+#' Activation function to use.
+#' Default: hyperbolic tangent (`tanh`).
+#' If you pass `NULL`, no activation is applied
+#' (ie. "linear" activation: `a(x) = x`). 
+#' 
+#' @param use_bias 
+#' Boolean, (default `TRUE`), whether the layer uses a bias vector. 
+#' 
+#' @param kernel_initializer 
+#' Initializer for the `kernel` weights matrix,
+#' used for the linear transformation of the inputs. Default:
+#' `glorot_uniform`. 
+#' 
+#' @param recurrent_initializer 
+#' Initializer for the `recurrent_kernel`
+#' weights matrix, used for the linear transformation of the recurrent
+#' state.  Default: `orthogonal`. 
+#' 
+#' @param bias_initializer 
+#' Initializer for the bias vector. Default: `zeros`. 
+#' 
+#' @param kernel_regularizer 
+#' Regularizer function applied to the `kernel` weights
+#' matrix. Default: `NULL`. 
+#' 
+#' @param recurrent_regularizer 
+#' Regularizer function applied to the
+#' `recurrent_kernel` weights matrix. Default: `NULL`. 
+#' 
+#' @param bias_regularizer 
+#' Regularizer function applied to the bias vector.
+#' Default: `NULL`. 
+#' 
+#' @param kernel_constraint 
+#' Constraint function applied to the `kernel` weights
+#' matrix. Default: `NULL`. 
+#' 
+#' @param recurrent_constraint 
+#' Constraint function applied to the
+#' `recurrent_kernel` weights matrix. Default: `NULL`. 
+#' 
+#' @param bias_constraint 
+#' Constraint function applied to the bias vector. Default:
+#' `NULL`. 
+#' 
+#' @param dropout 
+#' Float between 0 and 1. Fraction of the units to drop for the
+#' linear transformation of the inputs. Default: 0. 
+#' 
+#' @param recurrent_dropout 
+#' Float between 0 and 1. Fraction of the units to drop
+#' for the linear transformation of the recurrent state. Default: 0. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_simple_rnn_cell <- 
+function(object, units, activation = "tanh", use_bias = TRUE, 
+    kernel_initializer = "glorot_uniform", recurrent_initializer = "orthogonal", 
+    bias_initializer = "zeros", kernel_regularizer = NULL, recurrent_regularizer = NULL, 
+    bias_regularizer = NULL, kernel_constraint = NULL, recurrent_constraint = NULL, 
+    bias_constraint = NULL, dropout = 0, recurrent_dropout = 0, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$SimpleRNNCell, object, args)
+}
+
+
+#' Softmax activation function 
+#' 
+#' @details 
+#' Example without mask:
+#' 
+#' ```python
+#' >>> inp = np.asarray([[1., 2., 1.]])
+#' >>> layer = tf.keras.layers.Softmax()
+#' >>> layer(inp).numpy()
+#' array([[0.21194157, 0.5761169 , 0.21194157]], dtype=float32)
+#' >>> mask = np.asarray([[TRUE, FALSE, TRUE]], dtype=bool)
+#' >>> layer(inp, mask).numpy()
+#' array([[0.5, 0. , 0.5]], dtype=float32)
+#' ```
+#' 
+#' Input shape:
+#'     Arbitrary. Use the keyword argument `input_shape`
+#'     (list of integers, does not include the samples axis)
+#'     when using this layer as the first layer in a model.
+#' 
+#' Output shape:
+#'     Same shape as the input. 
+#' 
+#' @param axis 
+#' Integer, or list of Integers, axis along which the softmax
+#' normalization is applied. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_softmax <- 
+function(object, axis = -1L, ...) 
+{
+    args <- capture_args(match.call(), list(axis = as_axis), 
+        ignore = "object")
+    create_layer(keras$layers$Softmax, object, args)
+}
+
+
+#' Spatial 1D version of Dropout 
+#' 
+#' @details 
+#' This version performs the same function as Dropout, however, it drops
+#' entire 1D feature maps instead of individual elements. If adjacent frames
+#' within feature maps are strongly correlated (as is normally the case in
+#' early convolution layers) then regular dropout will not regularize the
+#' activations and will otherwise just result in an effective learning rate
+#' decrease. In this case, SpatialDropout1D will help promote independence
+#' between feature maps and should be used instead. 
+#' 
+#' @param rate 
+#' Float between 0 and 1. Fraction of the input units to drop. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_spatial_dropout_1d <- 
+function(object, rate, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$SpatialDropout1D, object, args)
+}
+
+
+#' Spatial 2D version of Dropout 
+#' 
+#' @details 
+#' This version performs the same function as Dropout, however, it drops
+#' entire 2D feature maps instead of individual elements. If adjacent pixels
+#' within feature maps are strongly correlated (as is normally the case in
+#' early convolution layers) then regular dropout will not regularize the
+#' activations and will otherwise just result in an effective learning rate
+#' decrease. In this case, SpatialDropout2D will help promote independence
+#' between feature maps and should be used instead. 
+#' 
+#' @param rate 
+#' Float between 0 and 1. Fraction of the input units to drop. 
+#' 
+#' @param data_format 
+#' 'channels_first' or 'channels_last'. In 'channels_first'
+#' mode, the channels dimension (the depth) is at index 1, in
+#' 'channels_last' mode is it at index 3. When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_spatial_dropout_2d <- 
+function(object, rate, data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$SpatialDropout2D, object, args)
+}
+
+
+#' Spatial 3D version of Dropout 
+#' 
+#' @details 
+#' This version performs the same function as Dropout, however, it drops
+#' entire 3D feature maps instead of individual elements. If adjacent voxels
+#' within feature maps are strongly correlated (as is normally the case in
+#' early convolution layers) then regular dropout will not regularize the
+#' activations and will otherwise just result in an effective learning rate
+#' decrease. In this case, SpatialDropout3D will help promote independence
+#' between feature maps and should be used instead. 
+#' 
+#' @param rate 
+#' Float between 0 and 1. Fraction of the input units to drop. 
+#' 
+#' @param data_format 
+#' 'channels_first' or 'channels_last'. In 'channels_first'
+#' mode, the channels dimension (the depth) is at index 1, in
+#' 'channels_last' mode is it at index 4. When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#' `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_spatial_dropout_3d <- 
+function(object, rate, data_format = NULL, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$SpatialDropout3D, object, args)
+}
+
+
+#' Performs spectral normalization on the weights of a target layer 
+#' 
+#' @details 
+#' This wrapper controls the Lipschitz constant of the weights of a layer by
+#' constraining their spectral norm, which can stabilize the training of GANs. 
+#' 
+#' @param layer 
+#' A `keras.layers.Layer` instance that
+#' has either a `kernel` (e.g. `Conv2D`, `Dense`...)
+#' or an `embeddings` attribute (`Embedding` layer). 
+#' 
+#' @param power_iterations 
+#' int, the number of iterations during normalization. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_spectral_normalization <- 
+function(object, layer, power_iterations = 1L, ...) 
+{
+    args <- capture_args(match.call(), list(power_iterations = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$SpectralNormalization, object, 
+        args)
+}
+
+
+#' Wrapper allowing a stack of RNN cells to behave as a single cell 
+#' 
+#' Used to implement efficient stacked RNNs. 
+#' 
+#' @param cells 
+#' List of RNN cell instances. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_stacked_rnn_cells <- 
+function(object, cells, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$StackedRNNCells, object, args)
+}
+
+
+#' A preprocessing layer which maps string features to integer indices 
+#' 
+#' @details 
+#' This layer translates a set of arbitrary strings into integer output via a
+#' table-based vocabulary lookup. This layer will perform no splitting or
+#' transformation of input strings. For a layer than can split and tokenize
+#' natural language, see the `tf.keras.layers.TextVectorization` layer.
+#' 
+#' The vocabulary for the layer must be either supplied on construction or
+#' learned via `adapt()`. During `adapt()`, the layer will analyze a data set,
+#' determine the frequency of individual strings tokens, and create a
+#' vocabulary from them. If the vocabulary is capped in size, the most frequent
+#' tokens will be used to create the vocabulary and all others will be treated
+#' as out-of-vocabulary (OOV).
+#' 
+#' There are two possible output modes for the layer.
+#' When `output_mode` is `"int"`,
+#' input strings are converted to their index in the vocabulary (an integer).
+#' When `output_mode` is `"multi_hot"`, `"count"`, or `"tf_idf"`, input strings
+#' are encoded into an array where each dimension corresponds to an element in
+#' the vocabulary.
+#' 
+#' The vocabulary can optionally contain a mask token as well as an OOV token
+#' (which can optionally occupy multiple indices in the vocabulary, as set
+#' by `num_oov_indices`).
+#' The position of these tokens in the vocabulary is fixed. When `output_mode`
+#' is `"int"`, the vocabulary will begin with the mask token (if set), followed
+#' by OOV indices, followed by the rest of the vocabulary. When `output_mode`
+#' is `"multi_hot"`, `"count"`, or `"tf_idf"` the vocabulary will begin with
+#' OOV indices and instances of the mask token will be dropped.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param max_tokens 
+#' Maximum size of the vocabulary for this layer. This should
+#' only be specified when adapting the vocabulary or when setting
+#' `pad_to_max_tokens=TRUE`. If NULL, there is no cap on the size of the
+#' vocabulary. Note that this size includes the OOV and mask tokens.
+#' Defaults to `NULL`. 
+#' 
+#' @param num_oov_indices 
+#' The number of out-of-vocabulary tokens to use. If this
+#' value is more than 1, OOV inputs are hashed to determine their OOV
+#' value. If this value is 0, OOV inputs will cause an error when calling
+#' the layer.  Defaults to `1`. 
+#' 
+#' @param mask_token 
+#' A token that represents masked inputs. When `output_mode` is
+#' `"int"`, the token is included in vocabulary and mapped to index 0. In
+#' other output modes, the token will not appear in the vocabulary and
+#' instances of the mask token in the input will be dropped. If set to
+#' NULL, no mask term will be added. Defaults to `NULL`. 
+#' 
+#' @param oov_token 
+#' Only used when `invert` is TRUE. The token to return for OOV
+#' indices. Defaults to `"[UNK]"`. 
+#' 
+#' @param vocabulary 
+#' Optional. Either an array of strings or a string path to a
+#' text file. If passing an array, can pass a list, list, 1D numpy array,
+#' or 1D tensor containing the string vocbulary terms. If passing a file
+#' path, the file should contain one line per term in the vocabulary. If
+#' this argument is set, there is no need to `adapt()` the layer. 
+#' 
+#' @param idf_weights 
+#' Only valid when `output_mode` is `"tf_idf"`. A list, list,
+#' 1D numpy array, or 1D tensor or the same length as the vocabulary,
+#' containing the floating point inverse document frequency weights, which
+#' will be multiplied by per sample term counts for the final `tf_idf`
+#' weight. If the `vocabulary` argument is set, and `output_mode` is
+#' `"tf_idf"`, this argument must be supplied. 
+#' 
+#' @param invert 
+#' Only valid when `output_mode` is `"int"`. If TRUE, this layer will
+#' map indices to vocabulary items instead of mapping vocabulary items to
+#' indices. Defaults to `FALSE`. 
+#' 
+#' @param output_mode 
+#' Specification for the output of the layer. Values can be
+#' `"int"`, `"one_hot"`, `"multi_hot"`, `"count"`, or `"tf_idf"`
+#' configuring the layer as follows:
+#'   - `"int"`: Return the raw integer indices of the input tokens.
+#'   - `"one_hot"`: Encodes each individual element in the input into an
+#'     array the same size as the vocabulary, containing a 1 at the element
+#'     index. If the last dimension is size 1, will encode on that
+#'     dimension. If the last dimension is not size 1, will append a new
+#'     dimension for the encoded output.
+#'   - `"multi_hot"`: Encodes each sample in the input into a single array
+#'     the same size as the vocabulary, containing a 1 for each vocabulary
+#'     term present in the sample. Treats the last dimension as the sample
+#'     dimension, if input shape is (..., sample_length), output shape will
+#'     be (..., num_tokens).
+#'   - `"count"`: As `"multi_hot"`, but the int array contains a count of
+#'     the number of times the token at that index appeared in the sample.
+#'   - `"tf_idf"`: As `"multi_hot"`, but the TF-IDF algorithm is applied to
+#'     find the value in each token slot.
+#' For `"int"` output, any shape of input and output is supported. For all
+#' other output modes, currently only output up to rank 2 is supported.
+#' Defaults to `"int"` 
+#' 
+#' @param pad_to_max_tokens 
+#' Only applicable when `output_mode` is `"multi_hot"`,
+#' `"count"`, or `"tf_idf"`. If TRUE, the output will have its feature axis
+#' padded to `max_tokens` even if the number of unique tokens in the
+#' vocabulary is less than max_tokens, resulting in a tensor of shape
+#' [batch_size, max_tokens] regardless of vocabulary size. Defaults to
+#' FALSE. 
+#' 
+#' @param sparse 
+#' Boolean. Only applicable when `output_mode` is `"multi_hot"`,
+#' `"count"`, or `"tf_idf"`. If TRUE, returns a `SparseTensor` instead of a
+#' dense `Tensor`. Defaults to `FALSE`. 
+#' 
+#' @param encoding 
+#' Optional. The text encoding to use to interpret the input
+#' strings. Defaults to `"utf-8"`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_string_lookup <- 
+function(object, max_tokens = NULL, num_oov_indices = 1L, mask_token = NULL, 
+    oov_token = "[UNK]", vocabulary = NULL, idf_weights = NULL, 
+    encoding = "utf-8", invert = FALSE, output_mode = "int", 
+    sparse = FALSE, pad_to_max_tokens = FALSE, ...) 
+{
+    args <- capture_args(match.call(), list(num_oov_indices = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$StringLookup, object, args)
+}
+
+
+#' Layer that subtracts two inputs 
+#' 
+#' @details 
+#' It takes as input a list of tensors of size 2, both of the same shape, and
+#' returns a single tensor, (inputs[0] - inputs[1]), also of the same shape. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_subtract <- 
+function(object, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Subtract, object, args)
+}
+
+
+#' A preprocessing layer which maps text features to integer sequences 
+#' 
+#' @details 
+#' This layer has basic options for managing text in a Keras model. It
+#' transforms a batch of strings (one example = one string) into either a list
+#' of token indices (one example = 1D tensor of integer token indices) or a
+#' dense representation (one example = 1D tensor of float values representing
+#' data about the example's tokens). This layer is meant to handle natural
+#' language inputs. To handle simple string inputs (categorical strings or
+#' pre-tokenized strings) see `tf.keras.layers.StringLookup`.
+#' 
+#' The vocabulary for the layer must be either supplied on construction or
+#' learned via `adapt()`. When this layer is adapted, it will analyze the
+#' dataset, determine the frequency of individual string values, and create a
+#' vocabulary from them. This vocabulary can have unlimited size or be capped,
+#' depending on the configuration options for this layer; if there are more
+#' unique values in the input than the maximum vocabulary size, the most
+#' frequent terms will be used to create the vocabulary.
+#' 
+#' The processing of each example contains the following steps:
+#' 
+#' 1. Standardize each example (usually lowercasing + punctuation stripping)
+#' 2. Split each example into substrings (usually words)
+#' 3. Recombine substrings into tokens (usually ngrams)
+#' 4. Index tokens (associate a unique int value with each token)
+#' 5. Transform each example using this index, either into a vector of ints or
+#'    a dense float vector.
+#' 
+#' Some notes on passing callables to customize splitting and normalization for
+#' this layer:
+#' 
+#' 1. Any callable can be passed to this Layer, but if you want to serialize
+#'    this object you should only pass functions that are registered Keras
+#'    serializables (see `tf.keras.saving.register_keras_serializable` for more
+#'    details).
+#' 2. When using a custom callable for `standardize`, the data received
+#'    by the callable will be exactly as passed to this layer. The callable
+#'    should return a tensor of the same shape as the input.
+#' 3. When using a custom callable for `split`, the data received by the
+#'    callable will have the 1st dimension squeezed out - instead of
+#'    `[["string to split"], ["another string to split"]]`, the Callable will
+#'    see `["string to split", "another string to split"]`. The callable should
+#'    return a Tensor with the first dimension containing the split tokens -
+#'    in this example, we should see something like `[["string", "to",
+#'    "split"], ["another", "string", "to", "split"]]`. This makes the callable
+#'    site natively compatible with `tf.strings.split()`.
+#' 
+#' For an overview and full list of preprocessing layers, see the preprocessing
+#' [guide](https://www.tensorflow.org/guide/keras/preprocessing_layers). 
+#' 
+#' @param max_tokens 
+#' Maximum size of the vocabulary for this layer. This should
+#' only be specified when adapting a vocabulary or when setting
+#' `pad_to_max_tokens=TRUE`. Note that this vocabulary
+#' contains 1 OOV token, so the effective number of tokens is
+#' `(max_tokens - 1 - (1 if output_mode == "int" else 0))`. 
+#' 
+#' @param standardize 
+#' Optional specification for standardization to apply to the
+#' input text. Values can be:
+#' - `NULL`: No standardization.
+#' - `"lower_and_strip_punctuation"`: Text will be lowercased and all
+#'   punctuation removed.
+#' - `"lower"`: Text will be lowercased.
+#' - `"strip_punctuation"`: All punctuation will be removed.
+#' - Callable: Inputs will passed to the callable function, which should
+#'   be standardized and returned. 
+#' 
+#' @param split 
+#' Optional specification for splitting the input text. Values can be:
+#' - `NULL`: No splitting.
+#' - `"whitespace"`: Split on whitespace.
+#' - `"character"`: Split on each unicode character.
+#' - Callable: Standardized inputs will passed to the callable function,
+#'   which should be split and returned. 
+#' 
+#' @param ngrams 
+#' Optional specification for ngrams to create from the
+#' possibly-split input text. Values can be NULL, an integer or list of
+#' integers; passing an integer will create ngrams up to that integer, and
+#' passing a list of integers will create ngrams for the specified values
+#' in the list. Passing NULL means that no ngrams will be created. 
+#' 
+#' @param output_mode 
+#' Optional specification for the output of the layer. Values
+#' can be `"int"`, `"multi_hot"`, `"count"` or `"tf_idf"`, configuring the
+#' layer as follows:
+#'   - `"int"`: Outputs integer indices, one integer index per split string
+#'     token. When `output_mode == "int"`, 0 is reserved for masked
+#'     locations; this reduces the vocab size to
+#'     `max_tokens - 2` instead of `max_tokens - 1`.
+#'   - `"multi_hot"`: Outputs a single int array per batch, of either
+#'     vocab_size or max_tokens size, containing 1s in all elements where
+#'     the token mapped to that index exists at least once in the batch
+#'     item.
+#'   - `"count"`: Like `"multi_hot"`, but the int array contains a count of
+#'     the number of times the token at that index appeared in the
+#'     batch item.
+#'   - `"tf_idf"`: Like `"multi_hot"`, but the TF-IDF algorithm is applied
+#'     to find the value in each token slot.
+#' For `"int"` output, any shape of input and output is supported. For all
+#' other output modes, currently only rank 1 inputs (and rank 2 outputs
+#' after splitting) are supported. 
+#' 
+#' @param output_sequence_length 
+#' Only valid in INT mode. If set, the output will
+#' have its time dimension padded or truncated to exactly
+#' `output_sequence_length` values, resulting in a tensor of shape
+#' `(batch_size, output_sequence_length)` regardless of how many tokens
+#' resulted from the splitting step. Defaults to `NULL`. 
+#' 
+#' @param pad_to_max_tokens 
+#' Only valid in  `"multi_hot"`, `"count"`, and `"tf_idf"`
+#' modes. If TRUE, the output will have its feature axis padded to
+#' `max_tokens` even if the number of unique tokens in the vocabulary is
+#' less than max_tokens, resulting in a tensor of shape `(batch_size,
+#' max_tokens)` regardless of vocabulary size. Defaults to `FALSE`. 
+#' 
+#' @param vocabulary 
+#' Optional. Either an array of strings or a string path to a
+#' text file. If passing an array, can pass a list, list, 1D numpy array,
+#' or 1D tensor containing the string vocabulary terms. If passing a file
+#' path, the file should contain one line per term in the vocabulary. If
+#' this argument is set, there is no need to `adapt()` the layer. 
+#' 
+#' @param idf_weights 
+#' Only valid when `output_mode` is `"tf_idf"`. A list, list,
+#' 1D numpy array, or 1D tensor of the same length as the vocabulary,
+#' containing the floating point inverse document frequency weights, which
+#' will be multiplied by per sample term counts for the final `tf_idf`
+#' weight. If the `vocabulary` argument is set, and `output_mode` is
+#' `"tf_idf"`, this argument must be supplied. 
+#' 
+#' @param ragged 
+#' Boolean. Only applicable to `"int"` output mode. If TRUE, returns
+#' a `RaggedTensor` instead of a dense `Tensor`, where each sequence may
+#' have a different length after string splitting. Defaults to `FALSE`. 
+#' 
+#' @param sparse 
+#' Boolean. Only applicable to `"multi_hot"`, `"count"`, and
+#' `"tf_idf"` output modes. If TRUE, returns a `SparseTensor` instead of a
+#' dense `Tensor`. Defaults to `FALSE`. 
+#' 
+#' @param encoding 
+#' Optional. The text encoding to use to interpret the input
+#' strings. Defaults to `"utf-8"`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_text_vectorization <- 
+function(object, max_tokens = NULL, standardize = "lower_and_strip_punctuation", 
+    split = "whitespace", ngrams = NULL, output_mode = "int", 
+    output_sequence_length = NULL, pad_to_max_tokens = FALSE, 
+    vocabulary = NULL, idf_weights = NULL, sparse = FALSE, ragged = FALSE, 
+    encoding = "utf-8", ...) 
+{
+    args <- capture_args(match.call(), list(max_tokens = as_nullable_integer, 
+        output_sequence_length = as_nullable_integer, ngrams = function(x) if (length(x) > 
+            1) 
+            as_integer_or_integer_tuple(x)
+        else as_nullable_integer(x)), ignore = "object")
+    create_layer(keras$layers$TextVectorization, object, args)
+}
+
+
+#' Thresholded Rectified Linear Unit 
+#' 
+#' @details 
+#' It follows:
+#' 
+#' ```
+#'     f(x) = x for x > theta
+#'     f(x) = 0 otherwise`
+#' ```
+#' 
+#' Input shape:
+#'     Arbitrary. Use the keyword argument `input_shape`
+#'     (list of integers, does not include the samples axis)
+#'     when using this layer as the first layer in a model.
+#' 
+#' Output shape:
+#'     Same shape as the input. 
+#' 
+#' @param theta 
+#' Float >= 0. Threshold location of activation. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_thresholded_relu <- 
+function(object, theta = 1, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$ThresholdedReLU, object, args)
+}
+
+
+#' This wrapper allows to apply a layer to every temporal slice of an input 
+#' 
+#' @details 
+#' Every input should be at least 3D, and the dimension of index one of the
+#' first input will be considered to be the temporal dimension.
+#' 
+#' Consider a batch of 32 video samples, where each sample is a 128x128 RGB
+#' image with `channels_last` data format, across 10 timesteps.
+#' The batch input shape is `(32, 10, 128, 128, 3)`.
+#' 
+#' You can then use `TimeDistributed` to apply the same `Conv2D` layer to each
+#' of the 10 timesteps, independently:
+#' 
+#' ```python
+#' >>> inputs = tf.keras.Input(shape=(10, 128, 128, 3))
+#' >>> conv_2d_layer = tf.keras.layers.Conv2D(64, (3, 3))
+#' >>> outputs = tf.keras.layers.TimeDistributed(conv_2d_layer)(inputs)
+#' >>> outputs.shape
+#' TensorShape([NULL, 10, 126, 126, 64])
+#' ```
+#' 
+#' Because `TimeDistributed` applies the same instance of `Conv2D` to each of
+#' the timestamps, the same set of weights are used at each timestamp. 
+#' 
+#' @param layer 
+#' a `tf.keras.layers.Layer` instance. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_time_distributed <- 
+function(object, layer, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$TimeDistributed, object, args)
+}
+
+
+#' Unit normalization layer 
+#' 
+#' @details 
+#' Normalize a batch of inputs so that each input in the batch has a L2 norm
+#' equal to 1 (across the axes specified in `axis`). 
+#' 
+#' @param axis 
+#' Integer or list. The axis or axes to normalize across.
+#' Typically, this is the features axis or axes. The left-out axes are
+#' typically the batch axis or axes. `-1` is the last dimension
+#' in the input. Defaults to `-1`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_unit_normalization <- 
+function(object, axis = -1L, ...) 
+{
+    args <- capture_args(match.call(), list(axis = as_axis), 
+        ignore = "object")
+    create_layer(keras$layers$UnitNormalization, object, args)
+}
+
+
+#' Upsampling layer for 1D inputs 
+#' 
+#' Repeats each temporal step `size` times along the time axis. 
+#' 
+#' @param size 
+#' Integer. Upsampling factor. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_up_sampling_1d <- 
+function(object, size = 2L, ...) 
+{
+    args <- capture_args(match.call(), list(size = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$UpSampling1D, object, args)
+}
+
+
+#' Upsampling layer for 2D inputs 
+#' 
+#' @details 
+#' Repeats the rows and columns of the data
+#' by `size[0]` and `size[1]` respectively. 
+#' 
+#' @param size 
+#' Int, or list of 2 integers.
+#' The upsampling factors for rows and columns. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch_size, channels, height, width)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param interpolation 
+#' A string, one of `"area"`, `"bicubic"`, `"bilinear"`,
+#' `"gaussian"`, `"lanczos3"`, `"lanczos5"`, `"mitchellcubic"`,
+#' `"nearest"`. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_up_sampling_2d <- 
+function(object, size = list(2L, 2L), data_format = NULL, interpolation = "nearest", 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$UpSampling2D, object, args)
+}
+
+
+#' Upsampling layer for 3D inputs 
+#' 
+#' @details 
+#' Repeats the 1st, 2nd and 3rd dimensions
+#' of the data by `size[0]`, `size[1]` and `size[2]` respectively. 
+#' 
+#' @param size 
+#' Int, or list of 3 integers.
+#' The upsampling factors for dim1, dim2 and dim3. 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#' while `channels_first` corresponds to inputs with shape
+#' `(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_up_sampling_3d <- 
+function(object, size = list(2L, 2L, 2L), data_format = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$UpSampling3D, object, args)
+}
+
+
+#' Abstract wrapper base class 
+#' 
+#' @details 
+#' Wrappers take another layer and augment it in various ways.
+#' Do not use this class as a layer, it is only an abstract base class.
+#' Two usable wrappers are the `TimeDistributed` and `Bidirectional` wrappers. 
+#' 
+#' @param layer 
+#' The layer to be wrapped. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_wrapper <- 
+function(object, layer, ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$Wrapper, object, args)
+}
+
+
+#' Zero-padding layer for 1D input (e.g. temporal sequence) 
+#' 
+#'  
+#' 
+#' @param padding 
+#' Int, or list of int (length 2).
+#' - If int:
+#' How many zeros to add at the beginning and end of
+#' the padding dimension (axis 1).
+#' - If list of int (length 2):
+#' How many zeros to add at the beginning and the end of
+#' the padding dimension (`(left_pad, right_pad)`). 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_zero_padding_1d <- 
+function(object, padding = 1L, ...) 
+{
+    args <- capture_args(match.call(), list(padding = as.integer), 
+        ignore = "object")
+    create_layer(keras$layers$ZeroPadding1D, object, args)
+}
+
+
+#' Zero-padding layer for 2D input (e.g. picture) 
+#' 
+#' @details 
+#' This layer can add rows and columns of zeros
+#' at the top, bottom, left and right side of an image tensor. 
+#' 
+#' @param padding 
+#' Int, or list of 2 ints, or list of 2 lists of 2 ints.
+#' - If int: the same symmetric padding
+#'   is applied to height and width.
+#' - If list of 2 ints:
+#'   interpreted as two different
+#'   symmetric padding values for height and width:
+#'   `(symmetric_height_pad, symmetric_width_pad)`.
+#' - If list of 2 lists of 2 ints:
+#'   interpreted as
+#'   `((top_pad, bottom_pad), (left_pad, right_pad))` 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, height, width, channels)` while `channels_first`
+#' corresponds to inputs with shape
+#' `(batch_size, channels, height, width)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_zero_padding_2d <- 
+function(object, padding = list(1L, 1L), data_format = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$ZeroPadding2D, object, args)
+}
+
+
+#' Zero-padding layer for 3D data (spatial or spatio-temporal) 
+#' 
+#'  
+#' 
+#' @param padding 
+#' Int, or list of 3 ints, or list of 3 lists of 2 ints.
+#' - If int: the same symmetric padding
+#'   is applied to height and width.
+#' - If list of 3 ints:
+#'   interpreted as two different
+#'   symmetric padding values for height and width:
+#'   `(symmetric_dim1_pad, symmetric_dim2_pad, symmetric_dim3_pad)`.
+#' - If list of 3 lists of 2 ints:
+#'   interpreted as
+#'   `((left_dim1_pad, right_dim1_pad), (left_dim2_pad,
+#'     right_dim2_pad), (left_dim3_pad, right_dim3_pad))` 
+#' 
+#' @param data_format 
+#' A string,
+#' one of `channels_last` (default) or `channels_first`.
+#' The ordering of the dimensions in the inputs.
+#' `channels_last` corresponds to inputs with shape
+#' `(batch_size, spatial_dim1, spatial_dim2, spatial_dim3, channels)`
+#' while `channels_first` corresponds to inputs with shape
+#' `(batch_size, channels, spatial_dim1, spatial_dim2, spatial_dim3)`.
+#' When unspecified, uses
+#' `image_data_format` value found in your Keras config file at
+#'  `~/.keras/keras.json` (if exists) else 'channels_last'.
+#' Defaults to 'channels_last'. 
+#' 
+#' @param ... standard layer arguments. 
+#' 
+#' @seealso 
+#'   +  <https://keras.io/api/layers> 
+#' @export 
+layer_zero_padding_3d <- 
+function(object, padding = list(1L, 1L, 1L), data_format = NULL, 
+    ...) 
+{
+    args <- capture_args(match.call(), NULL, ignore = "object")
+    create_layer(keras$layers$ZeroPadding3D, object, args)
+}

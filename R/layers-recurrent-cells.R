@@ -103,7 +103,7 @@
 #'   +  `reticulate::py_help(keras$layers$RNN)`
 #'
 #' @export
-layer_rnn <-
+old_layer_rnn <-
 function(object, cell,
          return_sequences = FALSE,
          return_state = FALSE,
@@ -179,7 +179,7 @@ function(object, cell,
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/SimpleRNNCell>
 #'   +  <https://keras.io/api/layers>
 #' @export
-layer_simple_rnn_cell <-
+old_layer_simple_rnn_cell <-
 function(units,
          activation = "tanh",
          use_bias = TRUE,
@@ -283,7 +283,7 @@ function(units,
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/GRUCell>
 #'
 #' @export
-layer_gru_cell <-
+old_layer_gru_cell <-
 function(units,
          activation = "tanh",
          recurrent_activation = "sigmoid",
@@ -320,7 +320,7 @@ function(units,
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/StackedRNNCells>
 #'
 #' @export
-layer_stacked_rnn_cells <-
+old_layer_stacked_rnn_cells <-
 function(cells, ...)
 {
     args <- capture_args(match.call())
@@ -412,7 +412,7 @@ function(cells, ...)
 #'   +  <https://www.tensorflow.org/api_docs/python/tf/keras/layers/LSTMCell>
 #'
 #' @export
-layer_lstm_cell <-
+old_layer_lstm_cell <-
 function(units,
          activation = "tanh",
          recurrent_activation = "sigmoid",
