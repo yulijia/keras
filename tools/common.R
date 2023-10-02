@@ -75,18 +75,39 @@ get_doc <- function(py_obj, style = "GOOGLE") {
     docstring_parser$parse(doc, style = docstring_parser$DocstringStyle[["AUTO"]])
   })
 
+  doc$extra_description <- ""
+  doc$call_params <- list()
+
   prep_to_compare <- . %>% strsplit("\n") %>% unlist() %>% trimws()
   doc0 <- prep_to_compare(docstring)
-  doc1 <- docstring_parser$compose(doc) %>% prep_to_compare()
+  doc1 <- prep_to_compare(docstring_parser$compose(doc))
   if(!all(doc0 %in% doc1)) {
-    message("Parsing docstring for ", py_obj$`__name__`, " resulted in lost content:\n***")
     doc00 <- strsplit(docstring, "\n")[[1]]
     lost_content <- doc00[doc0 == "" | !doc0 %in% doc1]
-    writeLines(lost_content)
-    doc$extra_description <- lost_content
-    message("***")
-  } else
-    doc$extra_description <- ""
+    # if(py_obj$`__name__` == "Attention")
+    #   browser()
+
+    # try reparsing Call Arguments
+    doc2 <- lost_content %>% str_flatten("\n") %>%
+      sub("Call arguments:", "Arguments:\n", .) %>%
+      docstring_parser$parse()
+
+    call_params <- doc2$params
+    doc$call_params <- call_params
+
+    prep_to_compare(docstring_parser$compose(doc2))
+    lost_content <- doc00[doc0 == "" | !doc0 %in% c(doc1, doc2)]
+    lost_content <- lost_content %>%
+      str_flatten("\n") %>%
+      str_trim() %>%
+      str_split_1("\n")
+    if(length(lost_content)) {
+      message("Parsing docstring for ", py_obj$`__name__`, " resulted in lost content:\n***")
+      writeLines(lost_content)
+      doc$extra_description <- glue::trim(lost_content)
+      message("***")
+    }
+  }
 
 
   doc$object <- py_obj
@@ -99,8 +120,41 @@ get_doc <- function(py_obj, style = "GOOGLE") {
 }
 
 
+r"(
+        docstring = docstring.replace("Args:", "# Arguments")
+        docstring = docstring.replace("Arguments:", "# Arguments")
+        docstring = docstring.replace("Attributes:", "# Attributes")
+        docstring = docstring.replace("Returns:", "# Returns")
+        docstring = docstring.replace("Raises:", "# Raises")
+        docstring = docstring.replace("Input shape:", "# Input shape")
+        docstring = docstring.replace("Output shape:", "# Output shape")
+        docstring = docstring.replace("Call arguments:", "# Call arguments")
+        docstring = docstring.replace("Returns:", "# Returns")
+        docstring = docstring.replace("Example:", "# Example\n")
+        docstring = docstring.replace("Examples:", "# Examples\n")
+
+        docstring = re.sub(r"\nReference:\n\s*", "\n**Reference**\n\n", docstring)
+        docstring = re.sub(r"\nReferences:\n\s*", "\n**References**\n\n", docstring)
+
+)"
 
 cleanup_description <- function(x) {
+
+  # replace <- function(old, new)
+    # x <<- gsub(old, new, x, fixed = TRUE)
+#
+#   replace("Args:", "# Arguments")
+#   replace("Arguments:", "# Arguments")
+#   replace("Attributes:", "# Attributes")
+#   replace("Returns:", "# Returns")
+#   replace("Raises:", "# Raises")
+#   replace("Input shape:", "# Input shape")
+#   replace("Output shape:", "# Output shape")
+#   replace("Call arguments:", "# Call arguments\n")
+#   replace("Returns:", "# Returns")
+#   replace("Example:", "# Example\n")
+#   replace("Examples:", "# Examples\n")
+
 
   ## TODO: try glue
   # remove leading and trailing whitespace

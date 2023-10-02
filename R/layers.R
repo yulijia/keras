@@ -6484,7 +6484,7 @@ function(object, ...)
 #' it becomes possible to do:
 #' `model = Model(input=[a, b], output=c)`
 #'
-#'   A `tensor`.
+#' A `tensor`.
 #'
 #' Example:
 #'
@@ -12875,7 +12875,7 @@ function(object, padding = list(1L, 1L, 1L), data_format = NULL,
 #' >>> model.add(tf.keras.layers.Dense(num_classes, activation='softmax'))
 #' ```
 #'
-#'     The scaled exponential unit activation: `scale * elu(x, alpha)`.
+#' The scaled exponential unit activation: `scale * elu(x, alpha)`.
 #'
 #' Notes:
 #'     - To be used together with the

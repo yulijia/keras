@@ -48,8 +48,7 @@ Example Usage:
 >>> model.add(tf.keras.layers.Dense(num_classes, activation='softmax'))
 }\if{html}{\out{</div>}}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{The scaled exponential unit activation: `scale * elu(x, alpha)`.
-}\if{html}{\out{</div>}}
+The scaled exponential unit activation: \code{scale * elu(x, alpha)}.
 
 Notes:
 - To be used together with the
