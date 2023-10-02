@@ -8,10 +8,10 @@ Hashing:
   num_bins: as.integer
   salt: as_nullable_integer
 
-# "*":
-#   input_shape: normalize_shape
-#   batch_size: as_nullable_integer
-#   batch_input_shape: normalize_shape
+"*":
+  input_shape: normalize_shape
+  batch_size: as_nullable_integer
+  batch_input_shape: normalize_shape
 
 # "*":
 #   axis: as_axis

@@ -20,7 +20,9 @@
 layer_abstract_rnn_cell <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$AbstractRNNCell, object, args)
 }
 
@@ -41,7 +43,9 @@ function(object, ...)
 layer_activation <- 
 function(object, activation, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Activation, object, args)
 }
 
@@ -64,7 +68,9 @@ function(object, activation, ...)
 layer_activity_regularization <- 
 function(object, l1 = 0, l2 = 0, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$ActivityRegularization, object, 
         args)
 }
@@ -85,7 +91,9 @@ function(object, l1 = 0, l2 = 0, ...)
 layer_add <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Add, object, args)
 }
 
@@ -123,7 +131,9 @@ function(object, ...)
 layer_additive_attention <- 
 function(object, use_scale = TRUE, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$AdditiveAttention, object, args)
 }
 
@@ -153,8 +163,9 @@ function(object, use_scale = TRUE, ...)
 layer_alpha_dropout <- 
 function(object, rate, noise_shape = NULL, seed = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(seed = as_nullable_integer), 
-        ignore = "object")
+    args <- capture_args(match.call(), list(seed = as_nullable_integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$AlphaDropout, object, args)
 }
 
@@ -196,7 +207,9 @@ function(object, rate, noise_shape = NULL, seed = NULL, ...)
 layer_attention <- 
 function(object, use_scale = FALSE, score_mode = "dot", ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Attention, object, args)
 }
 
@@ -215,7 +228,9 @@ function(object, use_scale = FALSE, score_mode = "dot", ...)
 layer_average <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Average, object, args)
 }
 
@@ -330,7 +345,9 @@ function(object, pool_size = 2L, strides = NULL, padding = "valid",
     data_format = "channels_last", ...) 
 {
     args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$AveragePooling1D, object, args)
 }
 
@@ -446,8 +463,10 @@ layer_average_pooling_2d <-
 function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid", 
     data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$AveragePooling2D, object, args)
 }
 
@@ -496,8 +515,10 @@ layer_average_pooling_3d <-
 function(object, pool_size = list(2L, 2L, 2L), strides = NULL, 
     padding = "valid", data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$AveragePooling3D, object, args)
 }
 
@@ -612,7 +633,9 @@ function(object, pool_size = 2L, strides = NULL, padding = "valid",
     data_format = "channels_last", ...) 
 {
     args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$AveragePooling1D, object, args)
 }
 
@@ -728,8 +751,10 @@ layer_average_pooling_2d <-
 function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid", 
     data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$AveragePooling2D, object, args)
 }
 
@@ -778,8 +803,10 @@ layer_average_pooling_3d <-
 function(object, pool_size = list(2L, 2L, 2L), strides = NULL, 
     padding = "valid", data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$AveragePooling3D, object, args)
 }
 
@@ -904,7 +931,8 @@ function(object, axis = -1L, momentum = 0.99, epsilon = 0.001,
     gamma_regularizer = NULL, beta_constraint = NULL, gamma_constraint = NULL, 
     synchronized = FALSE, ...) 
 {
-    args <- capture_args(match.call(), list(axis = as_axis), 
+    args <- capture_args(match.call(), list(axis = as_axis, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
         ignore = "object")
     create_layer(keras$layers$BatchNormalization, object, args)
 }
@@ -958,7 +986,9 @@ layer_bidirectional <-
 function(object, layer, merge_mode = "concat", weights = NULL, 
     backward_layer = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Bidirectional, object, args)
 }
 
@@ -1012,7 +1042,9 @@ layer_category_encoding <-
 function(object, num_tokens = NULL, output_mode = "multi_hot", 
     sparse = FALSE, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$CategoryEncoding, object, args)
 }
 
@@ -1057,7 +1089,9 @@ function(object, num_tokens = NULL, output_mode = "multi_hot",
 layer_center_crop <- 
 function(object, height, width, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$CenterCrop, object, args)
 }
 
@@ -1107,7 +1141,8 @@ function(object, height, width, ...)
 layer_concatenate <- 
 function(object, axis = -1L, ...) 
 {
-    args <- capture_args(match.call(), list(axis = as_axis), 
+    args <- capture_args(match.call(), list(axis = as_axis, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
         ignore = "object")
     create_layer(keras$layers$Concatenate, object, args)
 }
@@ -1227,8 +1262,9 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
 {
     args <- capture_args(match.call(), list(strides = as_integer_or_integer_tuple, 
         dilation_rate = as_integer_or_integer_tuple, groups = as.integer, 
-        filters = as.integer, kernel_size = as_integer_or_integer_tuple), 
-        ignore = "object")
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape, filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple), ignore = "object")
     create_layer(keras$layers$Conv1D, object, args)
 }
 
@@ -1336,8 +1372,10 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
     ...) 
 {
     args <- capture_args(match.call(), list(strides = as_integer_or_integer_tuple, 
-        dilation_rate = as_integer_or_integer_tuple, filters = as.integer, 
-        kernel_size = as_integer_or_integer_tuple), ignore = "object")
+        dilation_rate = as_integer_or_integer_tuple, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple), 
+        ignore = "object")
     create_layer(keras$layers$Conv1DTranspose, object, args)
 }
 
@@ -1454,9 +1492,10 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
     kernel_constraint = NULL, bias_constraint = NULL, ...) 
 {
     args <- capture_args(match.call(), list(groups = as.integer, 
-        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
-        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
-        ignore = "object")
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape, filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
+        strides = as_integer_or_integer_tuple), ignore = "object")
     create_layer(keras$layers$Conv2D, object, args)
 }
 
@@ -1579,9 +1618,11 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
     kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
     kernel_constraint = NULL, bias_constraint = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(filters = as.integer, 
-        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
-        strides = as_integer_or_integer_tuple), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
+        ignore = "object")
     create_layer(keras$layers$Conv2DTranspose, object, args)
 }
 
@@ -1699,9 +1740,10 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
     kernel_constraint = NULL, bias_constraint = NULL, ...) 
 {
     args <- capture_args(match.call(), list(groups = as.integer, 
-        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
-        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
-        ignore = "object")
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape, filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
+        strides = as_integer_or_integer_tuple), ignore = "object")
     create_layer(keras$layers$Conv3D, object, args)
 }
 
@@ -1828,9 +1870,11 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
     kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
     kernel_constraint = NULL, bias_constraint = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(filters = as.integer, 
-        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
-        strides = as_integer_or_integer_tuple), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
+        ignore = "object")
     create_layer(keras$layers$Conv3DTranspose, object, args)
 }
 
@@ -1970,8 +2014,10 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
     dropout = 0, recurrent_dropout = 0, ...) 
 {
     args <- capture_args(match.call(), list(strides = as_integer_or_integer_tuple, 
-        dilation_rate = as_integer_or_integer_tuple, filters = as.integer, 
-        kernel_size = as_integer_or_integer_tuple), ignore = "object")
+        dilation_rate = as_integer_or_integer_tuple, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple), 
+        ignore = "object")
     create_layer(keras$layers$ConvLSTM1D, object, args)
 }
 
@@ -2110,9 +2156,11 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
     return_sequences = FALSE, return_state = FALSE, go_backwards = FALSE, 
     stateful = FALSE, dropout = 0, recurrent_dropout = 0, ...) 
 {
-    args <- capture_args(match.call(), list(filters = as.integer, 
-        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
-        strides = as_integer_or_integer_tuple), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
+        ignore = "object")
     create_layer(keras$layers$ConvLSTM2D, object, args)
 }
 
@@ -2251,9 +2299,11 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
     return_sequences = FALSE, return_state = FALSE, go_backwards = FALSE, 
     stateful = FALSE, dropout = 0, recurrent_dropout = 0, ...) 
 {
-    args <- capture_args(match.call(), list(filters = as.integer, 
-        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
-        strides = as_integer_or_integer_tuple), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
+        ignore = "object")
     create_layer(keras$layers$ConvLSTM3D, object, args)
 }
 
@@ -2372,8 +2422,9 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
 {
     args <- capture_args(match.call(), list(strides = as_integer_or_integer_tuple, 
         dilation_rate = as_integer_or_integer_tuple, groups = as.integer, 
-        filters = as.integer, kernel_size = as_integer_or_integer_tuple), 
-        ignore = "object")
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape, filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple), ignore = "object")
     create_layer(keras$layers$Conv1D, object, args)
 }
 
@@ -2481,8 +2532,10 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
     ...) 
 {
     args <- capture_args(match.call(), list(strides = as_integer_or_integer_tuple, 
-        dilation_rate = as_integer_or_integer_tuple, filters = as.integer, 
-        kernel_size = as_integer_or_integer_tuple), ignore = "object")
+        dilation_rate = as_integer_or_integer_tuple, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple), 
+        ignore = "object")
     create_layer(keras$layers$Conv1DTranspose, object, args)
 }
 
@@ -2599,9 +2652,10 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
     kernel_constraint = NULL, bias_constraint = NULL, ...) 
 {
     args <- capture_args(match.call(), list(groups = as.integer, 
-        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
-        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
-        ignore = "object")
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape, filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
+        strides = as_integer_or_integer_tuple), ignore = "object")
     create_layer(keras$layers$Conv2D, object, args)
 }
 
@@ -2724,9 +2778,11 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
     kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
     kernel_constraint = NULL, bias_constraint = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(filters = as.integer, 
-        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
-        strides = as_integer_or_integer_tuple), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
+        ignore = "object")
     create_layer(keras$layers$Conv2DTranspose, object, args)
 }
 
@@ -2844,9 +2900,10 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
     kernel_constraint = NULL, bias_constraint = NULL, ...) 
 {
     args <- capture_args(match.call(), list(groups = as.integer, 
-        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
-        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
-        ignore = "object")
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape, filters = as.integer, 
+        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
+        strides = as_integer_or_integer_tuple), ignore = "object")
     create_layer(keras$layers$Conv3D, object, args)
 }
 
@@ -2973,9 +3030,11 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
     kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
     kernel_constraint = NULL, bias_constraint = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(filters = as.integer, 
-        kernel_size = as_integer_or_integer_tuple, dilation_rate = as_integer_or_integer_tuple, 
-        strides = as_integer_or_integer_tuple), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        filters = as.integer, kernel_size = as_integer_or_integer_tuple, 
+        dilation_rate = as_integer_or_integer_tuple, strides = as_integer_or_integer_tuple), 
+        ignore = "object")
     create_layer(keras$layers$Conv3DTranspose, object, args)
 }
 
@@ -2998,7 +3057,9 @@ function(object, filters, kernel_size, strides = list(1L, 1L,
 layer_cropping_1d <- 
 function(object, cropping = list(1L, 1L), ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Cropping1D, object, args)
 }
 
@@ -3041,7 +3102,9 @@ layer_cropping_2d <-
 function(object, cropping = list(list(0L, 0L), list(0L, 0L)), 
     data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Cropping2D, object, args)
 }
 
@@ -3093,7 +3156,9 @@ layer_cropping_3d <-
 function(object, cropping = list(list(1L, 1L), list(1L, 1L), 
     list(1L, 1L)), data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Cropping3D, object, args)
 }
 
@@ -3170,7 +3235,9 @@ function(object, units, activation = NULL, use_bias = TRUE,
     kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
     kernel_constraint = NULL, bias_constraint = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Dense, object, args)
 }
 
@@ -3197,7 +3264,9 @@ layer_dense_features <-
 function(object, feature_columns, trainable = TRUE, name = NULL, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$DenseFeatures, object, args)
 }
 
@@ -3312,8 +3381,9 @@ function(object, kernel_size, strides = 1L, padding = "valid",
     bias_constraint = NULL, ...) 
 {
     args <- capture_args(match.call(), list(strides = as.integer, 
-        depth_multiplier = as.integer, dilation_rate = as.integer), 
-        ignore = "object")
+        depth_multiplier = as.integer, dilation_rate = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$DepthwiseConv1D, object, args)
 }
 
@@ -3430,8 +3500,9 @@ function(object, kernel_size, strides = list(1L, 1L), padding = "valid",
     bias_regularizer = NULL, activity_regularizer = NULL, depthwise_constraint = NULL, 
     bias_constraint = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(depth_multiplier = as.integer), 
-        ignore = "object")
+    args <- capture_args(match.call(), list(depth_multiplier = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$DepthwiseConv2D, object, args)
 }
 
@@ -3501,7 +3572,9 @@ layer_discretization <-
 function(object, bin_boundaries = NULL, num_bins = NULL, epsilon = 0.01, 
     output_mode = "int", sparse = FALSE, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Discretization, object, args)
 }
 
@@ -3549,7 +3622,9 @@ function(object, bin_boundaries = NULL, num_bins = NULL, epsilon = 0.01,
 layer_dot <- 
 function(object, axes, normalize = FALSE, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Dot, object, args)
 }
 
@@ -3614,7 +3689,9 @@ function(object, axes, normalize = FALSE, ...)
 layer_dropout <- 
 function(object, rate, noise_shape = NULL, seed = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Dropout, object, args)
 }
 
@@ -3680,7 +3757,9 @@ function(object, equation, output_shape, activation = NULL,
     activity_regularizer = NULL, kernel_constraint = NULL, bias_constraint = NULL, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$EinsumDense, object, args)
 }
 
@@ -3714,7 +3793,9 @@ function(object, equation, output_shape, activation = NULL,
 layer_elu <- 
 function(object, alpha = 1, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$ELU, object, args)
 }
 
@@ -3783,7 +3864,9 @@ function(object, input_dim, output_dim, embeddings_initializer = "uniform",
     embeddings_constraint = NULL, mask_zero = FALSE, input_length = NULL, 
     sparse = FALSE, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Embedding, object, args)
 }
 
@@ -3814,7 +3897,9 @@ function(object, input_dim, output_dim, embeddings_initializer = "uniform",
 layer_flatten <- 
 function(object, data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Flatten, object, args)
 }
 
@@ -3839,7 +3924,9 @@ function(object, data_format = NULL, ...)
 layer_gaussian_dropout <- 
 function(object, rate, seed = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$GaussianDropout, object, args)
 }
 
@@ -3868,7 +3955,9 @@ function(object, rate, seed = NULL, ...)
 layer_gaussian_noise <- 
 function(object, stddev, seed = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$GaussianNoise, object, args)
 }
 
@@ -3902,8 +3991,10 @@ function(object, stddev, seed = NULL, ...)
 layer_global_average_pooling_1d <- 
 function(object, data_format = "channels_last", ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$GlobalAveragePooling1D, object, 
         args)
 }
@@ -3941,8 +4032,10 @@ function(object, data_format = "channels_last", ...)
 layer_global_average_pooling_2d <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$GlobalAveragePooling2D, object, 
         args)
 }
@@ -3981,8 +4074,10 @@ function(object, ...)
 layer_global_average_pooling_3d <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$GlobalAveragePooling3D, object, 
         args)
 }
@@ -4038,8 +4133,10 @@ function(object, ...)
 layer_global_max_pooling_1d <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$GlobalMaxPooling1D, object, args)
 }
 
@@ -4077,8 +4174,10 @@ function(object, ...)
 layer_global_max_pooling_2d <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$GlobalMaxPooling2D, object, args)
 }
 
@@ -4116,8 +4215,10 @@ function(object, ...)
 layer_global_max_pooling_3d <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$GlobalMaxPooling3D, object, args)
 }
 
@@ -4200,7 +4301,8 @@ function(object, groups = 32L, axis = -1L, epsilon = 0.001,
     beta_constraint = NULL, gamma_constraint = NULL, ...) 
 {
     args <- capture_args(match.call(), list(groups = as.integer, 
-        axis = as_axis), ignore = "object")
+        axis = as_axis, input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$GroupNormalization, object, args)
 }
 
@@ -4379,7 +4481,9 @@ function(object, units, activation = "tanh", recurrent_activation = "sigmoid",
     go_backwards = FALSE, stateful = FALSE, unroll = FALSE, time_major = FALSE, 
     reset_after = TRUE, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$GRU, object, args)
 }
 
@@ -4492,7 +4596,9 @@ function(object, units, activation = "tanh", recurrent_activation = "sigmoid",
     bias_constraint = NULL, dropout = 0, recurrent_dropout = 0, 
     reset_after = TRUE, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$GRUCell, object, args)
 }
 
@@ -4539,7 +4645,9 @@ layer_hashed_crossing <-
 function(object, num_bins, output_mode = "int", sparse = FALSE, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$HashedCrossing, object, args)
 }
 
@@ -4677,7 +4785,9 @@ function(object, num_bins, mask_value = NULL, salt = NULL, output_mode = "int",
     sparse = FALSE, ...) 
 {
     args <- capture_args(match.call(), list(num_bins = as.integer, 
-        salt = as_nullable_integer), ignore = "object")
+        salt = as_nullable_integer, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Hashing, object, args)
 }
 
@@ -4697,7 +4807,9 @@ function(object, num_bins, mask_value = NULL, salt = NULL, output_mode = "int",
 layer_identity <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Identity, object, args)
 }
 
@@ -4759,7 +4871,9 @@ function(shape = NULL, batch_size = NULL, name = NULL, dtype = NULL,
     sparse = NULL, tensor = NULL, ragged = NULL, type_spec = NULL, 
     ...) 
 {
-    args <- capture_args(match.call(), list(shape = normalize_shape))
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        shape = normalize_shape))
     create_layer(keras$layers$Input, NULL, args)
 }
 
@@ -4839,7 +4953,9 @@ function(object, input_shape = NULL, batch_size = NULL, dtype = NULL,
     input_tensor = NULL, sparse = NULL, name = NULL, ragged = NULL, 
     type_spec = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$InputLayer, object, args)
 }
 
@@ -4975,7 +5091,9 @@ function(object, max_tokens = NULL, num_oov_indices = 1L, mask_token = NULL,
     sparse = FALSE, pad_to_max_tokens = FALSE, ...) 
 {
     args <- capture_args(match.call(), list(num_oov_indices = as.integer, 
-        oov_token = as.integer), ignore = "object")
+        oov_token = as.integer, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$IntegerLookup, object, args)
 }
 
@@ -5034,7 +5152,9 @@ layer_lambda <-
 function(object, `function`, output_shape = NULL, mask = NULL, 
     arguments = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Lambda, object, args)
 }
 
@@ -5102,7 +5222,8 @@ function(object, axis = -1L, epsilon = 0.001, center = TRUE,
     beta_regularizer = NULL, gamma_regularizer = NULL, beta_constraint = NULL, 
     gamma_constraint = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(axis = as_axis), 
+    args <- capture_args(match.call(), list(axis = as_axis, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
         ignore = "object")
     create_layer(keras$layers$LayerNormalization, object, args)
 }
@@ -5150,7 +5271,9 @@ function(object, axis = -1L, epsilon = 0.001, center = TRUE,
 layer_leaky_relu <- 
 function(object, alpha = 0.3, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$LeakyReLU, object, args)
 }
 
@@ -5260,7 +5383,9 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
     implementation = 1L, ...) 
 {
     args <- capture_args(match.call(), list(strides = as.integer, 
-        implementation = as.integer), ignore = "object")
+        implementation = as.integer, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$LocallyConnected1D, object, args)
 }
 
@@ -5373,8 +5498,9 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
     kernel_constraint = NULL, bias_constraint = NULL, implementation = 1L, 
     ...) 
 {
-    args <- capture_args(match.call(), list(implementation = as.integer), 
-        ignore = "object")
+    args <- capture_args(match.call(), list(implementation = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$LocallyConnected2D, object, args)
 }
 
@@ -5508,7 +5634,9 @@ function(object, units, activation = "tanh", recurrent_activation = "sigmoid",
     return_state = FALSE, go_backwards = FALSE, stateful = FALSE, 
     time_major = FALSE, unroll = FALSE, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$LSTM, object, args)
 }
 
@@ -5623,7 +5751,9 @@ function(object, units, activation = "tanh", recurrent_activation = "sigmoid",
     recurrent_constraint = NULL, bias_constraint = NULL, dropout = 0, 
     recurrent_dropout = 0, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$LSTMCell, object, args)
 }
 
@@ -5647,7 +5777,9 @@ function(object, units, activation = "tanh", recurrent_activation = "sigmoid",
 layer_masking <- 
 function(object, mask_value = 0, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Masking, object, args)
 }
 
@@ -5686,7 +5818,9 @@ function(object, mask_value = 0, ...)
 layer_maximum <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Maximum, object, args)
 }
 
@@ -5780,7 +5914,9 @@ function(object, pool_size = 2L, strides = NULL, padding = "valid",
     data_format = "channels_last", ...) 
 {
     args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$MaxPooling1D, object, args)
 }
 
@@ -5917,8 +6053,10 @@ layer_max_pooling_2d <-
 function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid", 
     data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$MaxPooling2D, object, args)
 }
 
@@ -5967,8 +6105,10 @@ layer_max_pooling_3d <-
 function(object, pool_size = list(2L, 2L, 2L), strides = NULL, 
     padding = "valid", data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$MaxPooling3D, object, args)
 }
 
@@ -6062,7 +6202,9 @@ function(object, pool_size = 2L, strides = NULL, padding = "valid",
     data_format = "channels_last", ...) 
 {
     args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$MaxPooling1D, object, args)
 }
 
@@ -6199,8 +6341,10 @@ layer_max_pooling_2d <-
 function(object, pool_size = list(2L, 2L), strides = NULL, padding = "valid", 
     data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$MaxPooling2D, object, args)
 }
 
@@ -6249,8 +6393,10 @@ layer_max_pooling_3d <-
 function(object, pool_size = list(2L, 2L, 2L), strides = NULL, 
     padding = "valid", data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(pool_size = as.integer, 
-        strides = as_nullable_integer), ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape, 
+        pool_size = as.integer, strides = as_nullable_integer), 
+        ignore = "object")
     create_layer(keras$layers$MaxPooling3D, object, args)
 }
 
@@ -6289,7 +6435,9 @@ function(object, pool_size = list(2L, 2L, 2L), strides = NULL,
 layer_minimum <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Minimum, object, args)
 }
 
@@ -6379,7 +6527,9 @@ function(object, num_heads, key_dim, value_dim = NULL, dropout = 0,
     kernel_regularizer = NULL, bias_regularizer = NULL, activity_regularizer = NULL, 
     kernel_constraint = NULL, bias_constraint = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$MultiHeadAttention, object, args)
 }
 
@@ -6418,7 +6568,9 @@ function(object, num_heads, key_dim, value_dim = NULL, dropout = 0,
 layer_multiply <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Multiply, object, args)
 }
 
@@ -6478,7 +6630,8 @@ layer_normalization <-
 function(object, axis = -1L, mean = NULL, variance = NULL, invert = FALSE, 
     ...) 
 {
-    args <- capture_args(match.call(), list(axis = as_axis), 
+    args <- capture_args(match.call(), list(axis = as_axis, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
         ignore = "object")
     create_layer(keras$layers$Normalization, object, args)
 }
@@ -6502,7 +6655,9 @@ function(object, axis = -1L, mean = NULL, variance = NULL, invert = FALSE,
 layer_permute <- 
 function(object, dims, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Permute, object, args)
 }
 
@@ -6555,7 +6710,9 @@ layer_p_relu <-
 function(object, alpha_initializer = "zeros", alpha_regularizer = NULL, 
     alpha_constraint = NULL, shared_axes = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$PReLU, object, args)
 }
 
@@ -6604,7 +6761,9 @@ layer_random_brightness <-
 function(object, factor, value_range = list(0L, 255L), seed = NULL, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RandomBrightness, object, args)
 }
 
@@ -6657,7 +6816,9 @@ function(object, factor, value_range = list(0L, 255L), seed = NULL,
 layer_random_contrast <- 
 function(object, factor, seed = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RandomContrast, object, args)
 }
 
@@ -6707,7 +6868,9 @@ function(object, factor, seed = NULL, ...)
 layer_random_crop <- 
 function(object, height, width, seed = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RandomCrop, object, args)
 }
 
@@ -6752,7 +6915,9 @@ layer_random_flip <-
 function(object, mode = "horizontal_and_vertical", seed = NULL, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RandomFlip, object, args)
 }
 
@@ -6803,7 +6968,9 @@ layer_random_height <-
 function(object, factor, interpolation = "bilinear", seed = NULL, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RandomHeight, object, args)
 }
 
@@ -6884,7 +7051,9 @@ layer_random_rotation <-
 function(object, factor, fill_mode = "reflect", interpolation = "bilinear", 
     seed = NULL, fill_value = 0, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RandomRotation, object, args)
 }
 
@@ -6957,7 +7126,9 @@ function(object, height_factor, width_factor, fill_mode = "reflect",
     interpolation = "bilinear", seed = NULL, fill_value = 0, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RandomTranslation, object, args)
 }
 
@@ -7007,7 +7178,9 @@ layer_random_width <-
 function(object, factor, interpolation = "bilinear", seed = NULL, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RandomWidth, object, args)
 }
 
@@ -7088,7 +7261,9 @@ function(object, height_factor, width_factor = NULL, fill_mode = "reflect",
     interpolation = "bilinear", seed = NULL, fill_value = 0, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RandomZoom, object, args)
 }
 
@@ -7156,7 +7331,9 @@ layer_relu <-
 function(object, max_value = NULL, negative_slope = 0, threshold = 0, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$ReLU, object, args)
 }
 
@@ -7176,7 +7353,9 @@ function(object, max_value = NULL, negative_slope = 0, threshold = 0,
 layer_repeat_vector <- 
 function(object, n, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RepeatVector, object, args)
 }
 
@@ -7222,7 +7401,9 @@ function(object, n, ...)
 layer_rescaling <- 
 function(object, scale, offset = 0, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Rescaling, object, args)
 }
 
@@ -7247,7 +7428,9 @@ function(object, scale, offset = 0, ...)
 layer_reshape <- 
 function(object, target_shape, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Reshape, object, args)
 }
 
@@ -7298,7 +7481,9 @@ layer_resizing <-
 function(object, height, width, interpolation = "bilinear", 
     crop_to_aspect_ratio = FALSE, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Resizing, object, args)
 }
 
@@ -7399,7 +7584,9 @@ function(object, cell, return_sequences = FALSE, return_state = FALSE,
     go_backwards = FALSE, stateful = FALSE, unroll = FALSE, time_major = FALSE, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$RNN, object, args)
 }
 
@@ -7528,8 +7715,9 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
     pointwise_constraint = NULL, bias_constraint = NULL, ...) 
 {
     args <- capture_args(match.call(), list(strides = as.integer, 
-        dilation_rate = as.integer, depth_multiplier = as.integer), 
-        ignore = "object")
+        dilation_rate = as.integer, depth_multiplier = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$SeparableConv1D, object, args)
 }
 
@@ -7663,8 +7851,9 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
     depthwise_constraint = NULL, pointwise_constraint = NULL, 
     bias_constraint = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(depth_multiplier = as.integer), 
-        ignore = "object")
+    args <- capture_args(match.call(), list(depth_multiplier = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$SeparableConv2D, object, args)
 }
 
@@ -7793,8 +7982,9 @@ function(object, filters, kernel_size, strides = 1L, padding = "valid",
     pointwise_constraint = NULL, bias_constraint = NULL, ...) 
 {
     args <- capture_args(match.call(), list(strides = as.integer, 
-        dilation_rate = as.integer, depth_multiplier = as.integer), 
-        ignore = "object")
+        dilation_rate = as.integer, depth_multiplier = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$SeparableConv1D, object, args)
 }
 
@@ -7928,8 +8118,9 @@ function(object, filters, kernel_size, strides = list(1L, 1L),
     depthwise_constraint = NULL, pointwise_constraint = NULL, 
     bias_constraint = NULL, ...) 
 {
-    args <- capture_args(match.call(), list(depth_multiplier = as.integer), 
-        ignore = "object")
+    args <- capture_args(match.call(), list(depth_multiplier = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$SeparableConv2D, object, args)
 }
 
@@ -8043,7 +8234,9 @@ function(object, units, activation = "tanh", use_bias = TRUE,
     recurrent_dropout = 0, return_sequences = FALSE, return_state = FALSE, 
     go_backwards = FALSE, stateful = FALSE, unroll = FALSE, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$SimpleRNN, object, args)
 }
 
@@ -8127,7 +8320,9 @@ function(object, units, activation = "tanh", use_bias = TRUE,
     bias_constraint = NULL, dropout = 0, recurrent_dropout = 0, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$SimpleRNNCell, object, args)
 }
 
@@ -8167,7 +8362,8 @@ function(object, units, activation = "tanh", use_bias = TRUE,
 layer_softmax <- 
 function(object, axis = -1L, ...) 
 {
-    args <- capture_args(match.call(), list(axis = as_axis), 
+    args <- capture_args(match.call(), list(axis = as_axis, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
         ignore = "object")
     create_layer(keras$layers$Softmax, object, args)
 }
@@ -8195,7 +8391,9 @@ function(object, axis = -1L, ...)
 layer_spatial_dropout_1d <- 
 function(object, rate, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$SpatialDropout1D, object, args)
 }
 
@@ -8230,7 +8428,9 @@ function(object, rate, ...)
 layer_spatial_dropout_2d <- 
 function(object, rate, data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$SpatialDropout2D, object, args)
 }
 
@@ -8265,7 +8465,9 @@ function(object, rate, data_format = NULL, ...)
 layer_spatial_dropout_3d <- 
 function(object, rate, data_format = NULL, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$SpatialDropout3D, object, args)
 }
 
@@ -8292,8 +8494,9 @@ function(object, rate, data_format = NULL, ...)
 layer_spectral_normalization <- 
 function(object, layer, power_iterations = 1L, ...) 
 {
-    args <- capture_args(match.call(), list(power_iterations = as.integer), 
-        ignore = "object")
+    args <- capture_args(match.call(), list(power_iterations = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$SpectralNormalization, object, 
         args)
 }
@@ -8314,7 +8517,9 @@ function(object, layer, power_iterations = 1L, ...)
 layer_stacked_rnn_cells <- 
 function(object, cells, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$StackedRNNCells, object, args)
 }
 
@@ -8448,8 +8653,9 @@ function(object, max_tokens = NULL, num_oov_indices = 1L, mask_token = NULL,
     encoding = "utf-8", invert = FALSE, output_mode = "int", 
     sparse = FALSE, pad_to_max_tokens = FALSE, ...) 
 {
-    args <- capture_args(match.call(), list(num_oov_indices = as.integer), 
-        ignore = "object")
+    args <- capture_args(match.call(), list(num_oov_indices = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$StringLookup, object, args)
 }
 
@@ -8468,7 +8674,9 @@ function(object, max_tokens = NULL, num_oov_indices = 1L, mask_token = NULL,
 layer_subtract <- 
 function(object, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Subtract, object, args)
 }
 
@@ -8636,7 +8844,9 @@ function(object, max_tokens = NULL, standardize = "lower_and_strip_punctuation",
         output_sequence_length = as_nullable_integer, ngrams = function(x) if (length(x) > 
             1) 
             as_integer_or_integer_tuple(x)
-        else as_nullable_integer(x)), ignore = "object")
+        else as_nullable_integer(x), input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$TextVectorization, object, args)
 }
 
@@ -8670,7 +8880,9 @@ function(object, max_tokens = NULL, standardize = "lower_and_strip_punctuation",
 layer_thresholded_relu <- 
 function(object, theta = 1, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$ThresholdedReLU, object, args)
 }
 
@@ -8710,7 +8922,9 @@ function(object, theta = 1, ...)
 layer_time_distributed <- 
 function(object, layer, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$TimeDistributed, object, args)
 }
 
@@ -8735,7 +8949,8 @@ function(object, layer, ...)
 layer_unit_normalization <- 
 function(object, axis = -1L, ...) 
 {
-    args <- capture_args(match.call(), list(axis = as_axis), 
+    args <- capture_args(match.call(), list(axis = as_axis, input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
         ignore = "object")
     create_layer(keras$layers$UnitNormalization, object, args)
 }
@@ -8756,8 +8971,9 @@ function(object, axis = -1L, ...)
 layer_up_sampling_1d <- 
 function(object, size = 2L, ...) 
 {
-    args <- capture_args(match.call(), list(size = as.integer), 
-        ignore = "object")
+    args <- capture_args(match.call(), list(size = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$UpSampling1D, object, args)
 }
 
@@ -8799,7 +9015,9 @@ layer_up_sampling_2d <-
 function(object, size = list(2L, 2L), data_format = NULL, interpolation = "nearest", 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$UpSampling2D, object, args)
 }
 
@@ -8836,7 +9054,9 @@ layer_up_sampling_3d <-
 function(object, size = list(2L, 2L, 2L), data_format = NULL, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$UpSampling3D, object, args)
 }
 
@@ -8859,7 +9079,9 @@ function(object, size = list(2L, 2L, 2L), data_format = NULL,
 layer_wrapper <- 
 function(object, layer, ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$Wrapper, object, args)
 }
 
@@ -8885,8 +9107,9 @@ function(object, layer, ...)
 layer_zero_padding_1d <- 
 function(object, padding = 1L, ...) 
 {
-    args <- capture_args(match.call(), list(padding = as.integer), 
-        ignore = "object")
+    args <- capture_args(match.call(), list(padding = as.integer, 
+        input_shape = normalize_shape, batch_size = as_nullable_integer, 
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$ZeroPadding1D, object, args)
 }
 
@@ -8931,7 +9154,9 @@ layer_zero_padding_2d <-
 function(object, padding = list(1L, 1L), data_format = NULL, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$ZeroPadding2D, object, args)
 }
 
@@ -8975,6 +9200,8 @@ layer_zero_padding_3d <-
 function(object, padding = list(1L, 1L, 1L), data_format = NULL, 
     ...) 
 {
-    args <- capture_args(match.call(), NULL, ignore = "object")
+    args <- capture_args(match.call(), list(input_shape = normalize_shape, 
+        batch_size = as_nullable_integer, batch_input_shape = normalize_shape), 
+        ignore = "object")
     create_layer(keras$layers$ZeroPadding3D, object, args)
 }
