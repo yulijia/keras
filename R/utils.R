@@ -452,6 +452,9 @@ assert_all_dots_named <- function(envir = parent.frame(), cl) {
 
 ## TODO: we'll want the new summary() method to show colors in the Rstudio IDE, fix rendering.
 
+
+#' @param ignore character, arg names to ignore (not capture)
+#' @param modifiers named list of functions. names match args
 capture_args <- function(cl, modifiers = NULL, ignore = NULL,
                          envir = parent.frame(), fn = sys.function(-1)) {
 
@@ -485,9 +488,12 @@ capture_args <- function(cl, modifiers = NULL, ignore = NULL,
     args[[nm]] <- NULL
 
   nms_to_modify <- intersect(names(args), names(modifiers))
-  for (nm in nms_to_modify)
-    args[nm] <- list(modifiers[[nm]](args[[nm]]))
-   # list() so if modifier returns NULL, don't remove the arg
+  for (nm in nms_to_modify) {
+    # escape hatch: user supplied python objects pass through untransformed
+    if(!inherits(args[[nm]] -> val, "python.builtin.object"))
+      # list() so if modifier returns NULL, don't remove the arg
+      args[nm] <- list(modifiers[[nm]](val))
+  }
 
   args
 }
