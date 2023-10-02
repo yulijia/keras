@@ -4892,7 +4892,7 @@ function(object, ...)
 }
 
 
-# <function Input at 0x2b9eccf70>
+# <function Input>
 #' `Input()` is used to instantiate a Keras tensor
 #'
 #' @details
@@ -8545,9 +8545,9 @@ function(units, activation = "tanh", use_bias = TRUE, kernel_initializer = "glor
 layer_activation_softmax <-
 function(object, axis = -1L, ...)
 {
-    args <- capture_args(match.call(), list(axis = as_axis, input_shape = normalize_shape,
-        batch_size = as_nullable_integer, batch_input_shape = normalize_shape),
-        ignore = "object")
+    args <- capture_args(match.call(), list(axis = as.integer,
+        input_shape = normalize_shape, batch_size = as_nullable_integer,
+        batch_input_shape = normalize_shape), ignore = "object")
     create_layer(keras$layers$Softmax, object, args)
 }
 

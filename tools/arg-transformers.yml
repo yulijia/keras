@@ -64,3 +64,6 @@ Dot:
 LayerNormalization:
   axis: as.integer
 
+Softmax:
+  axis: as.integer
+

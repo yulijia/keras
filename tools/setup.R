@@ -530,7 +530,7 @@ new_layer_wrapper <- function(py_obj) {
   fn_string <- str_flatten(c(paste(r_wrapper_name, "<-"), fn_string), "\n")
 
   docs <- r_doc_from_py_fn(py_obj)
-  out <- str_flatten(c("# ", py_repr(py_obj), "\n", docs, fn_string), "")
+  out <- str_flatten(c("# ", sub(" at [0-9a-z]+>", ">", py_repr(py_obj)), "\n", docs, fn_string), "")
   # class(out) <-  "r_py_wrapper2"
   out
 }
