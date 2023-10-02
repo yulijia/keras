@@ -32,8 +32,8 @@ library(magrittr, include.only = c("%>%", "%<>%"))
 inspect <- import("inspect")
 docstring_parser <-  import("docstring_parser") # broken in py 3.10
 
-# keras <- import("tensorflow.keras")
-keras <- import("keras_core")
+keras <- import("tensorflow.keras")
+# keras <- import("keras_core")
 
 
 py$`_Layer` <- keras$layers$Layer
