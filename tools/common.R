@@ -357,6 +357,7 @@ new_layer_wrapper <- function(py_obj) {
 
     transformers$shape <- quote(normalize_shape)
     fn_body <- bquote({
+      # args <- capture_args(.(transformers))
       args <- capture_args(match.call(), .(transformers))
       create_layer(.(py_obj_expr), NULL, args)
     })
@@ -369,6 +370,7 @@ new_layer_wrapper <- function(py_obj) {
 
     fn_body <- bquote({
       args <- capture_args(match.call(), .(transformers), ignore = c("...", "inputs"))
+      # args <- capture_args(.(transformers), ignore = c("...", "inputs"))
       dots <- split_dots_named_unnamed(list(...))
       if (missing(inputs))
         inputs <- NULL
@@ -391,6 +393,7 @@ new_layer_wrapper <- function(py_obj) {
     # TODO: consider renaming these in keras 3, maybe something like
     # rnn_cell_{gru,simple,stacked,lstm}()
     fn_body <- bquote({
+      # args <- capture_args(.(transformers))
       args <- capture_args(match.call(), .(transformers))
       do.call(.(py_obj_expr), args)
     })
@@ -401,6 +404,7 @@ new_layer_wrapper <- function(py_obj) {
     #    alist(query, key = query, value = key, ..., call_args = list())
     frmls <- c(alist(inputs = ), frmls)
     fn_body <- bquote({
+      # args <- capture_args(.(transformers), ignore = "inputs")
       args <- capture_args(match.call(), .(transformers), ignore = "inputs")
       layer <- do.call(.(py_obj_expr), args)
       if (missing(inputs) || is.null(inputs))
@@ -414,6 +418,7 @@ new_layer_wrapper <- function(py_obj) {
 
     frmls <- c(alist(object = ), frmls)
     fn_body <- bquote({
+      # args <- capture_args(.(transformers), ignore = "object")
       args <- capture_args(match.call(), .(transformers), ignore = "object")
       create_layer(.(py_obj_expr), object, args)
     })

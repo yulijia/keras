@@ -454,7 +454,7 @@ assert_all_dots_named <- function(envir = parent.frame(), cl) {
 # @param ignore character, arg names to ignore (not capture)
 # @param modifiers named list of functions. names match args
 capture_args <- function(cl, modifiers = NULL, ignore = NULL,
-                         envir = parent.frame(), fn = sys.function(-1)) {
+                         envir = parent.frame(2L), fn = sys.function(-1)) {
 
   ## bug: match.call() resolves incorrectly if dots are from not the default sys.parent()
   ## e.g, this fails if dots originate from the callers caller:
@@ -466,24 +466,28 @@ capture_args <- function(cl, modifiers = NULL, ignore = NULL,
   ## call is itself a promise in another call. E.g.,:
   ##   do.call(foo, capture_args(match.call())) fails because fn resolves to do.call()
 
-  fn_arg_nms <- names(formals(fn))
-  known_args <- intersect(names(cl), fn_arg_nms)
-  known_args <- setdiff(known_args, ignore)
-  names(known_args) <- known_args
-  cl2 <- c(quote(list), lapply(known_args, as.symbol))
+  cl0 <- cl <- sys.call(-1L)
 
-  if("..." %in% fn_arg_nms && !"..." %in% ignore) {
-    assert_all_dots_named(envir, cl)
-    # this might reorder args by assuming ... are last, but it doesn't matter
-    # since everything is supplied as a keyword arg to the Python side anyway
-    cl2 <- c(cl2, quote(...))
-  }
+  # parent.frame(1L) == layer_dense() function evaluation env (e.g, where args are symbols bound to promises)
+  # parent.frame(2L) == env layer_dense is called from (e.g., where args are user exprs)
+  # first defuse rlang !!! and := in calls
+  cl[[1L]] <- quote(rlang::exprs)
+  cl_exprs <- eval(cl, envir)
 
-  args <- eval(as.call(cl2), envir)
+  # build up a call to base::list() using the exprs
+  cl <- as.call(c(list, cl_exprs))
 
-  # check `ignore` again, since arg might have been in `...`
-  for(nm in intersect(names(args), ignore))
-    args[[nm]] <- NULL
+  # match.call()
+  cl <- match.call(fn, cl,
+                   expand.dots = !"..." %in% ignore,
+                   envir = envir)
+
+  # filter out args to ignore
+  for(ig in intersect(names(cl), ignore))
+    cl[[ig]] <- NULL
+
+  # eval args
+  args <- eval(cl, envir = envir)
 
   nms_to_modify <- intersect(names(args), names(modifiers))
   for (nm in nms_to_modify) {
