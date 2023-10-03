@@ -66,9 +66,8 @@ layers %>%
   str_flatten("\n") %>% {
     while (nchar(.) !=
            nchar(. <- gsub("#'\n#'\n", "#'\n", ., fixed = TRUE))) {}
-
-    # while (nchar(.) !=
-    #        nchar(. <- gsub("\n\n\n", "\n\n", ., fixed = TRUE))) {}
+    while (nchar(.) !=
+           nchar(. <- gsub("\n\n\n\n", "\n\n\n", ., fixed = TRUE))) {}
     .
   } %>%
   writeLines("R/layers.R")
