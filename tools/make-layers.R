@@ -41,10 +41,9 @@ layers <- names(keras$layers) %>%
 }) %>%
   keras:::drop_nulls()
 
-
 mk_layer_activation_selu <- function() {
   roxygen <- r_doc_from_py_fn(keras$activations$selu) %>%
-    c("#@inheritDotParams layer_activation")
+    c("#' @inheritDotParams layer_activation")
 
   fn <- function(object, ...) {
     layer_activation(object, activation = "selu", ...)
@@ -67,6 +66,9 @@ layers %>%
   str_flatten("\n") %>% {
     while (nchar(.) !=
            nchar(. <- gsub("#'\n#'\n", "#'\n", ., fixed = TRUE))) {}
+
+    # while (nchar(.) !=
+    #        nchar(. <- gsub("\n\n\n", "\n\n", ., fixed = TRUE))) {}
     .
   } %>%
   writeLines("R/layers.R")

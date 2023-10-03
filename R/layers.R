@@ -12894,8 +12894,7 @@ function(object, padding = list(1L, 1L, 1L), data_format = NULL,
 #' @seealso
 #'   +  <https://keras.io/api/layers>
 #' @export
-
-#@inheritDotParams layer_activation
+#' @inheritDotParams layer_activation
 layer_activation_selu <-
 function (object, ...)
 {

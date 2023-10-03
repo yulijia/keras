@@ -1,7 +1,6 @@
 
 `_COMMON_` <- NULL
 
-# ---- imports ----
 # reticulate::virtualenv_remove("r-tensorflow")
 envir:::set_library_default_pos(value = 3L)
 library(envir)
@@ -52,7 +51,7 @@ source_python("tools/common.py") # keras_class_type()
 rm(r)
 
 
-# ---- docstrings ----
+
 print.docstring_parser.common.Docstring <- function(x) {
   cat(docstring_parser$compose(x))
 }
@@ -70,7 +69,8 @@ get_doc <- function(py_obj, style = "GOOGLE") {
 
   doc <- tryCatch({
     docstring_parser$parse(doc, style = docstring_parser$DocstringStyle[[style]])
-  }, docstring_parser.common.ParseError = function(e) {
+  },
+  docstring_parser.common.ParseError = function(e) {
     message("Parsing of ", py_obj$`__name__`, " failed with ", style, " style.")
     docstring_parser$parse(doc, style = docstring_parser$DocstringStyle[["AUTO"]])
   })
@@ -213,7 +213,6 @@ r_doc_from_py_fn <- function(py_fn, name = NULL) {
 
   x <- get_doc(py_fn)
 
-
   # first sentence is taken as title
   # 2nd paragraph is taken as @description
   # 3rd paragraph + is taken as @details
@@ -266,7 +265,7 @@ r_doc_from_py_fn <- function(py_fn, name = NULL) {
   x <- stringr::str_flatten(x, "\n")
   x <- gsub("\n", "\n#' ", x)
   x <- str_c("#' ", x, "\n", name)
-  x
+  str_trim(x)
 }
 
 
@@ -283,9 +282,7 @@ transformers_registry <-
 get_arg_transformers <- function(py_obj) {
   py_obj_name <- py_obj$`__name__`
 
-
   transformers <- list()
-
 
   # if(py_obj_name == "AveragePooling3D")
   #   browser()
@@ -342,113 +339,6 @@ get_arg_transformers <- function(py_obj) {
 }
 
 
-# new_layer_wrapper <-
-  function(py_obj) {
-
-  py_obj_name <- py_obj$`__name__`
-
-  ## get transformers
-  transformers <- get_arg_transformers(py_obj) # argument transformers
-
-  #
-  #   # Conv2d and friends
-  #   if (grepl("Conv", py_obj_name)) {
-  #     transformers$filters <- quote(as.integer)
-  #     transformers[c("kernel_size", "dilation_rate", "strides")] <-
-  #       list(quote(as_integer_tuple))
-  #   }
-  #
-  #   if (py_obj_name %in% c("Hashing"))
-  #     transformers %<>% modifyList(as.list(alist(
-  #       num_bins = as.integer,
-  #       salt = as_nullable_integer)))
-  #
-  #
-  #   if (py_obj_name %in% c("TextVectorization"))
-  #     transformers %<>% modifyList(as.list(alist(
-  #         max_tokens = as_nullable_integer,
-  #         output_sequence_length = as_nullable_integer,
-  #         ngrams = function(x) if(length(x) > 1) as_integer_tuple(x) else as_nullable_integer(x)
-  #       )))
-  #
-  #
-  #   transformers$input_shape <- quote(normalize_shape)
-  #   transformers$batch_size <- quote(as_nullable_integer)
-  #   transformers$batch_input_shape <- quote(normalize_shape)
-
-  # if(!length(transformers))
-  #   transformers <- NULL
-
-  ## build fn
-  frmls <- formals(py_obj)
-  frmls$self <- NULL
-  py_obj_expr <- substitute(keras$layers$NAME,
-                            list(NAME=as.name(py_obj_name)))
-
-  # if(py_obj_name == "Add")
-  # browser()
-
-  if(py_obj_name == "Input") {
-
-    transformers$shape <- quote(normalize_shape)
-    fn_body <- bquote({
-      args <- capture_args(match.call(), .(transformers))
-      create_layer(.(py_obj_expr), NULL, args)
-    })
-
-    # fn <-
-    # fn_body <- do.call(substitute, list(fn_body, list(object = NULL)))
-    # # replace ignore="object" to ignore=NULL
-    # #      <-   cl()
-    # fn_body[[2L]][[3L]]$ignore <- NULL
-    # # no need for compose_layer; --> relace create_layer() with do.call
-    # fn_body[[3L]] <- bquote(do.call(.(py_obj_expr), args))
-
-  } else if (grepl("layers.merging.", py_repr(py_obj), fixed = TRUE)) {
-    frmls <- c(alist(inputs = , ... =), frmls)
-    browser()
-    fn_body <- bquote({
-      if (missing(inputs))
-        return(keras$layers$Add(...))
-      if (!is.list(inputs))
-        inputs <- list(inputs)
-      dots <- split_dots_named_unnamed(list(...))
-      inputs <- c(inputs, dots$unnamed)
-      do.call(keras$layers$add, c(list(inputs), dots$named))
-    })
-
-  } else {
-
-    frmls <- c(alist(object = ), frmls)
-    fn_body <- bquote({
-      args <- capture_args(match.call(), .(transformers), ignore = "object")
-      create_layer(.(py_obj_expr), object, args)
-    })
-
-  }
-
-  fn <- as.function(c(frmls, fn_body))
-
-  fn_string <- deparse(fn)
-
-  # deparse adds a space for some reason
-  # fn_string <- sub("function (", "function(", fn_string, fixed = TRUE)
-
-  r_wrapper_name <-  snakecase::to_snake_case(py_obj$`__name__`) %>%
-    # conv_1_d  ->  conv_1d
-    sub("_([0-9])_d(_|$)", "_\\1d\\2", .) %>%
-    # ReLu -> re_lu -> relu
-    sub("(re)_(lu)", "\\1\\2", .) %>%
-    sprintf("layer_%s <- ", .)
-
-  fn_string <- str_flatten(c(r_wrapper_name, fn_string), "\n")
-  docs <- r_doc_from_py_fn(py_obj)
-  out <- str_flatten(c(docs, fn_string), "")
-  # class(out) <-  "r_py_wrapper2"
-  out
-}
-
-
 new_layer_wrapper <- function(py_obj) {
 
   py_obj_name <- py_obj$`__name__`
@@ -456,37 +346,6 @@ new_layer_wrapper <- function(py_obj) {
   ## get transformers
   transformers <- get_arg_transformers(py_obj) # argument transformers
 
-  #
-  #   # Conv2d and friends
-  #   if (grepl("Conv", py_obj_name)) {
-  #     transformers$filters <- quote(as.integer)
-  #     transformers[c("kernel_size", "dilation_rate", "strides")] <-
-  #       list(quote(as_integer_tuple))
-  #   }
-  #
-  #   if (py_obj_name %in% c("Hashing"))
-  #     transformers %<>% modifyList(as.list(alist(
-  #       num_bins = as.integer,
-  #       salt = as_nullable_integer)))
-  #
-  #
-  #   if (py_obj_name %in% c("TextVectorization"))
-  #     transformers %<>% modifyList(as.list(alist(
-  #         max_tokens = as_nullable_integer,
-  #         output_sequence_length = as_nullable_integer,
-  #         ngrams = function(x) if(length(x) > 1) as_integer_tuple(x) else as_nullable_integer(x)
-  #       )))
-  #
-  #
-  #   transformers$input_shape <- quote(normalize_shape)
-  #   transformers$batch_size <- quote(as_nullable_integer)
-  #   transformers$batch_input_shape <- quote(normalize_shape)
-
-  # if(!length(transformers))
-  #   transformers <- NULL
-
-  # tra
-
   ## build fn
   frmls <- formals(py_obj)
   frmls$self <- NULL
@@ -494,6 +353,7 @@ new_layer_wrapper <- function(py_obj) {
                             list(NAME=as.name(py_obj_name)))
 
   if(py_obj_name == "Input") {
+    # no `object` as first arg
 
     transformers$shape <- quote(normalize_shape)
     fn_body <- bquote({
@@ -501,17 +361,9 @@ new_layer_wrapper <- function(py_obj) {
       create_layer(.(py_obj_expr), NULL, args)
     })
 
-    # fn <-
-    # fn_body <- do.call(substitute, list(fn_body, list(object = NULL)))
-    # # replace ignore="object" to ignore=NULL
-    # #      <-   cl()
-    # fn_body[[2L]][[3L]]$ignore <- NULL
-    # # no need for compose_layer; --> relace create_layer() with do.call
-    # fn_body[[3L]] <- bquote(do.call(.(py_obj_expr), args))
-
   } else if (grepl("layers.merging.", py_repr(py_obj), fixed = TRUE)) {
+    # merging layers Add, Subtract, Dot, etc: accept unnamed args as tensors in ...
 
-    # accept tensors/layers in ..., collapse into `inputs` list for call method
     frmls <- c(alist(inputs = , ... =), frmls)
     frmls <- frmls[unique(names(frmls))]
 
@@ -536,7 +388,7 @@ new_layer_wrapper <- function(py_obj) {
   } else if (grepl(".rnn.", py_repr(py_obj), fixed = TRUE) &&
              grepl("Cells?$", py_obj_name)) {
     # layer_gru_cell() and friends don't compose w/ `object`
-    # #TODO: consider renaming these in keras 3, maybe something like
+    # TODO: consider renaming these in keras 3, maybe something like
     # rnn_cell_{gru,simple,stacked,lstm}()
     fn_body <- bquote({
       args <- capture_args(match.call(), .(transformers))
@@ -545,6 +397,8 @@ new_layer_wrapper <- function(py_obj) {
 
   } else if (py_obj_name == "MultiHeadAttention") {
     # first arg is inputs, a list
+    # TODO: in keras 3, change signature to:
+    #    alist(query, key = query, value = key, ..., call_args = list())
     frmls <- c(alist(inputs = ), frmls)
     fn_body <- bquote({
       args <- capture_args(match.call(), .(transformers), ignore = "inputs")
@@ -581,15 +435,12 @@ new_layer_wrapper <- function(py_obj) {
     sub("(re)_(lu)", "\\1\\2", .) %>%
     sprintf("layer_%s", .)
 
-  if(grepl("UpSampling.D", py_obj_name)) {
+  if(grepl("UpSampling.D", py_obj_name))
     r_wrapper_name %<>% sub("_up_sampling_", "_upsampling_", .)
-  }
 
-  if(r_wrapper_name == "layer_activation") {
-
-  } else if (grepl(".activation.", py_repr(py_obj), fixed = TRUE)) {
-    r_wrapper_name %<>% sub("layer_", "layer_activation_", .)
-  }
+  if (grepl(".activation.", py_repr(py_obj), fixed = TRUE))
+    if(r_wrapper_name != "layer_activation")
+      r_wrapper_name %<>% sub("layer_", "layer_activation_", .)
 
   if(r_wrapper_name == "layer_activation_p_relu")
     r_wrapper_name <-"layer_activation_parametric_relu"
@@ -597,9 +448,15 @@ new_layer_wrapper <- function(py_obj) {
   fn_string <- str_flatten(c(paste(r_wrapper_name, "<-"), fn_string), "\n")
 
   docs <- r_doc_from_py_fn(py_obj)
-  out <- str_flatten(c("# ", sub(" at [0-9a-z]+>", ">", py_repr(py_obj)), "\n", docs, fn_string), "")
-  # class(out) <-  "r_py_wrapper2"
+
+  comment <- paste("#", sub(" at [0-9a-z]+>", ">", py_repr(py_obj)))
+  out <- str_flatten(c(comment, docs, fn_string), "\n")
+  class(out) <-  "r_py_wrapper2"
   out
 }
 
 
+print.r_py_wrapper2 <- function(x, ...) {layer_random_brightness
+  try(clipr::write_clip(x))
+  cat(x, "\n")
+}

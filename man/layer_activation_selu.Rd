@@ -7,7 +7,12 @@
 layer_activation_selu(object, ...)
 }
 \arguments{
-\item{...}{standard layer arguments.}
+\item{...}{
+  Arguments passed on to \code{\link[=layer_activation]{layer_activation}}
+  \describe{
+    \item{\code{activation}}{Activation function, such as \code{tf.nn.relu}, or string name of
+built-in activation function, such as "relu".}
+  }}
 
 \item{x}{A tensor or variable to compute the activation function for.}
 }
